@@ -1,0 +1,3 @@
+[submodule "cuvis.pyil"]
+	path = cuvis.pyil
+	url = https://github.com/cubert-hyperspectral/cuvis.pyil.git
