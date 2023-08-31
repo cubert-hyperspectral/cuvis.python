@@ -10,7 +10,9 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '0.0.5'
+VERSION = '0.0.6'
+
+DESCRIPTION = 'CUVIS Python SDK.'
 
 def get_numpy_version():
 	version = ''
@@ -140,9 +142,8 @@ setup(
     license='Apache License 2.0',
     author='Ben Mueller @ Cubert GmbH, Ulm, Germany',
     author_email='mueller@cubert-gmbh.com',
-    description='CUVIS Python SDK.'
-                ' Linked to the cuvis installation at {}.'.format(
-        lib_dir),
+    description=DESCRIPTION,
+    long_description=long_description,
     #setup_requires=REQUIREMENTS['setup'],
     install_requires=REQUIREMENTS['install'],
     include_package_data=True,
