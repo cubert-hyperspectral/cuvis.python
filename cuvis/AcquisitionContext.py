@@ -333,9 +333,9 @@ class AcquisitionContext(object):
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_session_info(
                 self._handle, session):
             raise SDKException()
-        return SessionData(session.__getattribute__("name"),
-                           session.__getattribute__("session_no"),
-                           session.__getattribute__("sequence_no"))
+        return SessionData(session.name,
+                           session.session_no,
+                           session.sequence_no)
 
     # @copydoc cuvis_acq_cont_set_session_info
     @session_info.setter
@@ -345,9 +345,9 @@ class AcquisitionContext(object):
         """
         session = cuvis_il.cuvis_session_info_t()
         try:
-            session.__setattr__("name", val.name)
-            session.__setattr__("sequence_no", val.sequence_number)
-            session.__setattr__("session_no", val.session_number)
+            session.name = val.name
+            session.sequence_no = val.sequence_number
+            session.session_no = val.session_number
         except KeyError as e:
             raise ValueError(
                 "Missing {} in SessionFile Info dictionary.".format(e))

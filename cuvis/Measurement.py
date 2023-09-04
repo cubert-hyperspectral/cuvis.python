@@ -220,25 +220,25 @@ class ImageData(object):
             if dformat is None:
                 raise TypeError("Missing format for reading image buffer")
 
-            if img_buf.__getattribute__("format") == 1:
+            if img_buf.format == 1:
                 self.array = cuvis_il.cuvis_read_imbuf_uint8(img_buf)
-            elif img_buf.__getattribute__("format") == 2:
+            elif img_buf.format == 2:
                 self.array = cuvis_il.cuvis_read_imbuf_uint16(img_buf)
-            elif img_buf.__getattribute__("format") == 3:
+            elif img_buf.format == 3:
                 self.array = cuvis_il.cuvis_read_imbuf_uint32(img_buf)
-            elif img_buf.__getattribute__("format") == 4:
+            elif img_buf.format == 4:
                 self.array = cuvis_il.cuvis_read_imbuf_float32(img_buf)
             else:
                 raise SDKException()
 
-            self.width = img_buf.__getattribute__("width")
-            self.height = img_buf.__getattribute__("height")
-            self.channels = img_buf.__getattribute__("channels")
+            self.width = img_buf.width
+            self.height = img_buf.height
+            self.channels = img_buf.channels
 
-            if img_buf.__getattribute__("wavelength") is not None:
+            if img_buf.wavelength is not None:
                 self.wavelength = [
                     cuvis_il.p_unsigned_int_getitem(
-                        img_buf.__getattribute__("wavelength"), z) for z
+                        img_buf.wavelength, z) for z
                     in
                     range(self.channels)]
 

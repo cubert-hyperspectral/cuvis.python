@@ -41,7 +41,7 @@ class General(object):
         pass
 
     @property
-    def version(self):
+    def version(self) -> str:
         return cuvis_il.cuvis_version_swig()
 
     def set_log_level(self, lvl):
@@ -71,17 +71,17 @@ class ComponentInfo(object):
 
     def _get_internal(self):
         ci = cuvis_il.cuvis_component_info_t()
-        ci.__setattr__("type", internal.__CuvisComponentType__[self.type])
-        ci.__setattr__("displayname", self.display_name)
-        ci.__setattr__("sensorinfo", self.sensor_info)
-        ci.__setattr__("userfield", self.user_field)
-        ci.__setattr__("pixelformat", self.pixel_format)
+        ci.type = internal.__CuvisComponentType__[self.type]
+        ci.displayname = self.display_name
+        ci.sensorinfo = self.sensor_info
+        ci.userfield = self.user_field
+        ci.pixelformat = self.pixel_format
         return ci
     
     @classmethod
     def _from_internal(cls, ci):
-        return cls(type=internal.__ComponentType__[ci.__getattribute__("type")],
-                   display_name=ci.__getattribute__("displayname"),
-                   sensor_info=ci.__getattribute__("sensorinfo"),
-                   user_field=ci.__getattribute__("userfield"),
-                   pixel_format=ci.__getattribute__("pixelformat"))
+        return cls(type=internal.__ComponentType__[ci.type],
+                   display_name=ci.displayname,
+                   sensor_info=ci.sensorinfo,
+                   user_field=ci.userfield,
+                   pixel_format=ci.pixelformat)

@@ -8,8 +8,7 @@ if lib_dir is None:
     sys.exit(1)
 if platform.system() == "Windows":
     os.add_dll_directory(lib_dir)
-    add_il = os.path.abspath(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+    add_il = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
     os.environ['PATH'] += os.pathsep + add_il
     sys.path.append(str(add_il))
 elif platform.system() == 'Linux':
@@ -36,3 +35,5 @@ from .cuvis_types import OperationMode, HardwareState, ProcessingMode, PanSharpe
     PanSharpeningAlgorithm, TiffCompressionMode, TiffFormat, ComponentType, ReferenceType, SessionItemType
 
 from .cuvis_aux import SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData
+
+del os, platform, sys

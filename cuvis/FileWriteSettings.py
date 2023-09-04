@@ -23,29 +23,29 @@ class GeneralExportSettings(object):
 
     def _get_internal(self):
         ge = cuvis_il.cuvis_export_general_settings_t()
-        ge.__setattr__("export_dir", self.export_dir)
-        ge.__setattr__("channel_selection", self.channel_selection)
-        ge.__setattr__("spectra_multiplier", float(self.spectra_multiplier))
-        ge.__setattr__("pan_scale", float(self.pan_scale))
-        ge.__setattr__("pan_interpolation_type", internal.__CuvisPanSharpeningInterpolationType__[
-            self.pan_sharpening_interpolation_type])
-        ge.__setattr__("pan_algorithm", internal.__CuvisPanSharpeningAlgorithm__[
-            self.pan_sharpening_algorithm])
-        ge.__setattr__("add_pan", int(self.add_pan))
-        ge.__setattr__("add_fullscale_pan", int(self.add_fullscale_pan))
-        ge.__setattr__("permissive", int(self.permissive))
+        ge.export_dir = self.export_dir
+        ge.channel_selection = self.channel_selection
+        ge.spectra_multiplier = float(self.spectra_multiplier)
+        ge.pan_scale = float(self.pan_scale)
+        ge.pan_interpolation_type = internal.__CuvisPanSharpeningInterpolationType__[
+            self.pan_sharpening_interpolation_type]
+        ge.pan_algorithm = internal.__CuvisPanSharpeningAlgorithm__[
+            self.pan_sharpening_algorithm]
+        ge.add_pan = int(self.add_pan)
+        ge.add_fullscale_pan = int(self.add_fullscale_pan)
+        ge.permissive = int(self.permissive)
         return ge
     
     @classmethod
     def _from_internal(cls, ge):
-        return cls(export_dir=ge.__getattribute__("export_dir"),
-                   channel_selection=ge.__getattribute__("channel_selection"),
-                   spectra_multiplier=ge.__getattribute__("spectra_multiplier"),
-                   pan_sharpening_interpolation_type=internal.__PanSharpeningInterpolationType__[ge.__getattribute__("pan_interpolation_type")],
-                   pan_sharpening_algorithm=internal.__PanSharpeningAlgorithm__[ge.__getattribute__("pan_algorithm")],
-                   add_pan=bool(ge.__getattribute__("add_pan")),
-                   add_fullscale_pan=bool(ge.__getattribute__("add_fullscale_pan")),
-                   permissive=bool(ge.__getattribute__("permissive")))
+        return cls(export_dir=ge.export_dir,
+                   channel_selection=ge.channel_selection,
+                   spectra_multiplier=ge.spectra_multiplier,
+                   pan_sharpening_interpolation_type=internal.__PanSharpeningInterpolationType__[ge.pan_interpolation_type],
+                   pan_sharpening_algorithm=internal.__PanSharpeningAlgorithm__[ge.pan_algorithm],
+                   add_pan=bool(ge.add_pan),
+                   add_fullscale_pan=bool(ge.add_fullscale_pan),
+                   permissive=bool(ge.permissive))
 
 @dataclass
 class EnviExportSettings(GeneralExportSettings):
@@ -70,17 +70,16 @@ class TiffExportSettings(GeneralExportSettings):
     def _get_internal(self):
         ge = super()._get_internal()
         ts = cuvis_il.cuvis_export_tiff_settings_t()
-        ts.__setattr__("compression_mode",
-                       internal.__CuvisTiffCompressionMode__[self.compression_mode])
-        ts.__setattr__("format", internal.__CuvisTiffFormat__[self.format])
+        ts.compression_mode = internal.__CuvisTiffCompressionMode__[self.compression_mode]
+        ts.format = internal.__CuvisTiffFormat__[self.format]
         return ge, ts
     
     @classmethod
     def _from_internal(cls, ge, ts):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__,
-                   compression_mode=internal.__TiffCompressionMode__[ts.__getattribute__("compression_mode")],
-                   format=internal.__TiffFormat__[ts.__getattribute__("format")])
+                   compression_mode=internal.__TiffCompressionMode__[ts.compression_mode],
+                   format=internal.__TiffFormat__[ts.format])
 
 @dataclass
 class ViewExportSettings(GeneralExportSettings):
@@ -89,14 +88,14 @@ class ViewExportSettings(GeneralExportSettings):
     def _get_internal(self):
         ge = super()._get_internal()
         vs = cuvis_il.cuvis_export_view_settings_t()
-        vs.__setattr__("userplugin", self.userplugin)
+        vs.userplugin = self.userplugin
         return ge, vs
     
     @classmethod
     def _from_internal(cls, ge, vs):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__, 
-                   userplugin=vs.__getattribute__("userplugin"))
+                   userplugin=vs.userplugin)
 
 @dataclass
 class SaveArgs(GeneralExportSettings):
@@ -114,32 +113,32 @@ class SaveArgs(GeneralExportSettings):
     def _get_internal(self):
         ge = super()._get_internal()
         sa = cuvis_il.cuvis_save_args_t()
-        sa.__setattr__("allow_overwrite", int(self.allow_overwrite))
-        sa.__setattr__("allow_fragmentation", int(self.allow_fragmentation))
-        sa.__setattr__("allow_drop", int(self.allow_drop))
-        sa.__setattr__("allow_session_file", int(self.allow_session_file))
-        sa.__setattr__("allow_info_file", int(self.allow_info_file))
-        sa.__setattr__("operation_mode", internal.__CuvisOperationMode__[self.operation_mode])
-        sa.__setattr__("fps", int(self.fps))
-        sa.__setattr__("soft_limit", int(self.soft_limit))
-        sa.__setattr__("hard_limit", int(self.hard_limit))
-        sa.__setattr__("max_buftime", int(self.max_buftime))
+        sa.allow_overwrite = int(self.allow_overwrite)
+        sa.allow_fragmentation = int(self.allow_fragmentation)
+        sa.allow_drop = int(self.allow_drop)
+        sa.allow_session_file = int(self.allow_session_file)
+        sa.allow_info_file = int(self.allow_info_file)
+        sa.operation_mode = internal.__CuvisOperationMode__[self.operation_mode]
+        sa.fps = int(self.fps)
+        sa.soft_limit = int(self.soft_limit)
+        sa.hard_limit = int(self.hard_limit)
+        samax_buftime = int(self.max_buftime)
         return ge, sa
     
     @classmethod
     def _from_internal(cls, ge, sa):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__,
-                   allow_overwrite = bool(sa.__getattribute__("allow_overwrite")),
-                   allow_fragmentation = bool(sa.__getattribute__("allow_fragmentation")),
-                   allow_drop = bool(sa.__getattribute__("allow_drop")),
-                   allow_session_file = bool(sa.__getattribute__("allow_session_file")),
-                   allow_info_file = bool(sa.__getattribute__("allow_info_file")),
-                   operation_mode = internal.__OperationMode__[sa.__getattribute__("operation_mode")],
-                   fps = sa.__getattribute__("fps"),
-                   soft_limit = sa.__getattribute__("soft_limit"),
-                   hard_limit = sa.__getattribute__("hard_limit"),
-                   max_buftime = sa.__getattribute__("max_buftime")
+                   allow_overwrite = bool(sa.allow_overwrite),
+                   allow_fragmentation = bool(sa.allow_fragmentation),
+                   allow_drop = bool(sa.allow_drop),
+                   allow_session_file = bool(sa.allow_session_file),
+                   allow_info_file = bool(sa.allow_info_file),
+                   operation_mode = internal.__OperationMode__[sa.operation_mode],
+                   fps = sa.fps,
+                   soft_limit = sa.soft_limit,
+                   hard_limit = sa.hard_limit,
+                   max_buftime = sa.max_buftime
                 )
 
 @dataclass
@@ -149,15 +148,14 @@ class ProcessingArgs(object):
 
     def _get_internal(self):
         pa = cuvis_il.cuvis_proc_args_t()
-        pa.__setattr__("allow_recalib", int(self.allow_recalib))
-        pa.__setattr__("processing_mode",
-                       int(internal.__CuvisProcessingMode__[self.processing_mode]))
+        pa.allow_recalib = int(self.allow_recalib)
+        pa.processing_mode = int(internal.__CuvisProcessingMode__[self.processing_mode])
         return pa
     
     @classmethod
     def _from_internal(cls, pa):
-        return cls(allow_recalib=bool(pa.__getattribute__("allow_recalib")),
-                   processing_mode=internal.__ProcessingMode__[pa.__getattribute__("processing_mode")])
+        return cls(allow_recalib=bool(pa.allow_recalib),
+                   processing_mode=internal.__ProcessingMode__[pa.processing_mode])
 
 @dataclass
 class WorkerSettings(object):
@@ -170,10 +168,10 @@ class WorkerSettings(object):
 
     def _get_internal(self):
         wa = cuvis_il.cuvis_worker_settings_t()
-        wa.__setattr__("worker_count", int(self.worker_count))
-        wa.__setattr__("poll_interval", int(self.poll_intervall))
-        wa.__setattr__("keep_out_of_sequence", int(self.keep_out_of_sequence))
-        wa.__setattr__("worker_queue_hard_limit", int(self.hard_limit))
-        wa.__setattr__("worker_queue_soft_limit", int(self.soft_limit))
-        wa.__setattr__("can_drop", int(self.can_drop))
+        wa.worker_count = int(self.worker_count)
+        wa.poll_interval = int(self.poll_intervall)
+        wa.keep_out_of_sequence = int(self.keep_out_of_sequence)
+        wa.worker_queue_hard_limit = int(self.hard_limit)
+        wa.worker_queue_soft_limit = int(self.soft_limit)
+        wa.can_drop = int(self.can_drop)
         return wa
