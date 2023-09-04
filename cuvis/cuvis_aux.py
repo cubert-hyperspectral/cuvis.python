@@ -5,7 +5,7 @@ base_datetime = datetime.datetime(1970, 1, 1)
 
 from . import cuvis_il
 
-from typing import List
+from typing import List, Union
 
 import cuvis.cuvis_types as internal
 
@@ -89,29 +89,52 @@ class Bitset(object):
     _translation_dict = {}
     _inverse_dict = {}
 
+    @classmethod
+    def supremum(cls):
+        """"Returns a bitset containing all possible members of the current Bitset class"""
+        return cls(sum([v for k,v in cls._translation_dict.items()]))
+    
+    def all(self):
+        """"Returns a bitset containing all possible members of the current Bitset class"""
+        return type(self).supremum()
+
     def __init__(self, value):
         self._value = value
 
     def strings(self) -> List[str]:
+        """"Returns a list containing the string values of the current members of the Bitset"""
         return _bit_translate(self._value, type(self)._translation_dict)
 
     def __repr__(self):
+        """"Returns the string representation of the current Bitset"""
         return f'{self.__class__.__name__}({self.strings()})'
     
     def __int__(self):
+        """"Returns the internal integer value of the current Bitset """
         return self._value
     
     def __len__(self):
+        """"Returns the amount of members of the current Bitset """
         return bin(self._value).count('1')
     
     def __iter__(self):
+        """"Returns an iterator over the string values of the current member of the Bitset """
         return _bit_translate(self._value, type(self)._translation_dict).__iter__()
     
     def __contains__(self, member):
-        return type(self)._translation_dict[member] & self._value
+        """"Returns True if the input value is part of the set. The value can be a string, an int or a similiar Bitset instance """
+        if isinstance(member, str):
+            return type(self)._translation_dict[member] & self._value
+        elif isinstance(member, int):
+            return member & self._value
+        elif isinstance(member, type(self)):
+            return (member & self._value) == member
+        else:
+            raise ValueError(f'Cannot call operator with type {type(member)}')
     
     @classmethod
-    def from_strings(cls,*values):
+    def from_strings(cls,*values: List[str]):
+        """" Creates a Bitset from a list of strings """
         return cls(sum([cls._translation_dict[v] for v in values]))
 
     

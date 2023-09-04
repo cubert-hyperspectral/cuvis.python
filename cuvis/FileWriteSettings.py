@@ -122,7 +122,7 @@ class SaveArgs(GeneralExportSettings):
         sa.fps = int(self.fps)
         sa.soft_limit = int(self.soft_limit)
         sa.hard_limit = int(self.hard_limit)
-        samax_buftime = int(self.max_buftime)
+        sa.max_buftime = int(self.max_buftime)
         return ge, sa
     
     @classmethod

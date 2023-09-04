@@ -10,7 +10,7 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '0.0.7'
+VERSION = '0.0.11'
 
 DESCRIPTION = 'CUVIS Python SDK.'
 
@@ -40,7 +40,7 @@ REQUIREMENTS = {
     # Installation dependencies
     # Use with pip install . to install from source
     'install': [
-        str(f'numpy == {get_numpy_version()}'),
+        str(f'numpy >= 1.22.0'),
     ],
 }
 
