@@ -2,6 +2,14 @@
 
 This repository contains the python wrapper for the Cuvis SDK.
 
+## Installation
+
+This wrapper can be installed via 
+
+```
+pip install cuvis
+```
+
 ## Building
 
 For building the python wrapper, clone this git repository and initialize it's submodules recursively.
