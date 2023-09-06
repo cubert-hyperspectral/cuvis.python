@@ -10,27 +10,9 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '0.0.11'
+VERSION = '0.0.22'
 
 DESCRIPTION = 'CUVIS Python SDK.'
-
-def get_numpy_version():
-	version = ''
-	with open(os.path.join(here, 'cuvis.pyil', 'numpy_version.stamp')) as f:
-		version = f.read()
-	return version
-
-def get_pyil_files():
-    files = ['_cuvis_pyil.pyd', 'cuvis_il.py']
-    with open(os.path.join(here, 'cuvis.pyil', 'binary_dir.stamp')) as f:
-        path = f.read().strip('\n')
-
-        for file in files:
-            full_path = os.path.join(path, file)
-            copy(full_path, os.path.join(here, 'cuvis'))
-    pass
-
-             
 
 REQUIREMENTS = {
     # Installation script (this file) dependencies
@@ -40,7 +22,7 @@ REQUIREMENTS = {
     # Installation dependencies
     # Use with pip install . to install from source
     'install': [
-        str(f'numpy >= 1.22.0'),
+        'cuvis-il >= 0.0.10',
     ],
 }
 
@@ -78,7 +60,6 @@ class UploadCommand(Command):
             pass
 
         self.status('Copying latest pyil files')
-        get_pyil_files()
 
         self.status('Building Source and Wheel (universal) distribution…')
         os.system('python setup.py sdist'.format(sys.executable))
@@ -106,16 +87,15 @@ def __createManifest__(subdirs):
     current = os.path.dirname(__file__)
     relative_paths = [os.path.relpath(path, current) for path in subdirs]
 
-    single_files = [os.path.join(here, 'cuvis.pyil', 'numpy_version.stamp'),
-                    os.path.join(here, 'DESCRIPTION.md')]
+    single_files = [os.path.join(here, 'DESCRIPTION.md')]
 
     rel_single_files = [os.path.relpath(path, current) for path in single_files]
 
     with open(os.path.join(current, "MANIFEST.in"), "w") as manifest:
-        manifest.writelines(
-            "recursive-include {} *.pyd \n".format(" ".join(relative_paths)))
-        manifest.writelines(
-            "recursive-include {} *.so \n".format(" ".join(relative_paths)))
+        #manifest.writelines(
+        #    "recursive-include {} *.pyd \n".format(" ".join(relative_paths)))
+        #manifest.writelines(
+        #    "recursive-include {} *.so \n".format(" ".join(relative_paths)))
         manifest.writelines(
             "include {}  \n".format(" ".join(rel_single_files)))
 
@@ -144,6 +124,7 @@ setup(
     author_email='mueller@cubert-gmbh.com',
     description=DESCRIPTION,
     long_description=long_description,
+    long_description_content_type='text/markdown',
     #setup_requires=REQUIREMENTS['setup'],
     install_requires=REQUIREMENTS['install'],
     include_package_data=True,

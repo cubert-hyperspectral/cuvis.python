@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from . import cuvis_il
+from cuvis_il import cuvis_il
 from .SessionFile import SessionFile
 from .cuvis_aux import SDKException, Capabilities
 from .cuvis_types import OperationMode

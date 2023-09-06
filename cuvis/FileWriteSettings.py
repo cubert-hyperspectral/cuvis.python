@@ -1,4 +1,4 @@
-from . import cuvis_il
+from cuvis_il import cuvis_il
 from .cuvis_aux import SDKException
 from .cuvis_types import PanSharpeningInterpolationType, \
     PanSharpeningAlgorithm, \

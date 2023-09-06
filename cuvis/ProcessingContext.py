@@ -1,4 +1,4 @@
-from . import cuvis_il
+from cuvis_il import cuvis_il
 from .Calibration import Calibration
 from .FileWriteSettings import ProcessingArgs
 from .Measurement import Measurement
@@ -116,7 +116,7 @@ class ProcessingContext(object):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
-    def calc_distance(self, distMM: int) -> bool:
+    def calc_distance(self, distMM: float) -> bool:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_calc_distance(
                 self._handle, distMM):
             raise SDKException()
