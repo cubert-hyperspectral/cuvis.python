@@ -10,7 +10,7 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '0.0.22'
+VERSION = '3.2.1'
 
 DESCRIPTION = 'CUVIS Python SDK.'
 
