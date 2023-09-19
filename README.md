@@ -109,7 +109,7 @@ Further, we provide a set of example images to explore [here](https://cloud.cube
 
 ### Getting involved
 
-cuvis.hub welcomes your expertise and enthusiasm!
+cuvis.hub welcomes your enthusiasm and expertise!
 
 With providing our SDK wrappers on GitHub, we aim for a community-driven open 
 source application development by a diverse group of contributors.
