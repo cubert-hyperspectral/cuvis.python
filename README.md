@@ -1,19 +1,137 @@
+![image](https://camo.githubusercontent.com/9fc396a08b84779ea0f78a4085e96bee6035fca702cd382f38cb661fa1ff1d0c/68747470733a2f2f7777772e7370656374726f6578706f2e636f6d2f77702d636f6e74656e742f75706c6f6164732f323031382f30372f637562657274323031382e706e67)
+
+
 # cuvis.python
 
-This repository contains the python wrapper for the Cuvis SDK.
+cuvis.python is the python wrapper for the Cuvis SDK written in C ([available here](https://github.com/cubert-hyperspectral/cuvis.sdk)).
+
+- **Website:** https://www.cubert-hyperspectral.com/
+- **Source code:** https://github.com/cubert-hyperspectral/
+- **Support:** http://support.cubert-hyperspectral.com/
+
+This wrapper enables operating Cubert GmbH Hyperspectral Cameras, as well as, 
+analyzing data directly from the corporate data format(s) within python.
+This wrapper provides an object-oriented full representation of the basic C SDK 
+capabilities and python return variable formats based on commonly used modules, 
+like dictionaries, datetime or numpy objects.
+
+For other supported program languages, please have a look at the 
+source code page.
 
 ## Installation
 
-This wrapper can be installed via 
+### Prerequisites
+
+First, you need to install the Cuvis C SDK from [here](https://cloud.cubert-gmbh.de/index.php/s/kKVtx0x2fmYqVgx).
+The installation registers the installation path in the environment, which 
+the python wrapper is linked to.
+
+:warning: **If the C SDK is reinstalled into another directory later on, the 
+linkage breaks and the python wrapper might stop working.**
+
+
+### Via pip
+
+If you wish to use cuvis within another project, from within your 
+project environment, run 
 
 ```
 pip install cuvis
 ```
 
-Alternatively you can also clone this repository and install the wrapper locally.
-For additional dependencies see [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
+or add `cuvis`to your project `requirements.txt` or `setup.py`.
 
-Next, you need to install the Cuvis C SDK (see https://cloud.cubert-gmbh.de/index.php/s/kKVtx0x2fmYqVgx).
+### Via repository
+
+If you wish to download and use cuvis locally, clone the git repository
+
+  ```shell
+  git clone git@github.com:cubert-hyperspectral/cuvis.python.git
+  ```
+
+and install the wrapper locally. 
+
+For building the python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
+
+## How to ...
+
+### Getting started
+
+We provide an additional example repository [here](https://github.com/cubert-hyperspectral/cuvis.python.examples),
+covering the following examples:
+
+- 01_loadMeasurement
+
+   Load measurement from disk and print and plot the value (count) for all 
+available channels (wavelength) for one specific pixel.
 
 
+- 02_reprocessMeasurement
+
+   Load measurement as well as references (dark, white, distance) from disk 
+and reprocess the measurement to reflectance.
+
+
+- 03_exportMeasurement
+
+   Load measurement from disk and save to different file formats.
+
+
+- 04_changeDistance
+
+   Load measurement from disk and reprocess to a new given distance.
+
+
+- 05_recordSingleImages
+
+   Setup camera and record measurements via looping software trigger, aka 
+"single shot mode" or "software mode".
+
+
+- 05_recordSingleImages_async
+
+   Same as example 05_recordSingleImages but with `asyncio`.
+
+
+- 06_recordVideo
+
+   Setup camera and record measurements via internal clock triggering, aka 
+"video mode". In this example the `cuvis.Worker` is used to make use of 
+multithreading (`cuvis_worker_create`).
+
+
+- 06_recordVideo_async
+
+   Same as example 06_recordVideo but with `asyncio`.
+
+
+- 07_recordVideoFromSessionFile
+
+   Set up a virtual camera based on a pre-recorded session file to simulate 
+actual camera behaviour.
+
+
+Further, we provide a set of example images to explore [here](https://cloud.cubert-gmbh.de/index.php/s/3oECVGWpC1NpNqC).
+
+### Getting involved
+
+cuvis.hub welcomes your enthusiasm and expertise!
+
+With providing our SDK wrappers on GitHub, we aim for a community-driven open 
+source application development by a diverse group of contributors.
+Cubert GmbH aims for creating an open, inclusive, and positive community.
+Feel free to branch/fork this repository for later merge requests, open 
+issues or point us to your application specific projects.
+Contact us, if you want your open source project to be included and shared 
+on this hub; either if you search for direct support, collaborators or any 
+other input or simply want your project being used by this community.
+We ourselves try to expand the code base with further more specific 
+applications using our wrappers to provide starting points for research 
+projects, embedders or other users.
+
+### Getting help
+
+Directly code related issues can be posted here on the GitHub page, other, more 
+general and application related issues should be directed to the 
+aforementioned Cubert GmbH [support page](http://support.cubert-hyperspectral.com/).
 

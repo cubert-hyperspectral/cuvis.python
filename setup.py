@@ -10,7 +10,7 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '0.0.22'
+VERSION = '0.0.23'
 
 DESCRIPTION = 'CUVIS Python SDK.'
 
@@ -22,7 +22,7 @@ REQUIREMENTS = {
     # Installation dependencies
     # Use with pip install . to install from source
     'install': [
-        'cuvis-il >= 0.0.10',
+        'cuvis-il >= 0.0.12',
     ],
 }
 
@@ -87,7 +87,7 @@ def __createManifest__(subdirs):
     current = os.path.dirname(__file__)
     relative_paths = [os.path.relpath(path, current) for path in subdirs]
 
-    single_files = [os.path.join(here, 'DESCRIPTION.md')]
+    single_files = [os.path.join(here, 'README.md')]
 
     rel_single_files = [os.path.relpath(path, current) for path in single_files]
 
@@ -107,7 +107,7 @@ __createManifest__([add_il])
 # Import the DESCRIPTION.md and use it as the long-description.
 # Note: this will only work if 'DESCRIPTION.md' is present in your MANIFEST.in file!
 try:
-    with io.open(os.path.join(here, 'DESCRIPTION.md'), encoding='utf-8') as f:
+    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
         long_description = '\n' + f.read()
 except FileNotFoundError:
     long_description = DESCRIPTION
