@@ -50,14 +50,8 @@ If you wish to download and use cuvis locally, clone the git repository
   ```
 
 and install the wrapper locally. 
-Make sure to also update and install all submodules linked in this 
-repository with
 
-```shell
-git submodule update --init --recursive
-```
-
-, e.g. reference to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
+For building the python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
 
 ## How to ...
 
