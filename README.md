@@ -49,18 +49,70 @@ If you wish to download and use cuvis locally, clone the git repository
   git clone git@github.com:cubert-hyperspectral/cuvis.python.git
   ```
 
-and install the wrapper locally. All submodules 
+and install the wrapper locally. 
 
+For building the relevant python bindings refer to [cuvis.pyil](https://github.
+com/cubert-hyperspectral/cuvis.pyil).
 
 ## How to ...
 
 ### Getting started
 
 We provide an additional example repository [here](https://github.com/cubert-hyperspectral/cuvis.python.examples),
-covering some basic applications.
+covering the following examples:
 
-Further, we provide a set of example images to explore [here](https://cloud.cubert-gmbh.de/index.php/s/3oECVGWpC1NpNqC). 
-These are also needed for some of the examples above.
+- 01_loadMeasurement
+
+   Load measurement from disk and print and plot the value (count) for all 
+available channels (wavelength) for one specific pixel.
+
+
+- 02_reprocessMeasurement
+
+   Load measurement as well as references (dark, white, distance) from disk 
+and reprocess the measurement to reflectance.
+
+
+- 03_exportMeasurement
+
+   Load measurement from disk and save to different file formats.
+
+
+- 04_changeDistance
+
+   Load measurement from disk and reprocess to a new given distance.
+
+
+- 05_recordSingleImages
+
+   Setup camera and record measurements via looping software trigger, aka 
+"single shot mode" or "software mode".
+
+
+- 05_recordSingleImages_async
+
+   Same as example 05_recordSingleImages but with `asyncio`.
+
+
+- 06_recordVideo
+
+   Setup camera and record measurements via internal clock triggering, aka 
+"video mode". In this example the `cuvis.Worker` is used to make use of 
+multithreading (`cuvis_worker_create`).
+
+
+- 06_recordVideo_async
+
+   Same as example 06_recordVideo but with `asyncio`.
+
+
+- 07_recordVideoFromSessionFile
+
+   Set up a virtual camera based on a pre-recorded session file to simulate 
+actual camera behaviour.
+
+
+Further, we provide a set of example images to explore [here](https://cloud.cubert-gmbh.de/index.php/s/3oECVGWpC1NpNqC).
 
 ### Getting involved
 
