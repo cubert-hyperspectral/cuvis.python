@@ -51,8 +51,7 @@ If you wish to download and use cuvis locally, clone the git repository
 
 and install the wrapper locally. 
 
-For building the relevant python bindings refer to [cuvis.pyil](https://github.
-com/cubert-hyperspectral/cuvis.pyil).
+For building the relevant python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
 
 ## How to ...
 
