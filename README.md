@@ -60,8 +60,8 @@ For building the relevant python bindings refer to [cuvis.pyil](https://github.c
 We provide an additional example repository [here](https://github.com/cubert-hyperspectral/cuvis.python.examples),
 covering some basic applications.
 
-Further, we provide a set of example images to explore [here](https://cloud.cubert-gmbh.de/index.php/s/3oECVGWpC1NpNqC).
-These examples are also used by the examples mentioned above.
+Further, we provide a set of example measurements to explore [here](https://cloud.cubert-gmbh.de/index.php/s/3oECVGWpC1NpNqC).
+These measurements are also used by the examples mentioned above.
 
 ### Getting involved
 
