@@ -29,7 +29,6 @@ the python wrapper is linked to.
 :warning: **If the C SDK is reinstalled into another directory later on, the 
 linkage breaks and the python wrapper might stop working.**
 
-
 ### Via pip
 
 If you wish to use cuvis within another project, from within your 
@@ -51,7 +50,7 @@ If you wish to download and use cuvis locally, clone the git repository
 
 and install the wrapper locally. 
 
-For building the relevant python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
+For building the python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
 
 ## How to ...
 
