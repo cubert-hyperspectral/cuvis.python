@@ -104,8 +104,8 @@ add_il = os.path.join(here, "cuvis")
 
 __createManifest__([add_il])
 
-# Import the DESCRIPTION.md and use it as the long-description.
-# Note: this will only work if 'DESCRIPTION.md' is present in your MANIFEST.in file!
+# Import the README.md and use it as the long-description.
+# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
     with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
         long_description = '\n' + f.read()
