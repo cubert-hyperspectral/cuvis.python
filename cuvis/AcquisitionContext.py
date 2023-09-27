@@ -525,6 +525,41 @@ class AcquisitionContext(object):
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
+    
+
+    @property
+    def auto_exp_comp(self) -> float :
+        """
+
+        """
+        _ptr = cuvis_il.new_p_double()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_get(
+                self._handle, _ptr):
+            raise SDKException()
+        return bool(cuvis_il.p_double_value(_ptr))
+
+
+    # @copydoc cuvis_acq_cont_auto_exp_set
+    @auto_exp_comp.setter
+    def auto_exp_comp(self, val: float) -> None:
+        """
+
+        """
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_set(
+                self._handle, float(val)):
+            raise SDKException()
+        pass
+
+    # @copydoc cuvis_acq_cont_auto_exp_set_async
+    def set_auto_exp_comp_async(self, val: float) -> Async:
+        """
+
+        """
+        _pasync = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_set_async(
+                self._handle, _pasync, float(val)):
+            raise SDKException()
+        return Async(cuvis_il.p_int_value(_pasync))
 
     # @copydoc cuvis_acq_cont_preview_mode_get
     @property
