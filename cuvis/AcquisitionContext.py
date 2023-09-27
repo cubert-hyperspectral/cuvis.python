@@ -551,7 +551,7 @@ class AcquisitionContext(object):
         pass
 
     # @copydoc cuvis_acq_cont_auto_exp_set_async
-    def set_auto_exp__comp_async(self, val: float) -> Async:
+    def set_auto_exp_comp_async(self, val: float) -> Async:
         """
 
         """
