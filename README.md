@@ -38,7 +38,7 @@ project environment, run
 pip install cuvis
 ```
 
-or add `cuvis`to your project `requirements.txt` or `setup.py`.
+or add `cuvis` to your project `requirements.txt` or `setup.py`.
 
 ### Via repository
 
