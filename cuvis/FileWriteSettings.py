@@ -86,6 +86,12 @@ class ViewExportSettings(GeneralExportSettings):
     userplugin: str = None
 
     def _get_internal(self):
+        if self.userplugin is not None:
+            if os.path.exists(self.userplugin):
+                with open(self.userplugin) as f:
+                    userplugintmp = f.readlines()
+                self.userplugin = "".join(userplugintmp)
+                
         ge = super()._get_internal()
         vs = cuvis_il.cuvis_export_view_settings_t()
         vs.userplugin = self.userplugin
