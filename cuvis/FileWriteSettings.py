@@ -6,6 +6,7 @@ from .cuvis_types import PanSharpeningInterpolationType, \
     OperationMode, ProcessingMode
 
 import cuvis.cuvis_types as internal
+import os
 
 from dataclasses import dataclass
 
