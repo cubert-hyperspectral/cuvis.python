@@ -8,7 +8,9 @@ from .cuvis_types import PanSharpeningInterpolationType, \
 import cuvis.cuvis_types as internal
 import os
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
+
+
 
 @dataclass
 class GeneralExportSettings(object):
@@ -82,17 +84,33 @@ class TiffExportSettings(GeneralExportSettings):
                    compression_mode=internal.__TiffCompressionMode__[ts.compression_mode],
                    format=internal.__TiffFormat__[ts.format])
 
-@dataclass
+@dataclass(repr=False)
 class ViewExportSettings(GeneralExportSettings):
     userplugin: str = None
 
-    def _get_internal(self):
+    def __post_init__(self):
         if self.userplugin is not None:
+            if '<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">' in self.userplugin:
+                # Seems to be a valid plugin
+                return
             if os.path.exists(self.userplugin):
+                # Seems to be a valid path to a file, read in
                 with open(self.userplugin) as f:
-                    userplugintmp = f.readlines()
-                self.userplugin = "".join(userplugintmp)
-                
+                    self.userplugin = "".join(f.readlines())
+            else:
+                raise SDKException('Error when validating plugin data. Please provide a valid plugin or a path to a plugin file')
+            
+    def __repr__(self):
+        def short_str(s: str, l: int) -> str:
+            return (s[:l] + '...') if len(s) > l else s
+
+        """Returns a string containing but shortens the userplugin field."""
+        s = ', '.join(f'{field.name}={getattr(self, field.name)}' if field.name != 'userplugin' else f'{field.name}={short_str(getattr(self, field.name), 15)}' 
+                    for field in fields(self))
+        return f'{type(self).__name__}({s})'
+
+
+    def _get_internal(self):
         ge = super()._get_internal()
         vs = cuvis_il.cuvis_export_view_settings_t()
         vs.userplugin = self.userplugin
