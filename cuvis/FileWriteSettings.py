@@ -6,8 +6,10 @@ from .cuvis_types import PanSharpeningInterpolationType, \
     OperationMode, ProcessingMode
 
 import cuvis.cuvis_types as internal
+import os
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, InitVar
+
 
 @dataclass
 class GeneralExportSettings(object):
@@ -81,9 +83,41 @@ class TiffExportSettings(GeneralExportSettings):
                    compression_mode=internal.__TiffCompressionMode__[ts.compression_mode],
                    format=internal.__TiffFormat__[ts.format])
 
-@dataclass
+@dataclass(repr=False)
 class ViewExportSettings(GeneralExportSettings):
-    userplugin: str = None
+    userplugin: InitVar[str] = None
+
+    def __post_init__(self, userplugin: str):
+        if userplugin is not None:
+            if '<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">' in userplugin:
+                # Seems to be a valid plugin
+                self._userplugin = userplugin
+                return
+            if os.path.exists(userplugin):
+                # Seems to be a valid path to a file, read in
+                with open(userplugin) as f:
+                    self._userplugin = "".join(f.readlines())
+            else:
+                raise SDKException('Error when validating plugin data. Please provide a valid plugin or a path to a plugin file')
+            
+    @property
+    def userplugin(self) -> str:
+        return self._userplugin
+
+    @userplugin.setter
+    def userplugin(self, v: str) -> None:
+        self.__post_init__(v)
+
+            
+    def __repr__(self):
+        def short_str(s: str, l: int) -> str:
+            return (s[:l] + '...') if len(s) > l else s
+
+        """Returns a string containing but shortens the userplugin field."""
+        s = ', '.join(list(f'{field.name}={getattr(self, field.name)}'
+                    for field in fields(self)) + [f'userplugin={short_str(self._userplugin, 15)}'])
+        return f'{type(self).__name__}({s})'
+
 
     def _get_internal(self):
         ge = super()._get_internal()
