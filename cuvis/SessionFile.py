@@ -35,7 +35,7 @@ class SessionFile(object):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
     
-    def get_reference(self, frameNo: int, reftype: ReferenceType) -> Measurement:
+    def get_reference(self, frameNo: int, reftype: ReferenceType) ->  Optional[Measurement]:
         _ptr = cuvis_il.new_p_int()
         ret = cuvis_il.cuvis_session_file_get_reference_mesu(
                 self._handle, frameNo, internal.__CuvisSessionItemType__[reftype],
