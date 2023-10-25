@@ -4,11 +4,11 @@ from pathlib import Path
 from cuvis_il import cuvis_il
 from .Measurement import Measurement
 from .cuvis_aux import SDKException
-from .cuvis_types import OperationMode, SessionItemType
+from .cuvis_types import OperationMode, SessionItemType, ReferenceType
 
 import cuvis.cuvis_types as internal
 
-from typing import Union
+from typing import Union, Optional
 
 class SessionFile(object):
     def __init__(self, base: Union[Path,str]):
@@ -25,11 +25,24 @@ class SessionFile(object):
 
     pass
 
-    def get_measurement(self, frameNo: int, itemtype: SessionItemType = SessionItemType.no_gaps) -> Measurement:
+    def get_measurement(self, frameNo: int, itemtype: SessionItemType = SessionItemType.no_gaps) ->  Optional[Measurement]:
         _ptr = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_session_file_get_mesu(
-                self._handle, frameNo, internal.__CuvisSessionItemType__[itemtype],
-                _ptr):
+        ret =  cuvis_il.cuvis_session_file_get_mesu(self._handle, frameNo, internal.__CuvisSessionItemType__[itemtype],
+                _ptr)
+        if cuvis_il.status_no_measurement == ret:
+            return None
+        if cuvis_il.status_ok != ret:
+            raise SDKException()
+        return Measurement(cuvis_il.p_int_value(_ptr))
+    
+    def get_reference(self, frameNo: int, reftype: ReferenceType) -> Measurement:
+        _ptr = cuvis_il.new_p_int()
+        ret = cuvis_il.cuvis_session_file_get_reference_mesu(
+                self._handle, frameNo, internal.__CuvisSessionItemType__[reftype],
+                _ptr)
+        if cuvis_il.status_no_measurement == ret:
+            return None
+        if cuvis_il.status_ok != ret:
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
 
