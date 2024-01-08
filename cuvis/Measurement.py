@@ -138,13 +138,11 @@ class Measurement(object):
     def get_data_info(self):
         return_dict = {}
         for att in self.data["IMAGE_info"].__dir__():
-            if not (att.startswith("__") or att.startswith("this")):
+            if not (att.startswith("__") or att.startswith("this") or att.startswith("_")):
                 return_dict.update(
-                    {att: self.Data["IMAGE_info"].__getattribute__(att)})
+                    {att: self.data["IMAGE_info"].__getattribute__(att)})
         try:
-            return_dict["readout_time"] = str(
-                base_datetime + datetime.timedelta(
-                    milliseconds=return_dict["readout_time"]))
+            return_dict["readout_time"] = str(return_dict["readout_time"])
         except:
             print("No human readable readout_time available!")
         return return_dict
