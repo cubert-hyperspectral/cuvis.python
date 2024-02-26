@@ -118,7 +118,7 @@ class AcquisitionContext(object):
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_gain_get(self._handle,
                                                               idref, val):
             raise SDKException()
-        return cuvis_il.new_p_double(val)
+        return cuvis_il.p_double_value(val)
 
     # @copydoc cuvis_comp_gain_set
     def _set_gain(self, idref: int, val: float) -> None:
@@ -126,7 +126,7 @@ class AcquisitionContext(object):
 
         """
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_gain_set(self._handle,
-                                                              idref, val):
+                                                              idref, float(val)):
             raise SDKException()
         pass
 
@@ -197,7 +197,7 @@ class AcquisitionContext(object):
 
         """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_integration_time_set(
-                self._handle, val):
+                self._handle, float(val)):
             raise SDKException()
         pass
 
@@ -209,7 +209,7 @@ class AcquisitionContext(object):
         _pAsync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_acq_cont_integration_time_set_async(
-                    self._handle, _pAsync, val):
+                    self._handle, _pAsync, float(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pAsync))
 
@@ -229,7 +229,7 @@ class AcquisitionContext(object):
     def _set_integration_time_factor(self, idref: int, val: float) -> None:
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_comp_integration_time_factor_set(
-                    self._handle, idref, val):
+                    self._handle, idref, float(val)):
             raise SDKException()
         pass
 
@@ -241,7 +241,7 @@ class AcquisitionContext(object):
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_comp_integration_time_factor_set_async(
-                    self._handle, idref, _pasync, val):
+                    self._handle, idref, _pasync, float(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
@@ -286,7 +286,7 @@ class AcquisitionContext(object):
 
         """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_fps_set(
-                self._handle, val):
+                self._handle, float(val)):
             raise SDKException()
         pass
 
@@ -297,7 +297,7 @@ class AcquisitionContext(object):
         """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_fps_set_async(
-                self._handle, _pasync, val):
+                self._handle, _pasync, float(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
@@ -681,24 +681,34 @@ class Component:
         """
         return self._acq._get_temperature(self._idx)
     
-    #@property
-    #def bandwith(self) -> int:
-    #    """
-    #
-    #    """
-    #    return self._acq._get_bandwidth(self._idx)
-    
     @property
-    def gain(self) -> int:
+    def gain(self) -> float:
         """
 
         """
         return self._acq._get_gain(self._idx)
     
+
+    @gain.setter
+    def gain(self, val: float) -> None:
+        """
+
+        """
+        return self._acq._set_gain(self._idx, val)
+    
+
+    
     @property
-    def integration_time_factor(self) -> int:
+    def integration_time_factor(self) -> float:
         """
 
         """
         return self._acq._get_integration_time_factor(self._idx)
+    
+    @integration_time_factor.setter
+    def integration_time_factor(self, val: float) -> None:
+        """
+
+        """
+        return self._acq._set_integration_time_factor(self._idx, val)
     
