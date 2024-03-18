@@ -1,4 +1,7 @@
-from cuvis_il import cuvis_il
+try:
+    from cuvis_il import cuvis_il
+except:
+    import cuvis_il
 from .Calibration import Calibration
 from .FileWriteSettings import ProcessingArgs
 from .Measurement import Measurement

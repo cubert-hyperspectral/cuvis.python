@@ -3,7 +3,10 @@ import logging
 import datetime
 base_datetime = datetime.datetime(1970, 1, 1)
 
-from cuvis_il import cuvis_il
+try:
+    from cuvis_il import cuvis_il
+except:
+    import cuvis_il
 
 from typing import List, Union
 
