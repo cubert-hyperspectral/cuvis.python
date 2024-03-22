@@ -42,12 +42,9 @@ class AcquisitionContext(object):
         pass
 
 
-    @copydoc(cuvis_il.cuvis_acq_cont_get_state)
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_get_state)
     def state(self) -> HardwareState:
-        """
-
-        """
         val = cuvis_il.new_p_cuvis_hardware_state_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_state(
                 self._handle, val):
@@ -55,12 +52,9 @@ class AcquisitionContext(object):
         return internal.__HardwareState__[ cuvis_il.p_cuvis_hardware_state_t_value(val)]
 
 
-    @copydoc(cuvis_il.cuvis_acq_cont_get_component_count)
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_get_component_count)
     def component_count(self) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_component_count(
                 self._handle, val):
@@ -69,9 +63,6 @@ class AcquisitionContext(object):
 
     @copydoc(cuvis_il.cuvis_comp_online_get)
     def _get_component_online(self, idref: int) -> bool:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_online_get(
                 self._handle,idref, val):
