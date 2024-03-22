@@ -11,6 +11,7 @@ from .cuvis_aux import SDKException, SessionData
 from .cuvis_types import HardwareState, OperationMode
 
 from typing import Coroutine, Callable, Awaitable, Union, Iterable
+from .doc import copydoc
 
 import cuvis.cuvis_types as internal
 
@@ -41,7 +42,7 @@ class AcquisitionContext(object):
         pass
 
 
-    # @copydoc cuvis_acq_cont_get_state
+    @copydoc(cuvis_il.cuvis_acq_cont_get_state)
     @property
     def state(self) -> HardwareState:
         """
@@ -54,7 +55,7 @@ class AcquisitionContext(object):
         return internal.__HardwareState__[ cuvis_il.p_cuvis_hardware_state_t_value(val)]
 
 
-    # @copydoc cuvis_acq_cont_get_component_count
+    @copydoc(cuvis_il.cuvis_acq_cont_get_component_count)
     @property
     def component_count(self) -> int:
         """
@@ -66,7 +67,7 @@ class AcquisitionContext(object):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_online_get
+    @copydoc(cuvis_il.cuvis_comp_online_get)
     def _get_component_online(self, idref: int) -> bool:
         """
 
