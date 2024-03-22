@@ -69,11 +69,8 @@ class AcquisitionContext(object):
             raise SDKException()
         return bool(cuvis_il.p_int_value(val))
 
-    # @copydoc cuvis_acq_cont_get_component_info
+    @copydoc(cuvis_il.cuvis_acq_cont_get_component_info)
     def _get_component_info(self, idref: int) -> ComponentInfo:
-        """
-
-        """
         ci = cuvis_il.cuvis_component_info_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_component_info(
                 self._handle, idref, ci):
@@ -81,89 +78,65 @@ class AcquisitionContext(object):
         return ComponentInfo._from_internal(ci)
     
 
-    # @copydoc cuvis_acq_cont_queue_size_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_queue_size_get)
     def queue_size(self) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_queue_size_get(
                 self._handle, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_acq_cont_queue_size_set
     @queue_size.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_queue_size_set)
     def queue_size(self, val: int) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_queue_size_set(
                 self._handle, val):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_comp_gain_get
+    @copydoc(cuvis_il.cuvis_comp_gain_get)
     def _get_gain(self, idref: int) -> float:
-        """
-
-        """
         val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_gain_get(self._handle,
                                                               idref, val):
             raise SDKException()
         return cuvis_il.p_double_value(val)
 
-    # @copydoc cuvis_comp_gain_set
+    @copydoc(cuvis_il.cuvis_comp_gain_set)
     def _set_gain(self, idref: int, val: float) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_gain_set(self._handle,
                                                               idref, float(val)):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_comp_gain_set_async
+    @copydoc(cuvis_il.cuvis_comp_gain_set_async)
     def _set_gain_async(self, idref: int, val: float) -> Async:
-        """
-
-        """
         _pAsync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_gain_set_async(
                 self._handle, idref, _pAsync, val):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pAsync))
 
-    # @copydoc cuvis_acq_cont_operation_mode_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_operation_mode_get)
     def operation_mode(self) -> OperationMode:
-        """
-
-        """
         val = cuvis_il.new_p_cuvis_operation_mode_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_operation_mode_get(
                 self._handle, val):
             raise SDKException()
         return  internal.__OperationMode__[cuvis_il.p_cuvis_operation_mode_t_value(val)]
 
-    # @copydoc cuvis_acq_cont_operation_mode_set
     @operation_mode.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_operation_mode_set)
     def operation_mode(self, val: OperationMode) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_operation_mode_set(
                 self._handle, internal.__CuvisOperationMode__[val]):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_operation_mode_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_operation_mode_set_async)
     def set_operation_mode_async(self, val: OperationMode) -> Async:
-        """
-
-        """
         _pAsync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_acq_cont_operation_mode_set_async(
@@ -172,35 +145,25 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pAsync))
 
-    # @copydoc cuvis_acq_cont_integration_time_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_integration_time_get)
     def integration_time(self) -> float:
-        """
-
-        """
         val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_integration_time_get(
                 self._handle, val):
             raise SDKException()
         return cuvis_il.p_double_value(val)
 
-
-    # @copydoc cuvis_acq_cont_integration_time_set
     @integration_time.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_integration_time_set)
     def integration_time(self, val: float) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_integration_time_set(
                 self._handle, float(val)):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_integration_time_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_integration_time_set_async)
     def set_integration_time_async(self, val: float) -> Async:
-        """
-
-        """
         _pAsync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_acq_cont_integration_time_set_async(
@@ -208,11 +171,8 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pAsync))
 
-    # @copydoc cuvis_comp_integration_time_factor_get
+    @copydoc(cuvis_il.cuvis_comp_integration_time_factor_get)
     def _get_integration_time_factor(self, idref: int) -> float:
-        """
-
-        """
         val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_comp_integration_time_factor_get(
@@ -220,7 +180,7 @@ class AcquisitionContext(object):
             raise SDKException()
         return cuvis_il.p_double_value(val)
 
-    # @copydoc cuvis_comp_integration_time_factor_set
+    @copydoc(cuvis_il.cuvis_comp_integration_time_factor_set)
     def _set_integration_time_factor(self, idref: int, val: float) -> None:
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_comp_integration_time_factor_set(
@@ -228,11 +188,8 @@ class AcquisitionContext(object):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_comp_integration_time_factor_set_async
+    @copydoc(cuvis_il.cuvis_comp_integration_time_factor_set_async)
     def _set_integration_time_factor_async(self, idref: int, val: float) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_comp_integration_time_factor_set_async(
@@ -240,90 +197,66 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    # @copydoc cuvis_acq_cont_capture_async
+    @copydoc(cuvis_il.cuvis_acq_cont_capture_async)
     def capture(self) -> AsyncMesu:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
                 self._handle, _pasync):
             raise SDKException()
         return AsyncMesu(cuvis_il.p_int_value(_pasync))
 
-    # @copydoc cuvis_acq_cont_capture
+    @copydoc(cuvis_il.cuvis_acq_cont_capture)
     def capture_at(self, timeout_ms: int) -> Measurement:
-        """
-
-        """
         this_mesu = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture(
                 self._handle, this_mesu, timeout_ms):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(this_mesu))
 
-    # @copydoc cuvis_acq_cont_fps_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_fps_get)
     def fps(self) -> float:
-        """
-
-        """
         val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_fps_get(
                 self._handle, val):
             raise SDKException()
         return cuvis_il.p_double_value(val)
 
-    # @copydoc cuvis_acq_cont_fps_set
     @fps.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_fps_set)
     def fps(self, val: float) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_fps_set(
                 self._handle, float(val)):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_fps_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_fps_set_async)
     def set_fps_async(self, val: float) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_fps_set_async(
                 self._handle, _pasync, float(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    # @copydoc cuvis_acq_cont_has_next_measurement
+    @copydoc(cuvis_il.cuvis_acq_cont_has_next_measurement)
     def has_next_measurement(self) -> bool:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_has_next_measurement(
                 self._handle, val):
             raise SDKException()
         return cuvis_il.p_int_value(val) != 0
 
-    # @copydoc cuvis_acq_cont_get_next_measurement
+    @copydoc(cuvis_il.cuvis_acq_cont_get_next_measurement)
     def get_next_measurement(self, timeout_ms: int) -> Measurement:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_next_measurement(
                 self._handle, val, timeout_ms):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(val))
 
-    # @copydoc cuvis_acq_cont_get_session_info
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_get_session_info)
     def session_info(self) -> SessionData:
-        """
-
-        """
         session = cuvis_il.cuvis_session_info_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_session_info(
                 self._handle, session):
@@ -332,12 +265,9 @@ class AcquisitionContext(object):
                            session.session_no,
                            session.sequence_no)
 
-    # @copydoc cuvis_acq_cont_set_session_info
     @session_info.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_set_session_info)
     def session_info(self, val: SessionData) -> None:
-        """
-
-        """
         session = cuvis_il.cuvis_session_info_t()
         try:
             session.name = val.name
@@ -351,239 +281,173 @@ class AcquisitionContext(object):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_queue_used_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_queue_used_get)
     def queue_used(self) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_queue_used_get(
                 self._handle, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_driver_queue_used_get
+    @copydoc(cuvis_il.cuvis_comp_driver_queue_used_get)
     def _get_driver_queue_used(self, idref: int) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_driver_queue_used_get(
                 self._handle, idref, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_hardware_queue_used_get
+    @copydoc(cuvis_il.cuvis_comp_hardware_queue_used_get)
     def _get_hardware_queue_used(self, idref: int) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_hardware_queue_used_get(
                 self._handle, idref, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_driver_queue_size_get
+    @copydoc(cuvis_il.cuvis_comp_driver_queue_size_get)
     def _get_driver_queue_size(self, idref: int) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_driver_queue_size_get(
                 self._handle, idref, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_hardware_queue_size_get
+    @copydoc(cuvis_il.cuvis_comp_hardware_queue_size_get)
     def _get_hardware_queue_size(self, idref: int) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_hardware_queue_size_get(
                 self._handle, val, idref):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_temperature_get
+    @copydoc(cuvis_il.cuvis_comp_temperature_get)
     def _get_temperature(self, idref: int) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_temperature_get(
                 self._handle, idref, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_acq_cont_average_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_average_get)
     def average(self) -> int:
-        """
-
-        """
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_average_get(
                 self._handle, val):
             raise SDKException()
         return cuvis_il.p_int_value(val)
 
-    # @copydoc cuvis_comp_temperature_get
     @average.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_average_set)
     def average(self, avg: int) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_average_set(
                 self._handle, avg):
             raise SDKException()
         pass
 
-
-    # @copydoc cuvis_acq_cont_average_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_average_set_async)
     def set_average_async(self, avg: int) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_average_set_async(
                 self._handle, _pasync, avg):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    # @copydoc cuvis_acq_cont_continuous_set
+    @copydoc(cuvis_il.cuvis_acq_cont_continuous_set)
     def set_continuous(self, val: bool) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_continuous_set(
                 self._handle, int(val)):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_continuous_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_continuous_set_async)
     def set_continuous_async(self, val: bool) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_continuous_set_async(
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    # @copydoc cuvis_acq_cont_bandwidth_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_bandwidth_get)
     def bandwidth(self) -> int:
-        """
-
-        """
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_bandwidth_get(
                 self._handle, _ptr):
             raise SDKException()
         return cuvis_il.p_int_value(_ptr)
 
-    # @copydoc cuvis_acq_cont_auto_exp_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_get)
     def auto_exp(self) -> bool :
-        """
-
-        """
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_get(
                 self._handle, _ptr):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
-
-    # @copydoc cuvis_acq_cont_auto_exp_set
     @auto_exp.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_set)
     def auto_exp(self, val: bool) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_set(
                 self._handle, int(val)):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_auto_exp_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_set_async)
     def set_auto_exp_async(self, val: bool) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_set_async(
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
     
-
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_comp_get)
     def auto_exp_comp(self) -> float :
-        """
-
-        """
         _ptr = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_get(
                 self._handle, _ptr):
             raise SDKException()
         return bool(cuvis_il.p_double_value(_ptr))
 
-
-    # @copydoc cuvis_acq_cont_auto_exp_set
     @auto_exp_comp.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_comp_set)
     def auto_exp_comp(self, val: float) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_set(
                 self._handle, float(val)):
             raise SDKException()
         pass
 
-    # @copydoc cuvis_acq_cont_auto_exp_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_comp_set_async)
     def set_auto_exp_comp_async(self, val: float) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_set_async(
                 self._handle, _pasync, float(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    # @copydoc cuvis_acq_cont_preview_mode_get
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_preview_mode_get)
     def preview_mode(self) -> bool:
-        """
-
-        """
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_preview_mode_get(
                 self._handle, _ptr):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
-    # @copydoc cuvis_acq_cont_preview_mode_set
     @preview_mode.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_preview_mode_set)
     def preview_mode(self, val: bool) -> None:
-        """
-
-        """
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_preview_mode_set(
                 self._handle, val):
             raise SDKException()
         return
 
-    # @copydoc cuvis_acq_cont_preview_mode_set_async
+    @copydoc(cuvis_il.cuvis_acq_cont_preview_mode_set_async)
     def set_preview_mode_async(self, val: bool) -> Async:
-        """
-
-        """
         _pasync = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_preview_mode_set_async(
                 self._handle, _pasync, int(val)):
@@ -640,7 +504,7 @@ class AcquisitionContext(object):
 
     def components(self):
         """
-
+        Returns an iterator over all components
         """
         for i in range(0, self.component_count):
             yield Component(self,i)
@@ -663,47 +527,32 @@ class Component:
         self.info = acq._get_component_info(idx)
 
     @property
+    @copydoc(cuvis_il.cuvis_comp_online_get)
     def online(self) -> bool:
-        """
-
-        """
         return self._acq._get_component_online(self._idx)
     
     @property
+    @copydoc(cuvis_il.cuvis_comp_temperature_get)
     def temperature(self) -> int:
-        """
-
-        """
         return self._acq._get_temperature(self._idx)
     
     @property
+    @copydoc(cuvis_il.cuvis_comp_gain_get)
     def gain(self) -> float:
-        """
-
-        """
         return self._acq._get_gain(self._idx)
     
-
     @gain.setter
+    @copydoc(cuvis_il.cuvis_comp_gain_set)
     def gain(self, val: float) -> None:
-        """
-
-        """
         return self._acq._set_gain(self._idx, val)
     
-
-    
     @property
+    @copydoc(cuvis_il.cuvis_comp_integration_time_factor_get)
     def integration_time_factor(self) -> float:
-        """
-
-        """
         return self._acq._get_integration_time_factor(self._idx)
     
     @integration_time_factor.setter
+    @copydoc(cuvis_il.cuvis_comp_integration_time_factor_set)
     def integration_time_factor(self, val: float) -> None:
-        """
-
-        """
         return self._acq._set_integration_time_factor(self._idx, val)
     
