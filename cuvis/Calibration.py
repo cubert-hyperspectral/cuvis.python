@@ -8,6 +8,7 @@ except:
 from .SessionFile import SessionFile
 from .cuvis_aux import SDKException, Capabilities
 from .cuvis_types import OperationMode
+from .doc import copydoc
 
 from typing import Union
 
@@ -33,7 +34,7 @@ class Calibration(object):
                 "Could not interpret input of type {}.".format(type(base)))
         pass
 
-
+    @copydoc(cuvis_il.cuvis_calib_get_capabilities)
     def get_capabilities(self, operation_mode: OperationMode) -> Capabilities:
 
         _ptr = cuvis_il.new_p_int()
@@ -44,6 +45,7 @@ class Calibration(object):
         return Capabilities(cuvis_il.p_int_value(_ptr))
 
     @property
+    @copydoc(cuvis_il.cuvis_calib_get_id_swig)
     def id(self) -> str:
         _id = cuvis_il.cuvis_calib_get_id_swig(self._handle)
         return _id

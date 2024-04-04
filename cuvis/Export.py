@@ -3,6 +3,7 @@ try:
 except:
     import cuvis_il
 from .cuvis_aux import SDKException
+from .doc import copydoc
 
 from .Measurement import Measurement
 from .FileWriteSettings import GeneralExportSettings, EnviExportSettings, TiffExportSettings, ViewExportSettings, SaveArgs
@@ -18,6 +19,7 @@ class Exporter(object):
         cuvis_il.cuvis_exporter_free(_ptr)
         pass
 
+    @copydoc(cuvis_il.cuvis_exporter_apply)
     def apply(self, mesu: Measurement) -> Measurement:
         if cuvis_il.status_ok != cuvis_il.cuvis_exporter_apply(self._handle,
                                                                mesu._handle):
@@ -26,6 +28,7 @@ class Exporter(object):
         return mesu
 
     @property
+    @copydoc(cuvis_il.cuvis_exporter_get_queue_used)
     def queue_used(self) -> int:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_exporter_get_queue_used(

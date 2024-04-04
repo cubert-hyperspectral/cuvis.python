@@ -8,6 +8,7 @@ from .Measurement import Measurement
 from .SessionFile import SessionFile
 from .cuvis_aux import SDKException
 from .cuvis_types import ReferenceType, ProcessingMode
+from .doc import copydoc
 
 import cuvis.cuvis_types as internal
 
@@ -44,6 +45,7 @@ class ProcessingContext(object):
                 "could not interpret input of type {}.".format(type(base)))
         pass
 
+    @copydoc(cuvis_il.cuvis_proc_cont_apply)
     def apply(self, mesu: Measurement) -> Measurement:
         if isinstance(mesu, Measurement):
             if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_apply(
@@ -56,6 +58,7 @@ class ProcessingContext(object):
                 "Can only apply ProcessingContext to Measurement!")
         pass
 
+    @copydoc(cuvis_il.cuvis_proc_cont_set_reference)
     def set_reference(self, mesu: Measurement, refType: ReferenceType) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_set_reference(
                 self._handle, mesu._handle,
@@ -63,12 +66,14 @@ class ProcessingContext(object):
             raise SDKException()
         pass
 
+    @copydoc(cuvis_il.cuvis_proc_cont_clear_reference)
     def clear_reference(self, refType: ReferenceType) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_clear_reference(
                 self._handle, internal.__CuvisReferenceType__[refType]):
             raise SDKException()
         pass
 
+    @copydoc(cuvis_il.cuvis_proc_cont_get_reference)
     def get_reference(self, refType: ReferenceType) -> Measurement:
 
         has_ref = self.has_reference(refType)
@@ -81,6 +86,7 @@ class ProcessingContext(object):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
 
+    @copydoc(cuvis_il.cuvis_proc_cont_has_reference)
     def has_reference(self, refType: ReferenceType) -> bool:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_has_reference(
@@ -111,6 +117,7 @@ class ProcessingContext(object):
     def get_processing_args(self) -> ProcessingArgs:
         return dataclasses.replace(self._modeArgs)
 
+    @copydoc(cuvis_il.cuvis_proc_cont_is_capable)
     def is_capable(self, mesu: Measurement, pa: ProcessingArgs) -> bool:
         args = pa._get_internal()
         _ptr = cuvis_il.new_p_int()
@@ -119,6 +126,7 @@ class ProcessingContext(object):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
+    @copydoc(cuvis_il.cuvis_proc_cont_calc_distance)
     def calc_distance(self, distMM: float) -> bool:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_calc_distance(
                 self._handle, distMM):

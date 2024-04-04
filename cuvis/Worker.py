@@ -11,6 +11,7 @@ from .Export import Exporter
 from .SessionFile import SessionFile
 from .Measurement import Measurement
 from .FileWriteSettings import WorkerSettings
+from .doc import copydoc
 
 import asyncio as a
 
@@ -40,6 +41,7 @@ class Worker(object):
         self._handle = cuvis_il.p_int_value(_ptr)
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_acq_cont)
     def set_acquisition_context(self, base: AcquisitionContext=None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_acq_cont(
@@ -53,6 +55,7 @@ class Worker(object):
             self._acquisition_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_proc_cont)
     def set_processing_context(self, base: ProcessingContext=None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_proc_cont(
@@ -66,6 +69,7 @@ class Worker(object):
             self._processing_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_exporter)
     def set_exporter(self, base: Exporter=None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_exporter(
@@ -79,6 +83,7 @@ class Worker(object):
             self._exporter_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_viewer)
     def set_viewer(self, base: Viewer=None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_viewer(
@@ -92,6 +97,7 @@ class Worker(object):
             self._viewer_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_session_file)
     def set_session_file(self, base: SessionFile=None, skipDroppedFrames: bool=True) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_session_file(
@@ -105,12 +111,14 @@ class Worker(object):
             self._session_file_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_ingest_mesu)
     def ingest_mesu(self, mesu: Measurement) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_ingest_mesu(
                 self._handle, mesu):
             raise SDKException()
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_query_session_progress)
     def query_session_progress(self):
         frames_read = cuvis_il.new_p_int()
         frames_total = cuvis_il.new_p_int()
@@ -121,7 +129,7 @@ class Worker(object):
             raise SDKException()
         return {"frames_read": cuvis_il.p_int_value(frames_read), "frames_total":  cuvis_il.p_int_value(frames_total)}
 
-
+    @copydoc(cuvis_il.cuvis_worker_has_next_result)
     def has_next_result(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_has_next_result(
@@ -129,6 +137,7 @@ class Worker(object):
             raise SDKException()
         return cuvis_il.p_int_value(val) != 0
 
+    @copydoc(cuvis_il.cuvis_worker_get_next_result)
     def get_next_result(self, timeout) -> WorkerResult:
         this_mesu = cuvis_il.new_p_int()
         this_viewer = cuvis_il.new_p_int()
@@ -143,6 +152,7 @@ class Worker(object):
         return WorkerResult(mesu, view)
         # return mesu
 
+    @copydoc(cuvis_il.cuvis_worker_get_next_result)
     async def get_next_result_async(self, timeout: int) -> WorkerResult:
         poll_intervall = 100
         this_mesu = cuvis_il.new_p_int()
@@ -167,6 +177,7 @@ class Worker(object):
         return WorkerResult(mesu, view)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_queue_limits)
     def queue_limits(self) -> Tuple[int,int]:
         val_hard = cuvis_il.new_p_int()
         val_soft = cuvis_il.new_p_int()
@@ -185,6 +196,7 @@ class Worker(object):
         pass
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_queue_used)
     def queue_used(self) -> int:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_queue_used(
@@ -193,6 +205,7 @@ class Worker(object):
         return cuvis_il.p_int_value(val)
     
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_drop_behavior)
     def drop_behaviour(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_drop_behavior(

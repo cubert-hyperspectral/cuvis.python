@@ -7,6 +7,7 @@ except:
     import cuvis_il
 from .cuvis_aux import SDKException, SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData
 from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
+from .doc import copydoc
 
 import cuvis.cuvis_types as internal
 base_datetime = datetime.datetime(1970, 1, 1)
@@ -113,6 +114,7 @@ class Measurement(object):
             else:
                 self.data.update({key: "Not Implemented!"})
 
+    @copydoc(cuvis_il.cuvis_measurement_save)
     def save(self, saveargs: SaveArgs) -> None:
         ge, sa = saveargs._get_internal()
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_save(
@@ -120,6 +122,7 @@ class Measurement(object):
             raise SDKException()
         pass
 
+    @copydoc(cuvis_il.cuvis_measurement_set_name)
     def set_name(self, name: str) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_set_name(
                 self._handle, name):
@@ -151,6 +154,7 @@ class Measurement(object):
         return return_dict
 
     @property
+    @copydoc(cuvis_il.cuvis_measurement_get_capabilities)
     def capabilities(self) -> Capabilities:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_get_capabilities(
@@ -163,6 +167,7 @@ class Measurement(object):
         _id = cuvis_il.cuvis_measurement_get_calib_id_swig(self._handle)
         return _id
 
+    @copydoc(cuvis_il.cuvis_measurement_set_comment)
     def set_comment(self, comment: str) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_set_comment(
                 self._handle, comment):
@@ -171,24 +176,27 @@ class Measurement(object):
         pass
 
     @property
+    @copydoc(cuvis_il.cuvis_measurement_get_data_count)
     def data_count(self) -> int:
         out = cuvis_il.new_p_int()
         cuvis_il.cuvis_measurement_get_data_count(self._handle, out)
         return cuvis_il.p_int_value(out)
 
+    @copydoc(cuvis_il.cuvis_measurement_clear_cube)
     def clear_cube(self) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_clear_cube(
                 self._handle):
             raise SDKException()
         pass
 
+    @copydoc(cuvis_il.cuvis_measurement_clear_implicit_reference)
     def clear_implicit_reference(self, ref_type: ReferenceType) -> None:
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_measurement_clear_implicit_reference(
                     self._handle, internal.__CuvisReferenceType__[ref_type]):
             raise SDKException()
 
-
+    @copydoc(cuvis_il.cuvis_measurement_deep_copy)
     def deepcopy(self):
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_deep_copy(

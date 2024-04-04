@@ -8,6 +8,7 @@ except:
     import cuvis_il
 from .cuvis_aux import SDKException
 from .cuvis_types import ComponentType
+from .doc import copydoc
 
 import cuvis.cuvis_types as internal
 
@@ -47,6 +48,7 @@ class General(object):
     def version(self) -> str:
         return cuvis_il.cuvis_version_swig()
 
+    @copydoc(cuvis_il.cuvis_set_log_level)
     def set_log_level(self, lvl):
         lvl_dict = {"info": {"cuvis": cuvis_il.loglevel_info,
                              "logging": logging.INFO},

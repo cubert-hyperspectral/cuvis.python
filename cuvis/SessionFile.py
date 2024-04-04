@@ -8,6 +8,7 @@ except:
 from .Measurement import Measurement
 from .cuvis_aux import SDKException
 from .cuvis_types import OperationMode, SessionItemType, ReferenceType
+from .doc import copydoc
 
 import cuvis.cuvis_types as internal
 
@@ -28,6 +29,7 @@ class SessionFile(object):
 
     pass
 
+    @copydoc(cuvis_il.cuvis_session_file_get_mesu)
     def get_measurement(self, frameNo: int, itemtype: SessionItemType = SessionItemType.no_gaps) ->  Optional[Measurement]:
         _ptr = cuvis_il.new_p_int()
         ret =  cuvis_il.cuvis_session_file_get_mesu(self._handle, frameNo, internal.__CuvisSessionItemType__[itemtype],
@@ -38,6 +40,7 @@ class SessionFile(object):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
     
+    @copydoc(cuvis_il.cuvis_session_file_get_reference_mesu)
     def get_reference(self, frameNo: int, reftype: ReferenceType) ->  Optional[Measurement]:
         _ptr = cuvis_il.new_p_int()
         ret = cuvis_il.cuvis_session_file_get_reference_mesu(
@@ -49,6 +52,7 @@ class SessionFile(object):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
 
+    @copydoc(cuvis_il.cuvis_session_file_get_size)
     def get_size(self, itemtype: SessionItemType = SessionItemType.no_gaps) -> int:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_session_file_get_size(
@@ -57,6 +61,7 @@ class SessionFile(object):
         return cuvis_il.p_int_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_session_file_get_fps)
     def fps(self) -> float:
         val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_session_file_get_fps(
@@ -65,6 +70,7 @@ class SessionFile(object):
         return cuvis_il.p_double_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_session_file_get_operation_mode)
     def operation_mode(self) -> OperationMode:
         val = cuvis_il.new_p_cuvis_operation_mode_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_session_file_get_operation_mode(

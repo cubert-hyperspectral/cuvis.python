@@ -5,6 +5,7 @@ except:
 from .Measurement import ImageData, Measurement
 from .cuvis_aux import SDKException
 from .cuvis_types import CUVIS_imbuffer_format
+from .doc import copydoc
 
 from .FileWriteSettings import ViewExportSettings
 
@@ -53,6 +54,7 @@ class Viewer(object):
         # cuvis_il.cuvis_view_free(_ptr)
         return view_array
 
+    @copydoc(cuvis_il.cuvis_viewer_apply)
     def apply(self, mesu: Measurement) -> Dict[str,ImageData]:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_viewer_apply(self._handle,

@@ -5,6 +5,7 @@ except:
 from .Measurement import Measurement
 from .cuvis_aux import SDKException
 from .cuvis_types import AsyncResult
+from .doc import copydoc
 
 import asyncio as a
 
@@ -26,10 +27,8 @@ class AsyncMesu(object):
 
     pass
 
+    @copydoc(cuvis_il.cuvis_async_capture_get)
     def get(self, timeout_ms: Union[int, timedelta] ) -> Tuple[Optional[Measurement], AsyncResult]:
-        """
-
-        """
         _ptr = cuvis_il.new_p_int()
         _pmesu = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
@@ -72,10 +71,8 @@ class Async(object):
     def __init__(self, handle):
         self._handle = handle
 
+    @copydoc(cuvis_il.cuvis_async_call_get)
     def get(self, timeout_ms: Union[int, timedelta]) -> AsyncResult:
-        """
-
-        """
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         res = cuvis_il.cuvis_async_call_get(_ptr, _to_ms(timeout_ms))
