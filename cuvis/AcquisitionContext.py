@@ -323,7 +323,7 @@ class AcquisitionContext(object):
         return cuvis_il.p_int_value(val)
 
     @copydoc(cuvis_il.cuvis_comp_temperature_get)
-    def _get_temperature(self, idref: int) -> int:
+    def _get_temperature(self, idref: int) -> float:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_temperature_get(
                 self._handle, idref, val):
@@ -533,7 +533,7 @@ class Component:
     
     @property
     @copydoc(cuvis_il.cuvis_comp_temperature_get)
-    def temperature(self) -> int:
+    def temperature(self) -> float:
         return self._acq._get_temperature(self._idx)
     
     @property
