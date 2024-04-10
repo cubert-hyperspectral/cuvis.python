@@ -1,10 +1,7 @@
 import numpy as np
 from enum import Enum
 
-try:
-    from cuvis_il import cuvis_il
-except:
-    import cuvis_il
+from _cuvis_il import cuvis_il
 
 def __generateTranslationDict(enum_cls):
     transDict =  {value : cuvis_il.__dict__[value.name] for value in enum_cls }
