@@ -5,7 +5,9 @@ base_datetime = datetime.datetime(1970, 1, 1)
 
 try:
     from cuvis_il import cuvis_il
-except:
+except ImportError as e:
+    if e.msg.startswith('DLL'):
+        raise
     import cuvis_il
 
 from typing import List, Union
@@ -77,6 +79,8 @@ class SensorInfo(object):
     temperature: int
     gain: float
     readout_time: datetime.datetime
+    width: int
+    height: int
 
     @classmethod
     def _from_internal(cls, info):
@@ -84,7 +88,9 @@ class SensorInfo(object):
                    temperature=info.temperature,
                    gain=info.gain,
                    readout_time= base_datetime + datetime.timedelta(
-            milliseconds=info.readout_time))
+            milliseconds=info.readout_time),
+            width=info.width,
+            height=info.height)
 
     
 

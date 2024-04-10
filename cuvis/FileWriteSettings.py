@@ -1,6 +1,8 @@
 try:
     from cuvis_il import cuvis_il
-except:
+except ImportError as e:
+    if e.msg.startswith('DLL'):
+        raise
     import cuvis_il
 from .cuvis_aux import SDKException
 from .cuvis_types import PanSharpeningInterpolationType, \
@@ -18,7 +20,7 @@ from dataclasses import dataclass, fields, InitVar
 class GeneralExportSettings(object):
     export_dir: str = '.'
     channel_selection: str = 'all'
-    spectra_multiplier: float = 1.0
+    spectra_multiplier: int = 1
     pan_scale: float = 0.0
     pan_sharpening_interpolation_type: PanSharpeningInterpolationType = PanSharpeningInterpolationType.Linear
     pan_sharpening_algorithm: PanSharpeningAlgorithm = PanSharpeningAlgorithm.CubertMacroPixel
@@ -30,7 +32,7 @@ class GeneralExportSettings(object):
         ge = cuvis_il.cuvis_export_general_settings_t()
         ge.export_dir = self.export_dir
         ge.channel_selection = self.channel_selection
-        ge.spectra_multiplier = float(self.spectra_multiplier)
+        ge.spectra_multiplier = int(self.spectra_multiplier)
         ge.pan_scale = float(self.pan_scale)
         ge.pan_interpolation_type = internal.__CuvisPanSharpeningInterpolationType__[
             self.pan_sharpening_interpolation_type]
@@ -198,7 +200,6 @@ class ProcessingArgs(object):
 class WorkerSettings(object):
     worker_count: int = 0
     poll_intervall: int = 10
-    keep_out_of_sequence: bool = False
     hard_limit: int = 10
     soft_limit: int = 10
     can_drop: bool = True
@@ -207,7 +208,6 @@ class WorkerSettings(object):
         wa = cuvis_il.cuvis_worker_settings_t()
         wa.worker_count = int(self.worker_count)
         wa.poll_interval = int(self.poll_intervall)
-        wa.keep_out_of_sequence = int(self.keep_out_of_sequence)
         wa.worker_queue_hard_limit = int(self.hard_limit)
         wa.worker_queue_soft_limit = int(self.soft_limit)
         wa.can_drop = int(self.can_drop)
