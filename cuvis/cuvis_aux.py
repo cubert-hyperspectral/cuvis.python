@@ -5,7 +5,9 @@ base_datetime = datetime.datetime(1970, 1, 1)
 
 try:
     from cuvis_il import cuvis_il
-except:
+except ImportError as e:
+    if e.msg.startswith('DLL'):
+        raise
     import cuvis_il
 
 from typing import List, Union

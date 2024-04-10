@@ -3,7 +3,9 @@ from enum import Enum
 
 try:
     from cuvis_il import cuvis_il
-except:
+except ImportError as e:
+    if e.msg.startswith('DLL'):
+        raise
     import cuvis_il
 
 def __generateTranslationDict(enum_cls):
