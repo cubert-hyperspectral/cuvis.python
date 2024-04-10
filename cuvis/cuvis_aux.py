@@ -77,6 +77,8 @@ class SensorInfo(object):
     temperature: int
     gain: float
     readout_time: datetime.datetime
+    width: int
+    height: int
 
     @classmethod
     def _from_internal(cls, info):
@@ -84,7 +86,9 @@ class SensorInfo(object):
                    temperature=info.temperature,
                    gain=info.gain,
                    readout_time= base_datetime + datetime.timedelta(
-            milliseconds=info.readout_time))
+            milliseconds=info.readout_time),
+            width=info.width,
+            height=info.height)
 
     
 
