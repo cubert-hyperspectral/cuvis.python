@@ -1,7 +1,4 @@
-try:
-    from cuvis_il import cuvis_il
-except:
-    import cuvis_il
+from _cuvis_il import cuvis_il
 from .Measurement import Measurement
 from .Viewer import Viewer, ImageData
 from .cuvis_aux import SDKException
