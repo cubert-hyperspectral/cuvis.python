@@ -2,7 +2,7 @@
 
 from typing import Callable, TypeVar, Any, TypeAlias
 try:
-    from typing_extensions import ParamSpec
+    from typing_extensions import ParamSpec # type: ignore
 except ImportError as exc:
     from typing import ParamSpec
 
