@@ -127,28 +127,17 @@ class Measurement(object):
         self._refresh_metadata()
         pass
 
-    def get_thumbnail(self):
-        thumbnail = [val for key, val in self.data.items() if "view" in key]
-        if len(thumbnail) == 0:
+    @property
+    def thumbnail(self):
+        thumb = [val for key, val in self.data.items() if "view" in key]
+        if len(thumb) == 0:
             print("No thumbnail available. Use cube instead!")
-            pass
-        elif len(thumbnail) == 1:
-            return thumbnail[0]
-        elif len(thumbnail) > 1:
-            shapes = [th.array.shape for th in thumbnail]
-            return thumbnail[shapes.index(min(shapes))]
-
-    def get_data_info(self):
-        return_dict = {}
-        for att in self.data["IMAGE_info"].__dir__():
-            if not (att.startswith("__") or att.startswith("this") or att.startswith("_")):
-                return_dict.update(
-                    {att: self.data["IMAGE_info"].__getattribute__(att)})
-        try:
-            return_dict["readout_time"] = str(return_dict["readout_time"])
-        except:
-            print("No human readable readout_time available!")
-        return return_dict
+            return None
+        elif len(thumb) == 1:
+            return thumb[0]
+        elif len(thumb) > 1:
+            shapes = [th.array.shape for th in thumb]
+            return thumb[shapes.index(min(shapes))]
 
     @property
     def capabilities(self) -> Capabilities:
