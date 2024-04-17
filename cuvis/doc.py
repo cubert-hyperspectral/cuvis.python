@@ -1,10 +1,10 @@
 # taken from https://stackoverflow.com/questions/68901049/copying-the-docstring-of-function-onto-another-function-by-name
 
-from typing import Callable, TypeVar, Any, TypeAlias
+from typing import Callable, TypeVar, Any
 try:
-    from typing_extensions import ParamSpec # type: ignore
+    from typing_extensions import ParamSpec, TypeAlias # type: ignore
 except ImportError as exc:
-    from typing import ParamSpec
+    from typing import ParamSpec, TypeAlias
 
 
 
