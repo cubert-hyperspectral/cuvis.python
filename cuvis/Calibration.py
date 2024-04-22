@@ -9,37 +9,31 @@ from .SessionFile import SessionFile
 from .cuvis_aux import SDKException, Capabilities
 from .cuvis_types import OperationMode
 
+import cuvis.cuvis_types as internal
+
 from typing import Union
 
 class Calibration(object):
 
     def __init__(self, base: Union[Path, str, SessionFile]):
         self._handle = None
-
-        if isinstance(Path(base), Path) and os.path.exists(Path(base)):
-            _ptr = cuvis_il.new_p_int()
-            if cuvis_il.status_ok != cuvis_il.cuvis_calib_create_from_path(
-                    base, _ptr):
-                raise SDKException()
-            self._handle = cuvis_il.p_int_value(_ptr)
-        elif isinstance(base, SessionFile):
-            _ptr = cuvis_il.new_p_int()
-            if cuvis_il.status_ok != \
-                    cuvis_il.cuvis_calib_create_from_session_file(
-                        base._handle, _ptr):
-                raise SDKException()
+        _ptr = cuvis_il.new_p_int()
+        if isinstance(base, SessionFile):
+             retval = cuvis_il.cuvis_calib_create_from_session_file(base._handle, _ptr)
+        elif (isinstance(base, Path) and base.is_dir()) or os.path.exists(base):
+            retval = cuvis_il.cuvis_calib_create_from_path(str(base), _ptr)
         else:
-            raise SDKException(
-                "Could not interpret input of type {}.".format(type(base)))
-        pass
-
+            raise SDKException("Could not interpret input of type '{}'.".format(type(base)))
+        if cuvis_il.status_ok != retval:
+            raise SDKException()
+        self._handle = cuvis_il.p_int_value(_ptr)
 
     def get_capabilities(self, operation_mode: OperationMode) -> Capabilities:
 
         _ptr = cuvis_il.new_p_int()
 
         if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_capabilities(
-                self._handle, operation_mode, _ptr):
+                self._handle, internal.__CuvisOperationMode__[operation_mode], _ptr):
             raise SDKException()
         return Capabilities(cuvis_il.p_int_value(_ptr))
 
@@ -52,4 +46,3 @@ class Calibration(object):
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         cuvis_il.cuvis_calib_free(_ptr)
-        pass
