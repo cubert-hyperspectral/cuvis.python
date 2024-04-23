@@ -1,7 +1,17 @@
 import numpy as np
 from enum import Enum
+import logging
 
 from _cuvis_il import cuvis_il
+
+__CuvisLoglevel__ = {
+    logging.DEBUG: cuvis_il.loglevel_debug,
+    logging.INFO: cuvis_il.loglevel_info,
+    logging.WARNING: cuvis_il.loglevel_warning,
+    logging.ERROR: cuvis_il.loglevel_error,
+    logging.FATAL: cuvis_il.loglevel_fatal,
+}
+
 
 def __generateTranslationDict(enum_cls):
     transDict =  {value : cuvis_il.__dict__[value.name] for value in enum_cls }

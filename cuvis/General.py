@@ -11,32 +11,29 @@ import cuvis.cuvis_types as internal
 from dataclasses import dataclass
 
 class General(object):
-    def __init__(self, path=""):
-        log_path = "."
+    def __init__(self, settings_path:str=".", log_path:str="", global_loglevel:int=logging.DEBUG):
         FORMAT = '%(asctime)s -- %(levelname)s: %(message)s'
-        if os.path.exists(path):
-            log_path = path + os.sep
-        elif platform.system() == "Linux":
-            log_path = os.path.expanduser('~') + os.sep + ".cuvis" + os.sep
-            if not os.path.exists(log_path):
-                os.mkdir(log_path)
-        elif platform.system() == "Windows":
-            log_path = os.getenv('APPDATA') + os.sep + ".cuvis" + os.sep
-            if not os.path.exists(log_path):
-                os.mkdir(log_path)
-                
         if os.path.exists(log_path):
-            logging.basicConfig(filename=log_path + "cuvisSDK_python.log",
+            pass
+        elif platform.system() == "Linux":
+            log_path = os.path.join(os.path.expanduser('~'), ".cuvis")
+            os.makedirs(log_path, exist_ok=True)
+        elif platform.system() == "Windows":
+            log_path = "C:\\ProgramData\\cuvis"
+            os.makedirs(log_path, exist_ok=True)
+        
+        if os.path.exists(log_path):
+            logging.basicConfig(filename= os.path.join(log_path, "cuvisSDK_python.log"),
                                 format=FORMAT,
                                 encoding='utf-8',
-                                level=logging.DEBUG,
+                                level=global_loglevel,
                                 filemode='w')
         else:
             raise SDKException(
                 "path {} does not exist...".format(os.path.abspath(log_path)))
         logging.info("Logger ready.")
 
-        if cuvis_il.status_ok != cuvis_il.cuvis_init(log_path):
+        if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel]):
             raise SDKException()
         pass
 
