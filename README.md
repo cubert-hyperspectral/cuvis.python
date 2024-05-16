@@ -22,7 +22,7 @@ source code page.
 
 ### Prerequisites
 
-First, you need to install the Cuvis C SDK from [here](https://cloud.cubert-gmbh.de/index.php/s/m1WfR66TjcGl96z).
+First, you need to install the Cuvis C SDK from [here](https://cloud.cubert-gmbh.de/s/q3YiPZPJe5oXziZ).
 The installation registers the installation path in the environment, which 
 the python wrapper is linked to.
 
@@ -60,7 +60,7 @@ For building the python bindings refer to [cuvis.pyil](https://github.com/cubert
 We provide an additional example repository [here](https://github.com/cubert-hyperspectral/cuvis.python.examples),
 covering some basic applications.
 
-Further, we provide a set of example measurements to explore [here](https://cloud.cubert-gmbh.de/index.php/s/3oECVGWpC1NpNqC).
+Further, we provide a set of example measurements to explore [here](https://cloud.cubert-gmbh.de/s/SrkSRja5FKGS2Tw).
 These measurements are also used by the examples mentioned above.
 
 ### Getting involved
