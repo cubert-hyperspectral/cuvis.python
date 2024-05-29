@@ -75,6 +75,7 @@ class SensorInfo(object):
     readout_time: datetime.datetime
     width: int
     height: int
+    raw_frame_id: int
 
     @classmethod
     def _from_internal(cls, info):
@@ -84,7 +85,8 @@ class SensorInfo(object):
                    readout_time= base_datetime + datetime.timedelta(
             milliseconds=info.readout_time),
             width=info.width,
-            height=info.height)
+            height=info.height,
+            raw_frame_id=info.raw_frame_id)
 
     
 

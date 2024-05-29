@@ -24,6 +24,7 @@ class Measurement(object):
     processing_mode: ProcessingMode
     name: str
     session_info: SessionData
+    frame_id: int
 
     def __init__(self, base: Union[int,str]):
         self._handle = None
@@ -67,6 +68,7 @@ class Measurement(object):
         self.session_info = SessionData(_metaData.session_info_name,
                                    _metaData.session_info_session_no,
                                  _metaData.session_info_sequence_no)
+        self.frame_id = _metaData.measurement_frame_id
         cuvis_il.cuvis_mesu_metadata_free(_metaData)
 
     def refresh(self) -> None:
