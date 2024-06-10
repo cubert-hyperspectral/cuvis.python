@@ -1,4 +1,4 @@
-from _cuvis_il import cuvis_il
+from ._cuvis_il import cuvis_il
 from .Measurement import Measurement
 from .cuvis_aux import SDKException
 from .cuvis_types import AsyncResult
