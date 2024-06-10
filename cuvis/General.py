@@ -2,7 +2,7 @@ import logging
 import os
 import platform
 
-from _cuvis_il import cuvis_il
+from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException
 from .cuvis_types import ComponentType
 

@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from _cuvis_il import cuvis_il
+from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException, SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData
 from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
 

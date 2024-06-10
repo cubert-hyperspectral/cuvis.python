@@ -2,7 +2,7 @@ import numpy as np
 from enum import Enum
 import logging
 
-from _cuvis_il import cuvis_il
+from ._cuvis_il import cuvis_il
 
 __CuvisLoglevel__ = {
     logging.DEBUG: cuvis_il.loglevel_debug,
