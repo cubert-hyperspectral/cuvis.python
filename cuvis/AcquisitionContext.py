@@ -1,4 +1,4 @@
-from _cuvis_il import cuvis_il
+from ._cuvis_il import cuvis_il
 from .Async import Async, AsyncMesu
 from .Calibration import Calibration
 from .General import ComponentInfo
