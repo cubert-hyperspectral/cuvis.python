@@ -35,7 +35,9 @@ class General(object):
 
         if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel]):
             raise SDKException()
-        pass
+    
+    def __del__(self):
+        cuvis_il.cuvis_shutdown()
 
     @property
     def version(self) -> str:

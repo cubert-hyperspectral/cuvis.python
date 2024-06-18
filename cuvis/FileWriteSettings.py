@@ -143,6 +143,7 @@ class SaveArgs(GeneralExportSettings):
     soft_limit: int = 20
     hard_limit: int = 100
     max_buftime: int = 10000
+    full_export: bool = False
 
     def _get_internal(self):
         ge = super()._get_internal()
@@ -157,6 +158,7 @@ class SaveArgs(GeneralExportSettings):
         sa.soft_limit = int(self.soft_limit)
         sa.hard_limit = int(self.hard_limit)
         sa.max_buftime = int(self.max_buftime)
+        sa.full_export = int(self.full_export)
         return ge, sa
     
     @classmethod
@@ -172,7 +174,8 @@ class SaveArgs(GeneralExportSettings):
                    fps = sa.fps,
                    soft_limit = sa.soft_limit,
                    hard_limit = sa.hard_limit,
-                   max_buftime = sa.max_buftime
+                   max_buftime = sa.max_buftime,
+                   full_export = sa.full_export
                 )
 
 @dataclass
