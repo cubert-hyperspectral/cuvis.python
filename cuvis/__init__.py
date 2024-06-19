@@ -24,7 +24,7 @@ from .FileWriteSettings import GeneralExportSettings, SaveArgs, \
     ProcessingArgs, \
     EnviExportSettings, TiffExportSettings, ViewExportSettings, \
     WorkerSettings
-from .General import General
+from .General import init, shutdown, version, set_log_level
 from .Measurement import Measurement
 from .ProcessingContext import ProcessingContext
 from .SessionFile import SessionFile

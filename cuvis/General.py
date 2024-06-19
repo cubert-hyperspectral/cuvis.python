@@ -10,52 +10,53 @@ import cuvis.cuvis_types as internal
 
 from dataclasses import dataclass
 
-class General(object):
-    def __init__(self, settings_path:str=".", log_path:str="", global_loglevel:int=logging.DEBUG):
-        FORMAT = '%(asctime)s -- %(levelname)s: %(message)s'
-        if os.path.exists(log_path):
-            pass
-        elif platform.system() == "Linux":
-            log_path = os.path.join(os.path.expanduser('~'), ".cuvis")
-            os.makedirs(log_path, exist_ok=True)
-        elif platform.system() == "Windows":
-            log_path = "C:\\ProgramData\\cuvis"
-            os.makedirs(log_path, exist_ok=True)
-        
-        if os.path.exists(log_path):
-            logging.basicConfig(filename= os.path.join(log_path, "cuvisSDK_python.log"),
-                                format=FORMAT,
-                                encoding='utf-8',
-                                level=global_loglevel,
-                                filemode='w')
-        else:
-            raise SDKException(
-                "path {} does not exist...".format(os.path.abspath(log_path)))
-        logging.info("Logger ready.")
 
-        if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel]):
-            raise SDKException()
+def init(settings_path:str=".", log_path:str="", global_loglevel:int=logging.DEBUG):
+    FORMAT = '%(asctime)s -- %(levelname)s: %(message)s'
+    if os.path.exists(log_path):
         pass
+    elif platform.system() == "Linux":
+        log_path = os.path.join(os.path.expanduser('~'), ".cuvis")
+        os.makedirs(log_path, exist_ok=True)
+    elif platform.system() == "Windows":
+        log_path = "C:\\ProgramData\\cuvis"
+        os.makedirs(log_path, exist_ok=True)
+    
+    if os.path.exists(log_path):
+        logging.basicConfig(filename= os.path.join(log_path, "cuvisSDK_python.log"),
+                            format=FORMAT,
+                            encoding='utf-8',
+                            level=global_loglevel,
+                            filemode='w')
+    else:
+        raise SDKException(
+            "path {} does not exist...".format(os.path.abspath(log_path)))
+    logging.info("Logger ready.")
 
-    @property
-    def version(self) -> str:
-        return cuvis_il.cuvis_version_swig()
+    if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel]):
+        raise SDKException()
 
-    def set_log_level(self, lvl):
-        lvl_dict = {"info": {"cuvis": cuvis_il.loglevel_info,
-                             "logging": logging.INFO},
-                    "debug": {"cuvis": cuvis_il.loglevel_debug,
-                              "logging": logging.DEBUG},
-                    "error": {"cuvis": cuvis_il.loglevel_error,
-                              "logging": logging.ERROR},
-                    "fatal": {"cuvis": cuvis_il.loglevel_fatal,
-                              "logging": logging.CRITICAL},
-                    "warning": {"cuvis": cuvis_il.loglevel_warning,
-                                "logging": logging.WARNING},
-                    }
+def shutdown():
+    cuvis_il.cuvis_shutdown()
 
-        cuvis_il.cuvis_set_log_level(lvl_dict[lvl]["cuvis"])
-        logging.basicConfig(level=lvl_dict[lvl]["logging"])
+def version() -> str:
+    return cuvis_il.cuvis_version_swig()
+
+def set_log_level(lvl):
+    lvl_dict = {"info": {"cuvis": cuvis_il.loglevel_info,
+                            "logging": logging.INFO},
+                "debug": {"cuvis": cuvis_il.loglevel_debug,
+                            "logging": logging.DEBUG},
+                "error": {"cuvis": cuvis_il.loglevel_error,
+                            "logging": logging.ERROR},
+                "fatal": {"cuvis": cuvis_il.loglevel_fatal,
+                            "logging": logging.CRITICAL},
+                "warning": {"cuvis": cuvis_il.loglevel_warning,
+                            "logging": logging.WARNING},
+                }
+
+    cuvis_il.cuvis_set_log_level(lvl_dict[lvl]["cuvis"])
+    logging.basicConfig(level=lvl_dict[lvl]["logging"])
 
 
 @dataclass
