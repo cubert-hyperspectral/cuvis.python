@@ -50,7 +50,7 @@ If you wish to download and use the newest development cuvis locally, clone the 
 
 and install the wrapper locally. 
 
-If you wish to use the version compatible to the available Cuvis SDK download, check out the version on the site [above](https://cloud.cubert-gmbh.de/s/q3YiPZPJe5oXziZ) and use the respective release branch (e.g. [release/v3.2] (https://github.com/cubert-hyperspectral/cuvis.python/tree/release/v3.2)).
+If you wish to use the version compatible to the available Cuvis SDK download, check out the version on the site [above](https://cloud.cubert-gmbh.de/s/q3YiPZPJe5oXziZ) and use the respective release branch (e.g. [release/v3.2](https://github.com/cubert-hyperspectral/cuvis.python/tree/release/v3.2)).
 
 For building the python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
 
