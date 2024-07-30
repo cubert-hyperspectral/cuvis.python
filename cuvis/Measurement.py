@@ -19,6 +19,8 @@ class Measurement(object):
     factory_calibration: datetime.datetime
     assembly: str
     integration_time: int
+    averages: int
+    distance: float
     serial_number: str
     product_name: str
     processing_mode: ProcessingMode
