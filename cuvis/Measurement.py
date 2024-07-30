@@ -1,3 +1,5 @@
+from typing import Union, List
+from .FileWriteSettings import SaveArgs
 import datetime
 import os
 
@@ -8,8 +10,6 @@ from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
 import cuvis.cuvis_types as internal
 base_datetime = datetime.datetime(1970, 1, 1)
 
-from .FileWriteSettings import SaveArgs
-from typing import Union, List
 
 class Measurement(object):
     capture_time: datetime.datetime
@@ -19,13 +19,16 @@ class Measurement(object):
     factory_calibration: datetime.datetime
     assembly: str
     integration_time: int
+    averages: int
+    distance: float
     serial_number: str
     product_name: str
     processing_mode: ProcessingMode
     name: str
     session_info: SessionData
 
-    def __init__(self, base: Union[int,str]):
+
+    def __init__(self, base: Union[int, str]):
         self._handle = None
 
         if isinstance(base, int):
@@ -43,9 +46,8 @@ class Measurement(object):
         self.refresh()
         pass
 
-
     def _refresh_metadata(self):
-        _metaData =  cuvis_il.cuvis_mesu_metadata_allocate()
+        _metaData = cuvis_il.cuvis_mesu_metadata_allocate()
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_get_metadata(
                 self._handle, _metaData):
             raise SDKException
@@ -59,14 +61,16 @@ class Measurement(object):
             milliseconds=_metaData.factory_calibration)
         self.assembly = _metaData.assembly
         self.averages = _metaData.averages
+        self.distance = _metaData.distance
         self.integration_time = _metaData.integration_time
         self.serial_number = _metaData.serial_number
         self.product_name = _metaData.product_name
-        self.processing_mode = internal.__ProcessingMode__[_metaData.processing_mode]
+        self.processing_mode = internal.__ProcessingMode__[
+            _metaData.processing_mode]
         self.name = _metaData.name
         self.session_info = SessionData(_metaData.session_info_name,
-                                   _metaData.session_info_session_no,
-                                 _metaData.session_info_sequence_no)
+                                        _metaData.session_info_session_no,
+                                        _metaData.session_info_sequence_no)
         cuvis_il.cuvis_mesu_metadata_free(_metaData)
 
     def refresh(self) -> None:
@@ -174,7 +178,6 @@ class Measurement(object):
                     self._handle, internal.__CuvisReferenceType__[ref_type]):
             raise SDKException()
 
-
     def deepcopy(self):
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_deep_copy(
@@ -182,7 +185,7 @@ class Measurement(object):
             raise SDKException()
         copy = Measurement(cuvis_il.p_int_value(_ptr))
         return copy
-    
+
     def __del__(self):
         _ptr = cuvis_il.new_p_int()
         self.clear_cube()
@@ -190,6 +193,7 @@ class Measurement(object):
         cuvis_il.cuvis_measurement_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
         pass
+
 
 class ImageData(object):
     def __init__(self, img_buf=None, dformat=None):
@@ -234,4 +238,3 @@ class ImageData(object):
         else:
             raise TypeError(
                 "Wrong data type for image buffer: {}".format(type(img_buf)))
-        
