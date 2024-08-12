@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 
 from ._cuvis_il import cuvis_il
-from .Measurement import Measurement
+from .Measurement import Measurement, ImageData
 from .cuvis_aux import SDKException
-from .cuvis_types import OperationMode, SessionItemType, ReferenceType
+from .cuvis_types import OperationMode, SessionItemType, ReferenceType, CUVIS_imbuffer_format
 
 import cuvis.cuvis_types as internal
 
@@ -45,7 +45,18 @@ class SessionFile(object):
         if cuvis_il.status_ok != ret:
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
-
+    
+    def get_thumbnail(self) ->  ImageData:
+        thumbnail_data = cuvis_il.cuvis_view_data_t()
+        if cuvis_il.status_ok != cuvis_il.cuvis_session_file_get_thumbnail(self, thumbnail_data):
+            raise SDKException()
+    
+        if thumbnail_data.data.format == CUVIS_imbuffer_format["imbuffer_format_uint8"]:
+            return ImageData(img_buf=thumbnail_data.data,
+                                dformat=thumbnail_data.data.format)
+        else:
+            raise SDKException("Unsupported viewer bit depth!")
+    
     def get_size(self, itemtype: SessionItemType = SessionItemType.no_gaps) -> int:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_session_file_get_size(

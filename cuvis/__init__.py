@@ -34,6 +34,6 @@ from .Worker import Worker, WorkerResult
 from .cuvis_types import OperationMode, HardwareState, ProcessingMode, PanSharpeningInterpolationType, \
     PanSharpeningAlgorithm, TiffCompressionMode, TiffFormat, ComponentType, ReferenceType, SessionItemType
 
-from .cuvis_aux import SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData
+from .cuvis_aux import SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData, CalibrationInfo
 
 del os, platform, sys
