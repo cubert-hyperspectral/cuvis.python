@@ -35,7 +35,6 @@ class SDKException(Exception):
         super().__init__(self.message)
         pass
 
-
 @dataclass
 class SessionData(object):
     name: str
@@ -46,6 +45,24 @@ class SessionData(object):
         return "'SessionFile: {}; no. {}, seq. {}'".format(self.name,
                                                            self.session_number,
                                                            self.sequence_number)
+
+@dataclass
+class CalibrationInfo(object):
+    model_name: str
+    serial_no: str
+    calibration_date: datetime.datetime
+    annotation_name: str
+    unique_id: str
+    file_path: str
+
+    def __repr__(self):
+        return "'Calibration: model: {}, serial no.: {}, calibration date: {}, annotation: {}, unique ID: {}, file: {}'".format(
+            self.model_name,
+            self.serial_no,
+            self.calibration_date,
+            self.annotation_name,
+            self.unique_id,
+            self.file_path)
 
 @dataclass
 class GPSData(object):

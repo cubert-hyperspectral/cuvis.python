@@ -22,6 +22,10 @@ class Exporter(object):
         mesu.refresh()
         return mesu
 
+    def flush(self):
+        if cuvis_il.status_ok != cuvis_il.cuvis_exporter_flush(self._handle):
+            raise SDKException()
+
     @property
     def queue_used(self) -> int:
         _ptr = cuvis_il.new_p_int()

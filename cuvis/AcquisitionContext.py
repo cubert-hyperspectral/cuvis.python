@@ -235,6 +235,32 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
+    @property
+    @copydoc(cuvis_il.cuvis_acq_cont_get_pixel_format_swig)
+    def pixel_format(self, id: int) -> str:
+        return cuvis_il.cuvis_acq_cont_get_pixel_format_swig(self._handle, id)
+
+    @pixel_format.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_fps_set)
+    def pixel_format(self, id: int, val: str) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_set_pixel_format(
+                self._handle, val):
+            raise SDKException()
+        pass
+
+    @property
+    @copydoc(cuvis_il.cuvis_acq_cont_get_pixel_format_swig)
+    def available_pixel_formats(self, id: int) -> list[str]:
+        pCount = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_available_pixel_format_count(
+                self._handle, id, pCount):
+            raise SDKException()
+        count = cuvis_il.p_int_value(pCount)
+        formats = []
+        for i in range(count):
+            formats.append(str(cuvis_il.cuvis_acq_cont_get_available_pixel_format_swig(self._handle, id, i)))
+        return formats
+
     @copydoc(cuvis_il.cuvis_acq_cont_has_next_measurement)
     def has_next_measurement(self) -> bool:
         val = cuvis_il.new_p_int()
@@ -427,26 +453,26 @@ class AcquisitionContext(object):
         return Async(cuvis_il.p_int_value(_pasync))
 
     @property
-    @copydoc(cuvis_il.cuvis_acq_cont_preview_mode_get)
-    def preview_mode(self) -> bool:
+    @copydoc(cuvis_il.cuvis_acq_cont_binning_get)
+    def binning(self) -> bool:
         _ptr = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_preview_mode_get(
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_binning_get(
                 self._handle, _ptr):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
-    @preview_mode.setter
-    @copydoc(cuvis_il.cuvis_acq_cont_preview_mode_set)
-    def preview_mode(self, val: bool) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_preview_mode_set(
+    @binning.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_binning_set)
+    def binning(self, val: bool) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_binning_set(
                 self._handle, val):
             raise SDKException()
         return
 
-    @copydoc(cuvis_il.cuvis_acq_cont_preview_mode_set_async)
-    def set_preview_mode_async(self, val: bool) -> Async:
+    @copydoc(cuvis_il.cuvis_acq_cont_binning_set_async)
+    def set_binning_async(self, val: bool) -> Async:
         _pasync = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_preview_mode_set_async(
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_binning_set_async(
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))

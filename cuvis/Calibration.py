@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ._cuvis_il import cuvis_il
 from .SessionFile import SessionFile
-from .cuvis_aux import SDKException, Capabilities
+from .cuvis_aux import SDKException, Capabilities, CalibrationInfo
 from .cuvis_types import OperationMode
 
 import cuvis.cuvis_types as internal
@@ -33,6 +33,19 @@ class Calibration(object):
                 self._handle, internal.__CuvisOperationMode__[operation_mode], _ptr):
             raise SDKException()
         return Capabilities(cuvis_il.p_int_value(_ptr))
+
+    def get_info(self) -> cuvis_il.cuvis_calibration_info_t:
+        info = cuvis_il.cuvis_calibration_info_t()
+        if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_info(
+                self._handle, info):
+            raise SDKException()
+        return CalibrationInfo(
+            self.model_name,
+            self.serial_no,
+            self.calibration_date,
+            self.annotation_name,
+            self.unique_id,
+            self.file_path)
 
     @property
     def id(self) -> str:
