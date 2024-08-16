@@ -21,7 +21,7 @@ source code page.
 
 ### Prerequisites
 
-First, you need to install the Cuvis C SDK from [here](https://cloud.cubert-gmbh.de/s/q3YiPZPJe5oXziZ).
+First, you need to install the Cuvis C SDK from [here](https://cloud.cubert-gmbh.de/s/qpxkyWkycrmBK9m).
 The installation registers the installation path in the environment, which 
 the python wrapper is linked to.
 
