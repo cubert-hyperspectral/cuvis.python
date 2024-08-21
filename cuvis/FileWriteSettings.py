@@ -207,10 +207,10 @@ class ProcessingArgs(object):
 @dataclass
 class WorkerSettings(object):
     input_queue_size: int = 0
-    mandatory_queue_size: int = 10
-    supplementary_queue_size: int = 10
+    mandatory_queue_size: int = 4
+    supplementary_queue_size: int = 4
     output_queue_size: int = 10
-    can_skip_measurements: bool = True
+    can_skip_measurements: bool = False
     can_skip_supplementary_steps: bool = True
     can_drop_results: bool = True
 
