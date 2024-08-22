@@ -91,6 +91,8 @@ class TiffExportSettings(GeneralExportSettings):
 @dataclass(repr=False)
 class ViewExportSettings(GeneralExportSettings):
     userplugin: InitVar[str] = None
+    pre_pan_sharpen_cube: bool
+    complete: bool
 
     def __post_init__(self, userplugin: str):
         if userplugin is not None:
@@ -127,6 +129,8 @@ class ViewExportSettings(GeneralExportSettings):
         ge = super()._get_internal()
         vs = cuvis_il.cuvis_export_view_settings_t()
         vs.userplugin = self.userplugin
+        vs.pre_pan_sharpen_cube = int(self.pre_pan_sharpen_cube)
+        vs.complete = int(self.complete)
         return ge, vs
 
     @classmethod

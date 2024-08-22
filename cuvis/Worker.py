@@ -109,7 +109,6 @@ class Worker(object):
             raise SDKException()
         pass
 
-    @property
     @copydoc(cuvis_il.cuvis_worker_query_session_progress)
     def query_session_progress(self) -> float:
         val = cuvis_il.new_p_double()
