@@ -250,6 +250,21 @@ class Worker(object):
             raise SDKException()
         return WorkerState._from_internal(val)
 
+    def start_processing(self) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_start_processing(
+                self._handle):
+            raise SDKException()
+
+    def stop_processing(self) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_stop_processing(
+                self._handle):
+            raise SDKException()
+
+    def drop_all_queued(self) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_drop_all_queued(
+                self._handle):
+            raise SDKException()
+
     def register_worker_callback(self, callback: Callable[[WorkerResult], Awaitable[None]]) -> None:
         self.reset_worker_callback()
         poll_time = 0.001
