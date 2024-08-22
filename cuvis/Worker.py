@@ -10,6 +10,7 @@ from .Measurement import Measurement
 from .FileWriteSettings import WorkerSettings
 
 import asyncio as a
+from .doc import copydoc
 
 from dataclasses import dataclass
 from typing import Callable, Awaitable, Tuple
@@ -39,6 +40,7 @@ class Worker(object):
         self._handle = cuvis_il.p_int_value(_ptr)
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_acq_cont)
     def set_acquisition_context(self, base: AcquisitionContext = None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_acq_cont(
@@ -52,6 +54,7 @@ class Worker(object):
             self._acquisition_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_proc_cont)
     def set_processing_context(self, base: ProcessingContext = None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_proc_cont(
@@ -65,6 +68,7 @@ class Worker(object):
             self._processing_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_exporter)
     def set_exporter(self, base: Exporter = None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_exporter(
@@ -78,6 +82,7 @@ class Worker(object):
             self._exporter_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_set_viewer)
     def set_viewer(self, base: Viewer = None) -> None:
         if base is not None:
             if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_viewer(
@@ -91,25 +96,30 @@ class Worker(object):
             self._viewer_set = False
         pass
 
+    @copydoc(cuvis_il.cuvis_worker_ingest_session_file)
     def ingest_session_file(self, session: SessionFile, frame_selection: str = 'all') -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_worker_set_session_file(
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_ingest_session_file(
                 self._handle, session._handle, frame_selection):
             raise SDKException()
 
+    @copydoc(cuvis_il.cuvis_worker_ingest_mesu)
     def ingest_mesu(self, mesu: Measurement) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_ingest_mesu(
                 self._handle, mesu):
             raise SDKException()
         pass
 
+    @property
+    @copydoc(cuvis_il.cuvis_worker_query_session_progress)
     def query_session_progress(self) -> float:
         val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != \
                 cuvis_il.cuvis_worker_query_session_progress(self._handle,
                                                              val):
             raise SDKException()
-        return val
+        return cuvis_il.p_double_value(val)
 
+    @copydoc(cuvis_il.cuvis_worker_has_next_result)
     def has_next_result(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_has_next_result(
@@ -117,6 +127,7 @@ class Worker(object):
             raise SDKException()
         return cuvis_il.p_int_value(val) != 0
 
+    @copydoc(cuvis_il.cuvis_worker_get_next_result)
     def get_next_result(self, timeout) -> WorkerResult:
         this_mesu = cuvis_il.new_p_int()
         this_viewer = cuvis_il.new_p_int()
@@ -155,46 +166,52 @@ class Worker(object):
         return WorkerResult(mesu, view)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_input_queue_limit)
     def input_queue_limit(self) -> int:
-        val = cuvis_il.new_p_int()
+        val = cuvis_il.new_p_ulong()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_input_queue_limit(
                 self._handle, val):
             raise SDKException()
-        return bool(cuvis_il.p_int_value(val))
+        return cuvis_il.p_ulong_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_mandatory_queue_limit)
     def mandatory_queue_limit(self) -> int:
-        val = cuvis_il.new_p_int()
+        val = cuvis_il.new_p_ulong()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_mandatory_queue_limit(
                 self._handle, val):
             raise SDKException()
-        return bool(cuvis_il.p_int_value(val))
+        return cuvis_il.p_ulong_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_supplementary_queue_limit)
     def supplementary_queue_limit(self) -> int:
-        val = cuvis_il.new_p_int()
+        val = cuvis_il.new_p_ulong()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_supplementary_queue_limit(
                 self._handle, val):
             raise SDKException()
-        return bool(cuvis_il.p_int_value(val))
+        return cuvis_il.p_ulong_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_output_queue_limit)
     def output_queue_limit(self) -> int:
-        val = cuvis_il.new_p_int()
+        val = cuvis_il.new_p_ulong()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_output_queue_limit(
                 self._handle, val):
             raise SDKException()
-        return bool(cuvis_il.p_int_value(val))
+        return cuvis_il.p_ulong_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_queue_used)
     def queue_used(self) -> int:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_queue_used(
                 self._handle, val):
             raise SDKException()
-        return bool(cuvis_il.p_int_value(val))
+        return cuvis_il.p_int_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_can_drop_results)
     def can_drop_results(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_can_drop_results(
@@ -203,6 +220,7 @@ class Worker(object):
         return bool(cuvis_il.p_int_value(val))
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_can_skip_measurements)
     def can_skip_measurements(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_can_skip_measurements(
@@ -211,6 +229,7 @@ class Worker(object):
         return bool(cuvis_il.p_int_value(val))
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_can_skip_supplementary)
     def can_skip_supplementary(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_can_skip_supplementary(
@@ -219,6 +238,7 @@ class Worker(object):
         return bool(cuvis_il.p_int_value(val))
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_is_processing_mandatory)
     def is_processing_mandatory(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_is_processing_mandatory(
@@ -227,6 +247,7 @@ class Worker(object):
         return bool(cuvis_il.p_int_value(val))
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_is_processing)
     def is_processing(self) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_is_processing(
@@ -235,6 +256,7 @@ class Worker(object):
         return bool(cuvis_il.p_int_value(val))
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_threads_busy)
     def threads_busy(self) -> int:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_threads_busy(
@@ -243,6 +265,7 @@ class Worker(object):
         return cuvis_il.p_int_value(val)
 
     @property
+    @copydoc(cuvis_il.cuvis_worker_get_state)
     def state(self) -> WorkerState:
         val = cuvis_il.cuvis_worker_state_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_state(
@@ -250,16 +273,19 @@ class Worker(object):
             raise SDKException()
         return WorkerState._from_internal(val)
 
+    @copydoc(cuvis_il.cuvis_worker_start)
     def start_processing(self) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_worker_start_processing(
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_start(
                 self._handle):
             raise SDKException()
 
+    @copydoc(cuvis_il.cuvis_worker_stop)
     def stop_processing(self) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_worker_stop_processing(
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_stop(
                 self._handle):
             raise SDKException()
 
+    @copydoc(cuvis_il.cuvis_worker_drop_all_queued)
     def drop_all_queued(self) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_drop_all_queued(
                 self._handle):
