@@ -19,6 +19,7 @@ class GeneralExportSettings(object):
     pan_scale: float = 0.0
     pan_sharpening_interpolation_type: PanSharpeningInterpolationType = PanSharpeningInterpolationType.Linear
     pan_sharpening_algorithm: PanSharpeningAlgorithm = PanSharpeningAlgorithm.CubertMacroPixel
+    pre_pan_sharpen_cube: bool = False
     add_pan: bool = False
     add_fullscale_pan: bool = False
     permissive: bool = False
@@ -33,6 +34,7 @@ class GeneralExportSettings(object):
             self.pan_sharpening_interpolation_type]
         ge.pan_algorithm = internal.__CuvisPanSharpeningAlgorithm__[
             self.pan_sharpening_algorithm]
+        ge.pre_pan_sharpen_cube = int(self.pre_pan_sharpen_cube)
         ge.add_pan = int(self.add_pan)
         ge.add_fullscale_pan = int(self.add_fullscale_pan)
         ge.permissive = int(self.permissive)
@@ -47,6 +49,7 @@ class GeneralExportSettings(object):
                        ge.pan_interpolation_type],
                    pan_sharpening_algorithm=internal.__PanSharpeningAlgorithm__[
                        ge.pan_algorithm],
+                   pre_pan_sharpen_cube=ge.pre_pan_sharpen_cube,
                    add_pan=bool(ge.add_pan),
                    add_fullscale_pan=bool(ge.add_fullscale_pan),
                    permissive=bool(ge.permissive))
