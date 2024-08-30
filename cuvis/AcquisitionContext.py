@@ -234,11 +234,11 @@ class AcquisitionContext(object):
         return Async(cuvis_il.p_int_value(_pasync))
 
     @property
-    @copydoc(cuvis_il.cuvis_comp_pixel_format_get)
+    @copydoc(cuvis_il.cuvis_comp_pixel_format_get_swig)
     def _comp_pixel_format(self, id: int) -> str:
         return cuvis_il.cuvis_comp_pixel_format_get_swig(self._handle, id)
 
-    @pixel_format.setter
+    @_comp_pixel_format.setter
     @copydoc(cuvis_il.cuvis_comp_pixel_format_set)
     def _comp_pixel_format(self, id: int, val: str) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_pixel_format_set(
@@ -247,7 +247,7 @@ class AcquisitionContext(object):
         pass
 
     @property
-    @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get)
+    @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get_swig)
     def _comp_available_pixel_formats(self, id: int) -> list[str]:
         pCount = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_available_pixel_format_count_get(
@@ -575,7 +575,7 @@ class Component:
         return self._acq._set_integration_time_factor(self._idx, val)
 
     @property
-    @copydoc(cuvis_il.cuvis_comp_pixel_format_get)
+    @copydoc(cuvis_il.cuvis_comp_pixel_format_get_swig)
     def pixel_format(self) -> str:
         return cuvis_il.cuvis_comp_pixel_format_get_swig(self._handle, self._idx)
 
@@ -588,7 +588,7 @@ class Component:
         pass
 
     @property
-    @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get)
+    @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get_swig)
     def available_pixel_formats(self) -> list[str]:
         pCount = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_available_pixel_format_count_get(
