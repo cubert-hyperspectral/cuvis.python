@@ -14,6 +14,7 @@ import cuvis.cuvis_types as internal
 
 import asyncio as a
 
+
 class AcquisitionContext(object):
     def __init__(self, base: Union[Calibration, SessionFile], *, simulate: bool = False):
         self._handle = None
@@ -38,7 +39,6 @@ class AcquisitionContext(object):
                 "Could not interpret input of type {}.".format(type(base)))
         pass
 
-
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_get_state)
     def state(self) -> HardwareState:
@@ -46,8 +46,7 @@ class AcquisitionContext(object):
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_state(
                 self._handle, val):
             raise SDKException()
-        return internal.__HardwareState__[ cuvis_il.p_cuvis_hardware_state_t_value(val)]
-
+        return internal.__HardwareState__[cuvis_il.p_cuvis_hardware_state_t_value(val)]
 
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_get_component_count)
@@ -62,7 +61,7 @@ class AcquisitionContext(object):
     def _get_component_online(self, idref: int) -> bool:
         val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_online_get(
-                self._handle,idref, val):
+                self._handle, idref, val):
             raise SDKException()
         return bool(cuvis_il.p_int_value(val))
 
@@ -73,7 +72,6 @@ class AcquisitionContext(object):
                 self._handle, idref, ci):
             raise SDKException()
         return ComponentInfo._from_internal(ci)
-    
 
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_queue_size_get)
@@ -122,7 +120,7 @@ class AcquisitionContext(object):
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_operation_mode_get(
                 self._handle, val):
             raise SDKException()
-        return  internal.__OperationMode__[cuvis_il.p_cuvis_operation_mode_t_value(val)]
+        return internal.__OperationMode__[cuvis_il.p_cuvis_operation_mode_t_value(val)]
 
     @operation_mode.setter
     @copydoc(cuvis_il.cuvis_acq_cont_operation_mode_set)
@@ -236,29 +234,30 @@ class AcquisitionContext(object):
         return Async(cuvis_il.p_int_value(_pasync))
 
     @property
-    @copydoc(cuvis_il.cuvis_acq_cont_get_pixel_format_swig)
-    def pixel_format(self, id: int) -> str:
-        return cuvis_il.cuvis_acq_cont_get_pixel_format_swig(self._handle, id)
+    @copydoc(cuvis_il.cuvis_comp_pixel_format_get_swig)
+    def _comp_pixel_format(self, id: int) -> str:
+        return cuvis_il.cuvis_comp_pixel_format_get_swig(self._handle, id)
 
-    @pixel_format.setter
-    @copydoc(cuvis_il.cuvis_acq_cont_fps_set)
-    def pixel_format(self, id: int, val: str) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_set_pixel_format(
-                self._handle, val):
+    @_comp_pixel_format.setter
+    @copydoc(cuvis_il.cuvis_comp_pixel_format_set)
+    def _comp_pixel_format(self, id: int, val: str) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_comp_pixel_format_set(
+                self._handle, id, val):
             raise SDKException()
         pass
 
     @property
-    @copydoc(cuvis_il.cuvis_acq_cont_get_pixel_format_swig)
-    def available_pixel_formats(self, id: int) -> list[str]:
+    @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get_swig)
+    def _comp_available_pixel_formats(self, id: int) -> list[str]:
         pCount = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_get_available_pixel_format_count(
+        if cuvis_il.status_ok != cuvis_il.cuvis_comp_available_pixel_format_count_get(
                 self._handle, id, pCount):
             raise SDKException()
         count = cuvis_il.p_int_value(pCount)
         formats = []
         for i in range(count):
-            formats.append(str(cuvis_il.cuvis_acq_cont_get_available_pixel_format_swig(self._handle, id, i)))
+            formats.append(
+                str(cuvis_il.cuvis_comp_available_pixel_format_get_swig(self._handle, id, i)))
         return formats
 
     @copydoc(cuvis_il.cuvis_acq_cont_has_next_measurement)
@@ -404,7 +403,7 @@ class AcquisitionContext(object):
 
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_get)
-    def auto_exp(self) -> bool :
+    def auto_exp(self) -> bool:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_get(
                 self._handle, _ptr):
@@ -426,10 +425,10 @@ class AcquisitionContext(object):
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
-    
+
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_auto_exp_comp_get)
-    def auto_exp_comp(self) -> float :
+    def auto_exp_comp(self) -> float:
         _ptr = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_auto_exp_comp_get(
                 self._handle, _ptr):
@@ -476,39 +475,39 @@ class AcquisitionContext(object):
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
-    
-    def register_state_change_callback(self, callback: Callable[[HardwareState, list[tuple[str,bool]]], Awaitable[None]]) -> None:
+
+    def register_state_change_callback(self, callback: Callable[[HardwareState, list[tuple[str, bool]]], Awaitable[None]]) -> None:
         """
 
         """
         self.reset_state_change_callback()
-        
+
         async def _internal_state_loop():
-                poll_time = 0.5
-                last_state = HardwareState.Offline
-                last_component_states = [(cmp.info.display_name, False)  
-                             for cmp in self.components()]
-                first_pending = True
-                while True:
-                    state_changed = first_pending
-                    first_pending = False
+            poll_time = 0.5
+            last_state = HardwareState.Offline
+            last_component_states = [(cmp.info.display_name, False)
+                                     for cmp in self.components()]
+            first_pending = True
+            while True:
+                state_changed = first_pending
+                first_pending = False
 
-                    current_state = self.state
-                    if last_state != current_state:
+                current_state = self.state
+                if last_state != current_state:
+                    state_changed = True
+                    last_state = current_state
+                for i, cmp in enumerate(self.components()):
+                    comp_state = cmp.online()
+                    last_comp_state = last_component_states[i][1]
+
+                    if comp_state != last_comp_state:
                         state_changed = True
-                        last_state = current_state
-                    for i, cmp in enumerate(self.components()):
-                        comp_state = cmp.online()
-                        last_comp_state = last_component_states[i][1]
+                        last_component_states[i] = last_component_states[i][0], comp_state
 
-                        if comp_state != last_comp_state:
-                            state_changed = True
-                            last_component_states[i] = last_component_states[i][0] , comp_state
-
-                    if state_changed:
-                        await callback(last_state, last_component_states)
-                    else:
-                        await a.sleep(poll_time)
+                if state_changed:
+                    await callback(last_state, last_component_states)
+                else:
+                    await a.sleep(poll_time)
 
         self._state_poll_task = a.create_task(_internal_state_loop())
 
@@ -520,17 +519,12 @@ class AcquisitionContext(object):
             self._state_poll_task.cancel()
             self._state_poll_task = None
 
-
-
-
-        
-
     def components(self):
         """
         Returns an iterator over all components
         """
         for i in range(0, self.component_count):
-            yield Component(self,i)
+            yield Component(self, i)
         pass
 
     def __del__(self):
@@ -544,6 +538,7 @@ class Component:
     """
 
     """
+
     def __init__(self, acq: AcquisitionContext, idx: int):
         self._acq = acq
         self._idx = idx
@@ -553,29 +548,55 @@ class Component:
     @copydoc(cuvis_il.cuvis_comp_online_get)
     def online(self) -> bool:
         return self._acq._get_component_online(self._idx)
-    
+
     @property
     @copydoc(cuvis_il.cuvis_comp_temperature_get)
     def temperature(self) -> float:
         return self._acq._get_temperature(self._idx)
-    
+
     @property
     @copydoc(cuvis_il.cuvis_comp_gain_get)
     def gain(self) -> float:
         return self._acq._get_gain(self._idx)
-    
+
     @gain.setter
     @copydoc(cuvis_il.cuvis_comp_gain_set)
     def gain(self, val: float) -> None:
         return self._acq._set_gain(self._idx, val)
-    
+
     @property
     @copydoc(cuvis_il.cuvis_comp_integration_time_factor_get)
     def integration_time_factor(self) -> float:
         return self._acq._get_integration_time_factor(self._idx)
-    
+
     @integration_time_factor.setter
     @copydoc(cuvis_il.cuvis_comp_integration_time_factor_set)
     def integration_time_factor(self, val: float) -> None:
         return self._acq._set_integration_time_factor(self._idx, val)
-    
+
+    @property
+    @copydoc(cuvis_il.cuvis_comp_pixel_format_get_swig)
+    def pixel_format(self) -> str:
+        return cuvis_il.cuvis_comp_pixel_format_get_swig(self._handle, self._idx)
+
+    @pixel_format.setter
+    @copydoc(cuvis_il.cuvis_comp_pixel_format_set)
+    def pixel_format(self, val: str) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_comp_pixel_format_set(
+                self._handle, self._idx, val):
+            raise SDKException()
+        pass
+
+    @property
+    @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get_swig)
+    def available_pixel_formats(self) -> list[str]:
+        pCount = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_comp_available_pixel_format_count_get(
+                self._handle, self._idx, pCount):
+            raise SDKException()
+        count = cuvis_il.p_int_value(pCount)
+        formats = []
+        for i in range(count):
+            formats.append(
+                str(cuvis_il.cuvis_comp_available_pixel_format_get_swig(self._handle, self._idx, i)))
+        return formats
