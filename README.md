@@ -40,7 +40,7 @@ pip install cuvis
 or add `cuvis` to your project `requirements.txt` or `setup.py`.
 We currently provide pre-compiled binaries for Python 3.9, 3.10, 3.11 and 3.12 for Windows 64-bit.
 
-To access the newest python cuvis version (for use with SDK beta versions, etc) you can install them with
+To access the newest python cuvis version (for use with SDK beta versions, etc) you can install it with
 
 ```
 pip install cuvis --pre
