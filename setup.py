@@ -10,7 +10,7 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '3.3.0rc1'
+VERSION = '3.3.0'
 
 DESCRIPTION = 'CUVIS Python SDK.'
 
@@ -22,7 +22,7 @@ REQUIREMENTS = {
     # Installation dependencies
     # Use with pip install . to install from source
     'install': [
-        'cuvis-il == 3.3.0rc1',
+        'cuvis-il == 3.3.0',
     ],
 }
 
