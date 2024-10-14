@@ -233,20 +233,17 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    @property
     @copydoc(cuvis_il.cuvis_comp_pixel_format_get_swig)
-    def _comp_pixel_format(self, id: int) -> str:
+    def _get_comp_pixel_format(self, id: int) -> str:
         return cuvis_il.cuvis_comp_pixel_format_get_swig(self._handle, id)
 
-    @_comp_pixel_format.setter
     @copydoc(cuvis_il.cuvis_comp_pixel_format_set)
-    def _comp_pixel_format(self, id: int, val: str) -> None:
+    def _set_comp_pixel_format(self, id: int, val: str) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_pixel_format_set(
                 self._handle, id, val):
             raise SDKException()
         pass
 
-    @property
     @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get_swig)
     def _comp_available_pixel_formats(self, id: int) -> list[str]:
         pCount = cuvis_il.new_p_int()
@@ -577,26 +574,14 @@ class Component:
     @property
     @copydoc(cuvis_il.cuvis_comp_pixel_format_get_swig)
     def pixel_format(self) -> str:
-        return cuvis_il.cuvis_comp_pixel_format_get_swig(self._handle, self._idx)
+        return self._acq._get_comp_pixel_format(self._idx)
 
     @pixel_format.setter
     @copydoc(cuvis_il.cuvis_comp_pixel_format_set)
     def pixel_format(self, val: str) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_comp_pixel_format_set(
-                self._handle, self._idx, val):
-            raise SDKException()
-        pass
+        self._acq._set_comp_pixel_format(self._idx, val)
 
     @property
     @copydoc(cuvis_il.cuvis_comp_available_pixel_format_get_swig)
     def available_pixel_formats(self) -> list[str]:
-        pCount = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_comp_available_pixel_format_count_get(
-                self._handle, self._idx, pCount):
-            raise SDKException()
-        count = cuvis_il.p_int_value(pCount)
-        formats = []
-        for i in range(count):
-            formats.append(
-                str(cuvis_il.cuvis_comp_available_pixel_format_get_swig(self._handle, self._idx, i)))
-        return formats
+        return self._acq._comp_available_pixel_formats(self._idx)
