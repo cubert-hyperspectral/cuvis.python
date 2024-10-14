@@ -10,17 +10,20 @@ import cuvis.cuvis_types as internal
 
 from typing import Union
 
+
 class Calibration(object):
 
     def __init__(self, base: Union[Path, str, SessionFile]):
         self._handle = None
         _ptr = cuvis_il.new_p_int()
         if isinstance(base, SessionFile):
-             retval = cuvis_il.cuvis_calib_create_from_session_file(base._handle, _ptr)
+            retval = cuvis_il.cuvis_calib_create_from_session_file(
+                base._handle, _ptr)
         elif (isinstance(base, Path) and base.is_dir()) or os.path.exists(base):
             retval = cuvis_il.cuvis_calib_create_from_path(str(base), _ptr)
         else:
-            raise SDKException("Could not interpret input of type '{}'.".format(type(base)))
+            raise SDKException(
+                "Could not interpret input of type '{}'.".format(type(base)))
         if cuvis_il.status_ok != retval:
             raise SDKException()
         self._handle = cuvis_il.p_int_value(_ptr)
@@ -34,18 +37,20 @@ class Calibration(object):
             raise SDKException()
         return Capabilities(cuvis_il.p_int_value(_ptr))
 
-    def get_info(self) -> cuvis_il.cuvis_calibration_info_t:
-        info = cuvis_il.cuvis_calibration_info_t()
+    @property
+    def info(self) -> CalibrationInfo:
+
+        ret = cuvis_il.cuvis_calibration_info_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_info(
-                self._handle, info):
+                self._handle, ret):
             raise SDKException()
         return CalibrationInfo(
-            self.model_name,
-            self.serial_no,
-            self.calibration_date,
-            self.annotation_name,
-            self.unique_id,
-            self.file_path)
+            ret.model_name,
+            ret.serial_no,
+            ret.calibration_date,
+            ret.annotation_name,
+            ret.unique_id,
+            ret.file_path)
 
     @property
     def id(self) -> str:
