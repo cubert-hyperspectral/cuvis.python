@@ -10,7 +10,7 @@ from setuptools.command import develop
 here = os.path.abspath(os.path.dirname(__file__))
 
 NAME = 'cuvis'
-VERSION = '3.3.0'
+VERSION = '3.3.0.post1'
 
 DESCRIPTION = 'CUVIS Python SDK.'
 
@@ -22,7 +22,7 @@ REQUIREMENTS = {
     # Installation dependencies
     # Use with pip install . to install from source
     'install': [
-        'cuvis-il == 3.3.0',
+        'cuvis-il>=3.3.0,<=3.3.0.post999999',
     ],
 }
 
@@ -67,7 +67,7 @@ class UploadCommand(Command):
         os.system('python setup.py sdist'.format(sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
-        os.system('twine upload -r testpypi dist/*')
+        os.system('twine upload dist/*')
 
         # self.status('Pushing git tags…')
         # os.system('git tag v{0}'.format(about['__version__']))
