@@ -39,7 +39,6 @@ class Calibration(object):
 
     @property
     def info(self) -> CalibrationInfo:
-
         ret = cuvis_il.cuvis_calibration_info_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_info(
                 self._handle, ret):

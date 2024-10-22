@@ -7,7 +7,7 @@ from .SessionFile import SessionFile
 from .cuvis_aux import SDKException, SessionData
 from .cuvis_types import HardwareState, OperationMode
 
-from typing import Coroutine, Callable, Awaitable, Union, Iterable
+from typing import Coroutine, Callable, Awaitable, Union, Iterable, Optional
 from .doc import copydoc
 
 import cuvis.cuvis_types as internal
@@ -193,12 +193,18 @@ class AcquisitionContext(object):
         return Async(cuvis_il.p_int_value(_pasync))
 
     @copydoc(cuvis_il.cuvis_acq_cont_capture_async)
-    def capture(self) -> AsyncMesu:
-        _pasync = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
-                self._handle, _pasync):
-            raise SDKException()
-        return AsyncMesu(cuvis_il.p_int_value(_pasync))
+    def capture(self, to_interal=False) -> Optional[AsyncMesu]:
+        if not to_interal:
+            _pasync = cuvis_il.new_p_int()
+            if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
+                    self._handle, _pasync):
+                raise SDKException()
+            return AsyncMesu(cuvis_il.p_int_value(_pasync))
+        else:
+            if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
+                    self._handle, 0):
+                raise SDKException()
+            return None
 
     @copydoc(cuvis_il.cuvis_acq_cont_capture)
     def capture_at(self, timeout_ms: int) -> Measurement:

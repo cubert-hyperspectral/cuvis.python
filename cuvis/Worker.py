@@ -105,7 +105,7 @@ class Worker(object):
     @copydoc(cuvis_il.cuvis_worker_ingest_mesu)
     def ingest_mesu(self, mesu: Measurement) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_ingest_mesu(
-                self._handle, mesu):
+                self._handle, mesu._handle):
             raise SDKException()
         pass
 
