@@ -39,12 +39,12 @@ class Viewer(object):
         for i in range(dataCount):
             view_data = cuvis_il.cuvis_view_data_t()
             if cuvis_il.status_ok != cuvis_il.cuvis_view_get_data(
-                    new_handle, view_data):
+                    new_handle, i, view_data):
                 raise SDKException()
 
             if view_data.data.format == CUVIS_imbuffer_format["imbuffer_format_uint8"]:
-                view_data[view_data.id] = ImageData(img_buf=view_data.data,
-                                                    dformat=view_data.data.format)
+                view_array[view_data.id] = ImageData(img_buf=view_data.data,
+                                                     dformat=view_data.data.format)
             else:
                 raise SDKException("Unsupported viewer bit depth!")
         # TODO when is a good point to release the view
