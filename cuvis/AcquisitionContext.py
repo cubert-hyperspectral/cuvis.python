@@ -349,11 +349,11 @@ class AcquisitionContext(object):
 
     @copydoc(cuvis_il.cuvis_comp_temperature_get)
     def _get_temperature(self, idref: int) -> float:
-        val = cuvis_il.new_p_int()
+        val = cuvis_il.new_p_double()
         if cuvis_il.status_ok != cuvis_il.cuvis_comp_temperature_get(
                 self._handle, idref, val):
             raise SDKException()
-        return cuvis_il.p_int_value(val)
+        return cuvis_il.p_double_value(val)
 
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_average_get)
