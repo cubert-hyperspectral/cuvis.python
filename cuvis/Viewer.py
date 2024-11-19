@@ -25,7 +25,7 @@ class Viewer(object):
                     type(settings)))
         pass
 
-    def _create_view_data(self, new_handle: int) -> Dict[str, ImageData]:
+    def _create_view_data(self, new_handle: int) -> dict[str, ImageData] | ImageData:
 
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_view_get_data_count(
@@ -47,9 +47,11 @@ class Viewer(object):
                                                      dformat=view_data.data.format)
             else:
                 raise SDKException("Unsupported viewer bit depth!")
-        # TODO when is a good point to release the view
-        # cuvis_il.cuvis_view_free(_ptr)
-        return view_array
+        if len(view_array.keys()) == 1:
+            # if only one value is available, do not wrap in dictionary
+            return list(view_array.values())[0]
+        else:
+            return view_array
 
     def apply(self, mesu: Measurement) -> Dict[str, ImageData]:
         _ptr = cuvis_il.new_p_int()
