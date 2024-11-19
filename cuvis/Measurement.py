@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union
 from .FileWriteSettings import SaveArgs
 import datetime
 import os
@@ -241,7 +241,7 @@ class ImageData(object):
             raise TypeError(
                 "Wrong data type for image buffer: {}".format(type(img_buf)))
 
-    def __getitem__(self, key) -> np.ndarray | tuple[np.ndarray, np.ndarray] | object:
+    def __getitem__(self, key) -> Union[np.ndarray, tuple[np.ndarray, np.ndarray], object]:
         """
         Enables slicing and indexing of the image data.
         Example:

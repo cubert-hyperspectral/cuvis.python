@@ -5,7 +5,7 @@ from .cuvis_types import CUVIS_imbuffer_format
 
 from .FileWriteSettings import ViewerSettings
 
-from typing import Union, Dict
+from typing import Union
 
 
 class Viewer(object):
@@ -25,7 +25,7 @@ class Viewer(object):
                     type(settings)))
         pass
 
-    def _create_view_data(self, new_handle: int) -> dict[str, ImageData] | ImageData:
+    def _create_view_data(self, new_handle: int) -> Union[dict[str, ImageData], ImageData]:
 
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_view_get_data_count(
@@ -53,7 +53,7 @@ class Viewer(object):
         else:
             return view_array
 
-    def apply(self, mesu: Measurement) -> Dict[str, ImageData]:
+    def apply(self, mesu: Measurement) -> dict[str, ImageData]:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_viewer_apply(self._handle,
                                                              mesu._handle, _ptr):
