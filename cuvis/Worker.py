@@ -13,7 +13,7 @@ import asyncio as a
 from .doc import copydoc
 
 from dataclasses import dataclass
-from typing import Callable, Awaitable, Tuple
+from typing import Callable, Awaitable
 
 
 @dataclass

@@ -1,11 +1,14 @@
-from typing import Union, List
+from typing import Union
 from .FileWriteSettings import SaveArgs
 import datetime
 import os
+import numpy as np
 
 from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException, SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData
 from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
+from .cube_utils import ImageData
+
 
 import cuvis.cuvis_types as internal
 base_datetime = datetime.datetime(1970, 1, 1)
@@ -30,6 +33,7 @@ class Measurement(object):
 
     def __init__(self, base: Union[int, str]):
         self._handle = None
+        self._session = None
 
         if isinstance(base, int):
             self._handle = base
@@ -130,6 +134,42 @@ class Measurement(object):
         pass
 
     @property
+    def cube(self) -> ImageData:
+        """
+        Retrieves or processes the 'cube' data for this Measurement.
+
+        This property prioritizes convenience over strict design principles:
+        - Attempts to retrieve the 'cube' from `self.data`.
+        - Lazily initializes a `ProcessingContext` if a session is available but uninitialized.
+        - May trigger expensive processing and modify internal state during property access.
+
+        While functional, this approach introduces side effects and tight coupling, making it less
+        predictable and not the cleanest solution. Suitable for specific workflows where these
+        trade-offs are acceptable.
+
+        Raises
+        ------
+        ValueError
+            If the 'cube' is not available and processing is not possible.
+
+        Returns
+        -------
+        ImageData
+            The 'cube' data, either retrieved from `self.data` or generated through processing.
+        """
+        if 'cube' in self.data:
+            return self.data.get('cube')
+        if self._session is not None:
+            # try fallback if session is known
+            if self._session._pc is None:
+                from .ProcessingContext import ProcessingContext
+                self._session._pc = ProcessingContext(self._session)
+            self._session._pc.apply(self)
+            return self.data.get('cube', None)
+        raise ValueError(
+            "This Measurement does not have a cube saved. Consider reprocessing with a Processing Context.")
+
+    @property
     def thumbnail(self):
         thumb = [val for key, val in self.data.items() if "view" in key]
         if len(thumb) == 0:
@@ -194,48 +234,3 @@ class Measurement(object):
         cuvis_il.cuvis_measurement_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
         pass
-
-
-class ImageData(object):
-    def __init__(self, img_buf=None, dformat=None):
-
-        if img_buf is None:
-
-            self.width = None
-            self.height = None
-            self.channels = None
-            self.array = None
-            self.wavelength = None
-
-        elif isinstance(img_buf, cuvis_il.cuvis_imbuffer_t):
-
-            if dformat is None:
-                raise TypeError("Missing format for reading image buffer")
-
-            if img_buf.format == 1:
-                self.array = cuvis_il.cuvis_read_imbuf_uint8(img_buf)
-            elif img_buf.format == 2:
-                self.array = cuvis_il.cuvis_read_imbuf_uint16(img_buf)
-            elif img_buf.format == 3:
-                self.array = cuvis_il.cuvis_read_imbuf_uint32(img_buf)
-            elif img_buf.format == 4:
-                self.array = cuvis_il.cuvis_read_imbuf_float32(img_buf)
-            else:
-                raise SDKException()
-
-            self.width = img_buf.width
-            self.height = img_buf.height
-            self.channels = img_buf.channels
-
-            if img_buf.wavelength is not None:
-                self.wavelength = [
-                    cuvis_il.p_unsigned_int_getitem(
-                        img_buf.wavelength, z) for z
-                    in
-                    range(self.channels)]
-
-            # print("got image of size {}.".format(self.array.shape))
-
-        else:
-            raise TypeError(
-                "Wrong data type for image buffer: {}".format(type(img_buf)))

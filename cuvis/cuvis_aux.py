@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass
 import cuvis.cuvis_types as internal
-from typing import List, Union
+from typing import Union
 from ._cuvis_il import cuvis_il
 import logging
 import datetime
@@ -150,7 +150,7 @@ class Bitset(object):
     def __init__(self, value):
         self._value = value
 
-    def strings(self) -> List[str]:
+    def strings(self) -> list[str]:
         """"Returns a list containing the string values of the current members of the Bitset"""
         return _bit_translate(self._value, type(self)._translation_dict)
 
@@ -182,7 +182,7 @@ class Bitset(object):
             raise ValueError(f'Cannot call operator with type {type(member)}')
 
     @classmethod
-    def from_strings(cls, *values: List[str]):
+    def from_strings(cls, *values: list[str]):
         """" Creates a Bitset from a list of strings """
         return cls(sum([cls._translation_dict[v] for v in values]))
 
