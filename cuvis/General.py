@@ -53,9 +53,9 @@ def sdk_version() -> str:
 
 def wrapper_version() -> str:
     pip_version = pkg_resources.require('cuvis')[0].version
-    with open(Path(__file__).parent / "git-hash.txt", 'r') as f:
+    with open(Path(__file__).parent.parent / "git-hash.txt", 'r') as f:
         git_hash = f.readline()
-        return f'{pip_version} {git_hash}'
+        return f'{pip_version} {git_hash}'.strip()
 
 
 def set_log_level(lvl):
