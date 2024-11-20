@@ -98,7 +98,8 @@ def __createManifest__(subdirs):
     current = os.path.dirname(__file__)
     relative_paths = [os.path.relpath(path, current) for path in subdirs]
 
-    single_files = [os.path.join(here, 'README.md')]
+    single_files = [os.path.join(here, 'README.md'),
+                    os.path.join(here, 'git-hash.txt')]
 
     rel_single_files = [os.path.relpath(path, current)
                         for path in single_files]
