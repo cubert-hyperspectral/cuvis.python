@@ -2,10 +2,11 @@ import os
 import platform
 import sys
 import io
-
+import subprocess
 from shutil import rmtree, copy
 from setuptools import setup, find_packages, Command
 from setuptools.command import develop
+from pathlib import Path
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -33,6 +34,13 @@ if 'CUVIS' in os.environ:
 else:
     Exception(
         'CUVIS SDK does not seem to exist on this machine! Make sure that the environment variable CUVIS is set.')
+
+
+def get_git_commit_hash() -> str:
+    try:
+        return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    except subprocess.CalledProcessError:
+        return 'unknown'
 
 # taken from https://github.com/navdeep-G/setup.py/blob/master/setup.py
 
@@ -67,7 +75,7 @@ class UploadCommand(Command):
         os.system('python setup.py sdist'.format(sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
-        os.system('twine upload -r testpypi dist/*')
+        os.system('twine upload dist/*')
 
         # self.status('Pushing git tags…')
         # os.system('git tag v{0}'.format(about['__version__']))
@@ -116,6 +124,8 @@ try:
 except FileNotFoundError:
     long_description = DESCRIPTION
 
+with open(Path(__file__).parent / "git-hash.txt", 'w') as f:
+    f.write(f'{get_git_commit_hash()}\n')
 
 setup(
     name=NAME,
