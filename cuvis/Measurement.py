@@ -61,8 +61,11 @@ class Measurement(object):
         self.measurement_flags = MeasurementFlags(_metaData.measurement_flags)
         self.path = _metaData.path
         self.comment = _metaData.comment
-        self.factory_calibration = base_datetime + datetime.timedelta(
-            milliseconds=_metaData.factory_calibration)
+        try:
+            self.factory_calibration = base_datetime + datetime.timedelta(
+                milliseconds=_metaData.factory_calibration)
+        except OverflowError:
+            self.factory_calibration = None
         self.assembly = _metaData.assembly
         self.averages = _metaData.averages
         self.distance = _metaData.distance
