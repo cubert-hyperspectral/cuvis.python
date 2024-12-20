@@ -24,12 +24,8 @@ REQUIREMENTS = {
     # Use with pip install . to install from source
     'install': [
         'cuvis-il>=3.3.0,<=3.3.0.post999999',
-    ],
-    'extras': {
-        ':python_version == "3.9"': [
-            "typing-extensions"
-        ]
-    },
+        'typing-extension; python_version < "3.10"'
+    ]
 }
 
 lib_dir = ""
@@ -147,7 +143,6 @@ setup(
     long_description_content_type='text/markdown',
     # setup_requires=REQUIREMENTS['setup'],
     install_requires=REQUIREMENTS['install'],
-    extras_require=REQUIREMENTS['extras'],
     include_package_data=True,
         cmdclass={
         'upload': UploadCommand,
