@@ -66,6 +66,15 @@ class AsyncMesu(object):
         cuvis_il.cuvis_async_capture_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
 
+    def __deepcopy__(self, memo):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Deep copying is not supported for AsyncMesu')
+
+    def __copy__(self):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError(
+            'Shallow copying is not supported for AsyncMesu')
+
 
 class Async(object):
     def __init__(self, handle):
@@ -111,3 +120,12 @@ class Async(object):
         cuvis_il.p_int_assign(_ptr, self._handle)
         cuvis_il.cuvis_async_call_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
+
+    def __deepcopy__(self, memo):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Deep copying is not supported for Async')
+
+    def __copy__(self):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError(
+            'Shallow copying is not supported for Async')
