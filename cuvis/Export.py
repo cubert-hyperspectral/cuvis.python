@@ -4,6 +4,7 @@ from .cuvis_aux import SDKException
 from .Measurement import Measurement
 from .FileWriteSettings import GeneralExportSettings, EnviExportSettings, TiffExportSettings, ViewExportSettings, SaveArgs
 
+
 class Exporter(object):
     def __init__(self):
         self._handle = None
@@ -25,6 +26,14 @@ class Exporter(object):
     def flush(self):
         if cuvis_il.status_ok != cuvis_il.cuvis_exporter_flush(self._handle):
             raise SDKException()
+
+    def __deepcopy__(self, memo):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Deep copying is not supported for Exporter')
+
+    def __copy__(self):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Shallow copying is not supported for Exporter')
 
     @property
     def queue_used(self) -> int:

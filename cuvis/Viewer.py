@@ -67,3 +67,11 @@ class Viewer(object):
         cuvis_il.p_int_assign(_ptr, self._handle)
         cuvis_il.cuvis_viewer_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
+
+    def __deepcopy__(self, memo):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Deep copying is not supported for Viewer')
+
+    def __copy__(self):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Shallow copying is not supported for Viewer')

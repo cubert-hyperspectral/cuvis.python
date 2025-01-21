@@ -237,3 +237,10 @@ class Measurement(object):
         cuvis_il.cuvis_measurement_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
         pass
+
+    def __deepcopy__(self, memo):
+        return self.deepcopy()
+
+    def __copy__(self, memo):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Shallow copying is not supported for Measurement')

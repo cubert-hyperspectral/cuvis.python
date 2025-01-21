@@ -12,6 +12,7 @@ from typing import Union
 
 import dataclasses
 
+
 class ProcessingContext(object):
     def __init__(self, base: Union[Calibration, SessionFile, Measurement]):
         self._handle = None
@@ -133,3 +134,12 @@ class ProcessingContext(object):
         cuvis_il.cuvis_proc_cont_free(_ptr)
         self._handle = cuvis_il.p_int_value(_ptr)
         pass
+
+    def __deepcopy__(self, memo):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError('Deep copying is not supported for ProcessingContext')
+
+    def __copy__(self):
+        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
+        raise TypeError(
+            'Shallow copying is not supported for ProcessingContext')
