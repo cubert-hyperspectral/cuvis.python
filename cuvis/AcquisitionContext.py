@@ -497,6 +497,7 @@ class AcquisitionContext(object):
             while True:
                 if self.ready:
                     await callback()
+                    break
                 else:
                     await a.sleep(poll_time)
 
