@@ -50,12 +50,12 @@ class AcquisitionContext(object):
         return internal.__HardwareState__[cuvis_il.p_cuvis_hardware_state_t_value(val)]
 
     @property
-    @copydoc(cuvis_il.cuvis_acq_cont_get_state)
+    @copydoc(cuvis_il.cuvis_acq_cont_ready_get)
     def ready(self) -> bool:
-        val = cuvis_il.new_p_int_t()
+        val = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_ready_get(self._handle, val):
             raise SDKException()
-        return bool(cuvis_il.p_cuvis_int_t_value(val))
+        return bool(cuvis_il.p_int_value(val))
 
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_get_component_count)
@@ -488,11 +488,10 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    def register_ready_callback(self, callback: Callable[Awaitable[None]]) -> None:
-
+    def register_ready_callback(self, callback: Callable[None, Awaitable[None]]) -> None:
         self.reset_ready_callback()
 
-        async def _internal_state_loop():
+        async def _internal_ready_loop():
             poll_time = 0.5
             while True:
                 if self.ready:
@@ -501,7 +500,7 @@ class AcquisitionContext(object):
                 else:
                     await a.sleep(poll_time)
 
-        self._ready_poll_task = a.create_task(_internal_state_loop())
+        self._ready_poll_task = a.create_task(_internal_ready_loop())
 
     def reset_ready_callback(self) -> None:
         if self._ready_poll_task is not None:
