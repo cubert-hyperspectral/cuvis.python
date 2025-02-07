@@ -20,6 +20,7 @@ class AcquisitionContext(object):
         self._handle = None
         self._simulate = simulate
         self._state_poll_task = None
+        self._ready_poll_task = None
 
         if isinstance(base, Calibration):
             _ptr = cuvis_il.new_p_int()
@@ -47,6 +48,14 @@ class AcquisitionContext(object):
                 self._handle, val):
             raise SDKException()
         return internal.__HardwareState__[cuvis_il.p_cuvis_hardware_state_t_value(val)]
+
+    @property
+    @copydoc(cuvis_il.cuvis_acq_cont_ready_get)
+    def ready(self) -> bool:
+        val = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_ready_get(self._handle, val):
+            raise SDKException()
+        return bool(cuvis_il.p_int_value(val))
 
     @property
     @copydoc(cuvis_il.cuvis_acq_cont_get_component_count)
@@ -478,6 +487,25 @@ class AcquisitionContext(object):
                 self._handle, _pasync, int(val)):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
+
+    def register_ready_callback(self, callback: Callable[None, Awaitable[None]]) -> None:
+        self.reset_ready_callback()
+
+        async def _internal_ready_loop():
+            poll_time = 0.5
+            while True:
+                if self.ready:
+                    await callback()
+                    break
+                else:
+                    await a.sleep(poll_time)
+
+        self._ready_poll_task = a.create_task(_internal_ready_loop())
+
+    def reset_ready_callback(self) -> None:
+        if self._ready_poll_task is not None:
+            self._ready_poll_task.cancel()
+            self._ready_poll_task = None
 
     def register_state_change_callback(self, callback: Callable[[HardwareState, list[tuple[str, bool]]], Awaitable[None]]) -> None:
         """
