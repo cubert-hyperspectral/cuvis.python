@@ -1,4 +1,4 @@
-import os
+
 from pathlib import Path
 
 from ._cuvis_il import cuvis_il
@@ -13,11 +13,12 @@ from typing import Union, Optional
 
 class SessionFile(object):
     def __init__(self, base: Union[Path, str]):
+        base = Path(base)
         self._handle = None
         self._pc = None
-        if isinstance(Path(base), Path) and os.path.exists(base):
+        if base.exists():
             _ptr = cuvis_il.new_p_int()
-            if cuvis_il.status_ok != cuvis_il.cuvis_session_file_load(base,
+            if cuvis_il.status_ok != cuvis_il.cuvis_session_file_load(str(base),
                                                                       _ptr):
                 raise SDKException()
             self._handle = cuvis_il.p_int_value(_ptr)
