@@ -23,7 +23,7 @@ class SessionFile(object):
                 raise SDKException()
             self._handle = cuvis_il.p_int_value(_ptr)
         else:
-            raise SDKException(
+            raise FileNotFoundError(
                 "Could not open SessionFile File! File not found!")
 
     def get_measurement(self, frameNo: int = 0, itemtype: SessionItemType = SessionItemType.no_gaps) -> Optional[Measurement]:
