@@ -3,6 +3,7 @@ from .FileWriteSettings import SaveArgs
 import datetime
 import os
 import numpy as np
+from pathlib import Path
 
 from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException, SessionData, Capabilities, MeasurementFlags, SensorInfo, GPSData
@@ -31,22 +32,26 @@ class Measurement(object):
     session_info: SessionData
     frame_id: int
 
-    def __init__(self, base: Union[int, str]):
+    def __init__(self, base: Union[int, str, Path]):
         self._handle = None
         self._session = None
 
         if isinstance(base, int):
             self._handle = base
-        elif isinstance(base, str) and os.path.exists(base):
+        elif isinstance(base, str) or isinstance(base, Path):
+            base = Path(base)
+            if not base.exists():
+                raise FileNotFoundError(
+                    'Could not open Measurement. File does not exists.')
+
             _ptr = cuvis_il.new_p_int()
-            if cuvis_il.status_ok != cuvis_il.cuvis_measurement_load(base,
+            if cuvis_il.status_ok != cuvis_il.cuvis_measurement_load(str(base),
                                                                      _ptr):
                 raise SDKException()
             self._handle = cuvis_il.p_int_value(_ptr)
         else:
-            raise SDKException(
-                "Could not open Measurement! Either handle not"
-                " available or file not found!")
+            raise ValueError(
+                "Could not open Measurement! Unknown Input")
         self.refresh()
         pass
 
