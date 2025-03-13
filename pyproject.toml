@@ -41,5 +41,5 @@ Issues = "https://github.com/cubert-hyperspectral/cuvis.python/issues"
 packages = ["cuvis"]
 include-package-data = true
 
-[tool.twine]
-repository = "testpypi"
+[tool.setuptools.package-data]
+cuvis = ["git-hash.txt"]
