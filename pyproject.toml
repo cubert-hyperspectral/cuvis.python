@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cuvis"
+version = "3.3.2"
+description = "CUVIS Python SDK."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache License 2.0" }
+authors = [
+    { name = "Cubert GmbH, Ulm, Germany", email = "SDK@cubert-gmbh.com" }
+]
+
+dependencies = [
+    "cuvis-il>3.3.1",
+    "typing_extensions; python_version<'3.10'",  # Only for Python 3.9
+    "setuptools; python_version>='3.12'"  # Only for Python 3.12+
+]
+
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.urls]
+Homepage = "https://www.cubert-hyperspectral.com/"
+Repository = "https://github.com/cubert-hyperspectral/cuvis.python"
+Documentation = "https://cubert-hyperspectral.github.io/cuvis.doc/"
+Changelog = "https://github.com/cubert-hyperspectral/cuvis.python/releases"
+Issues = "https://github.com/cubert-hyperspectral/cuvis.python/issues"
+
+[tool.setuptools]
+packages = ["cuvis"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+cuvis = ["git-hash.txt"]
