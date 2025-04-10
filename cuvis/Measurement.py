@@ -65,7 +65,7 @@ class Measurement(object):
             milliseconds=_metaData.capture_time)
         self.measurement_flags = MeasurementFlags(_metaData.measurement_flags)
         self.path = _metaData.path
-        self.comment = _metaData.comment
+        self._comment = _metaData.comment
         try:
             self.factory_calibration = base_datetime + datetime.timedelta(
                 milliseconds=_metaData.factory_calibration)
@@ -79,7 +79,7 @@ class Measurement(object):
         self.product_name = _metaData.product_name
         self.processing_mode = internal.__ProcessingMode__[
             _metaData.processing_mode]
-        self.name = _metaData.name
+        self._name = _metaData.name
         self.session_info = SessionData(_metaData.session_info_name,
                                         _metaData.session_info_session_no,
                                         _metaData.session_info_sequence_no)
@@ -134,7 +134,12 @@ class Measurement(object):
             raise SDKException()
         pass
 
-    def set_name(self, name: str) -> None:
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, name: str) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_set_name(
                 self._handle, name):
             raise SDKException()
@@ -202,7 +207,12 @@ class Measurement(object):
         _id = cuvis_il.cuvis_measurement_get_calib_id_swig(self._handle)
         return _id
 
-    def set_comment(self, comment: str) -> None:
+    @property
+    def comment(self) -> str:
+        return self._comment
+
+    @comment.setter
+    def comment(self, comment: str) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_set_comment(
                 self._handle, comment):
             raise SDKException()
