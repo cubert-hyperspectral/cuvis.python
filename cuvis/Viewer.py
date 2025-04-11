@@ -42,11 +42,9 @@ class Viewer(object):
                     new_handle, i, view_data):
                 raise SDKException()
 
-            if view_data.data.format == CUVIS_imbuffer_format["imbuffer_format_uint8"]:
-                view_array[view_data.id] = ImageData(img_buf=view_data.data,
-                                                     dformat=view_data.data.format)
-            else:
-                raise SDKException("Unsupported viewer bit depth!")
+            view_array[view_data.id] = ImageData(img_buf=view_data.data,
+                                                 dformat=view_data.data.format)
+
         if len(view_array.keys()) == 1:
             # if only one value is available, do not wrap in dictionary
             return list(view_array.values())[0]
