@@ -16,21 +16,21 @@ base_datetime = datetime.datetime(1970, 1, 1)
 
 
 class Measurement(object):
-    capture_time: datetime.datetime
-    measurement_flags: MeasurementFlags
-    path: str
+    capture_time: datetime.datetime  # read-only
+    measurement_flags: MeasurementFlags  # read-only
+    path: str  # read-only
     comment: str
-    factory_calibration: datetime.datetime
-    assembly: str
-    integration_time: int
-    averages: int
-    distance: float
-    serial_number: str
-    product_name: str
-    processing_mode: ProcessingMode
+    factory_calibration: datetime.datetime  # read-only
+    assembly: str  # read-only
+    integration_time: int  # read-only
+    averages: int  # read-only
+    distance: float  # read-only
+    serial_number: str  # read-only
+    product_name: str  # read-only
+    processing_mode: ProcessingMode  # read-only
     name: str
-    session_info: SessionData
-    frame_id: int
+    session_info: SessionData  # read-only
+    frame_id: int  # read-only
 
     def __init__(self, base: Union[int, str, Path]):
         self._handle = None
@@ -61,29 +61,29 @@ class Measurement(object):
                 self._handle, _metaData):
             raise SDKException
 
-        self.capture_time = base_datetime + datetime.timedelta(
+        self._capture_time = base_datetime + datetime.timedelta(
             milliseconds=_metaData.capture_time)
-        self.measurement_flags = MeasurementFlags(_metaData.measurement_flags)
-        self.path = _metaData.path
+        self._measurement_flags = MeasurementFlags(_metaData.measurement_flags)
+        self._path = _metaData.path
         self._comment = _metaData.comment
         try:
-            self.factory_calibration = base_datetime + datetime.timedelta(
+            self._factory_calibration = base_datetime + datetime.timedelta(
                 milliseconds=_metaData.factory_calibration)
         except OverflowError:
-            self.factory_calibration = None
-        self.assembly = _metaData.assembly
-        self.averages = _metaData.averages
-        self.distance = _metaData.distance
-        self.integration_time = _metaData.integration_time
-        self.serial_number = _metaData.serial_number
-        self.product_name = _metaData.product_name
-        self.processing_mode = internal.__ProcessingMode__[
+            self._factory_calibration = None
+        self._assembly = _metaData.assembly
+        self._averages = _metaData.averages
+        self._distance = _metaData.distance
+        self._integration_time = _metaData.integration_time
+        self._serial_number = _metaData.serial_number
+        self._product_name = _metaData.product_name
+        self._processing_mode = internal.__ProcessingMode__[
             _metaData.processing_mode]
         self._name = _metaData.name
-        self.session_info = SessionData(_metaData.session_info_name,
-                                        _metaData.session_info_session_no,
-                                        _metaData.session_info_sequence_no)
-        self.frame_id = _metaData.measurement_frame_id
+        self._session_info = SessionData(_metaData.session_info_name,
+                                         _metaData.session_info_session_no,
+                                         _metaData.session_info_sequence_no)
+        self._frame_id = _metaData.measurement_frame_id
         cuvis_il.cuvis_mesu_metadata_free(_metaData)
 
     def refresh(self) -> None:
@@ -135,6 +135,62 @@ class Measurement(object):
         pass
 
     @property
+    def capture_time(self) -> datetime.datetime:
+        return self._capture_time
+
+    @property
+    def measurement_flags(self) -> MeasurementFlags:
+        return self._measurement_flags
+
+    @property
+    def path(self) -> str:
+        return self._path
+
+    @property
+    def comment(self) -> str:
+        return self._comment
+
+    @comment.setter
+    def comment(self, comment: str) -> None:
+        if cuvis_il.status_ok != cuvis_il.cuvis_measurement_set_comment(
+                self._handle, comment):
+            raise SDKException()
+        self._refresh_metadata()
+        pass
+
+    @property
+    def factory_calibration(self) -> datetime.datetime:
+        return self._factory_calibration
+
+    @property
+    def assembly(self) -> str:
+        return self._assembly
+
+    @property
+    def integration_time(self) -> int:
+        return self._integration_time
+
+    @property
+    def averages(self) -> int:
+        return self._averages
+
+    @property
+    def distance(self) -> float:
+        return self._distance
+
+    @property
+    def serial_number(self) -> str:
+        return self._serial_number
+
+    @property
+    def product_name(self) -> str:
+        return self._product_name
+
+    @property
+    def processing_mode(self) -> ProcessingMode:
+        return self._processing_mode
+
+    @property
     def name(self) -> str:
         return self._name
 
@@ -145,6 +201,14 @@ class Measurement(object):
             raise SDKException()
         self._refresh_metadata()
         pass
+
+    @property
+    def session_info(self) -> SessionData:
+        return self._session_info
+
+    @property
+    def frame_id(self) -> int:
+        return self._frame_id
 
     @property
     def cube(self) -> ImageData:
@@ -206,18 +270,6 @@ class Measurement(object):
     def calibration_id(self) -> str:
         _id = cuvis_il.cuvis_measurement_get_calib_id_swig(self._handle)
         return _id
-
-    @property
-    def comment(self) -> str:
-        return self._comment
-
-    @comment.setter
-    def comment(self, comment: str) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_measurement_set_comment(
-                self._handle, comment):
-            raise SDKException()
-        self._refresh_metadata()
-        pass
 
     @property
     def data_count(self) -> int:
