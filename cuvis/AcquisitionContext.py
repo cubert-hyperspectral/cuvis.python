@@ -517,7 +517,7 @@ class AcquisitionContext(object):
             poll_time = 0.5
             last_state = HardwareState.Offline
             last_component_states = [(cmp.info.display_name, False)
-                                     for cmp in self.components()]
+                                     for cmp in self.components]
             first_pending = True
             while True:
                 state_changed = first_pending
@@ -527,7 +527,7 @@ class AcquisitionContext(object):
                 if last_state != current_state:
                     state_changed = True
                     last_state = current_state
-                for i, cmp in enumerate(self.components()):
+                for i, cmp in enumerate(self.components):
                     comp_state = cmp.online()
                     last_comp_state = last_component_states[i][1]
 
@@ -550,13 +550,16 @@ class AcquisitionContext(object):
             self._state_poll_task.cancel()
             self._state_poll_task = None
 
+    @property
     def components(self):
-        """
-        Returns an iterator over all components
-        """
-        for i in range(0, self.component_count):
-            yield Component(self, i)
-        pass
+        def _components():
+            """
+            Returns an iterator over all components
+            """
+            for i in range(0, self.component_count):
+                yield Component(self, i)
+            pass
+        return list(_components())
 
     def __del__(self):
         _ptr = cuvis_il.new_p_int()
