@@ -35,7 +35,7 @@ class SDKException(Exception):
         pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class SessionData(object):
     name: str
     session_number: int
@@ -47,7 +47,7 @@ class SessionData(object):
                                                            self.sequence_number)
 
 
-@dataclass
+@dataclass(frozen=True)
 class CalibrationInfo(object):
     model_name: str
     serial_no: str
@@ -66,7 +66,7 @@ class CalibrationInfo(object):
             self.file_path)
 
 
-@dataclass
+@dataclass(frozen=True)
 class GPSData(object):
     longitude: float
     latitude: float
@@ -87,7 +87,7 @@ class GPSData(object):
                        milliseconds=gps.time))
 
 
-@dataclass
+@dataclass(frozen=True)
 class SensorInfo(object):
     averages: int
     temperature: int
@@ -113,7 +113,7 @@ class SensorInfo(object):
                    binning=(info.binning != 0))
 
 
-@dataclass
+@dataclass(frozen=True)
 class WorkerState(object):
     measurementsInQueue: int
     sessionFilesInQueue: int
