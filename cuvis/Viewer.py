@@ -13,7 +13,7 @@ class Viewer(object):
         self._handle = None
         if isinstance(settings, int):
             self._handle = settings
-        if isinstance(settings, ViewerSettings):
+        elif isinstance(settings, ViewerSettings):
             _ptr = cuvis_il.new_p_int()
             if cuvis_il.status_ok != cuvis_il.cuvis_viewer_create(
                     _ptr, settings._get_internal()):
