@@ -129,38 +129,37 @@ class Worker(object):
 
     @copydoc(cuvis_il.cuvis_worker_get_next_result)
     def get_next_result(self, timeout) -> WorkerResult:
-        this_mesu = cuvis_il.new_p_int()
-        this_viewer = cuvis_il.new_p_int()
+        ptr_mesu = cuvis_il.new_p_int()
+        ptr_view = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_next_result(
-                self._handle, this_mesu, this_viewer, timeout):
+                self._handle, ptr_mesu, ptr_view, timeout):
             raise SDKException()
-        mesu = Measurement(cuvis_il.p_int_value(this_mesu))
+        mesu = Measurement(cuvis_il.p_int_value(ptr_mesu))
         if self._viewer_set:
-            view = Viewer(cuvis_il.p_int_value(this_viewer)).apply(this_mesu)
+            view = Viewer._create_view_data(None, cuvis_il.p_int_value(ptr_view))
         else:
             view = None
         return WorkerResult(mesu, view)
-        # return mesu
 
     async def get_next_result_async(self, timeout: int) -> WorkerResult:
         poll_intervall = 100
-        this_mesu = cuvis_il.new_p_int()
-        this_viewer = cuvis_il.new_p_int()
+        ptr_mesu = cuvis_il.new_p_int()
+        ptr_view = cuvis_il.new_p_int()
 
         tries = 0
         while tries * poll_intervall < timeout:
             if self.has_next_result():
                 await a.sleep(0)
                 if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_next_result(
-                        self._handle, this_mesu, this_viewer, 100):
+                        self._handle, ptr_mesu, ptr_view, 100):
                     raise SDKException()
                 break
             else:
                 tries += 1
                 await a.sleep(poll_intervall / 1000)
-        mesu = Measurement(cuvis_il.p_int_value(this_mesu))
+        mesu = Measurement(cuvis_il.p_int_value(ptr_mesu))
         if self._viewer_set:
-            view = Viewer(cuvis_il.p_int_value(this_viewer)).apply(this_mesu)
+            view = Viewer._create_view_data(None, cuvis_il.p_int_value(ptr_view))
         else:
             view = None
         return WorkerResult(mesu, view)
