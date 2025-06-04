@@ -13,29 +13,8 @@ import cuvis.cuvis_types as internal
 from dataclasses import dataclass
 
 
-def init(settings_path: str = ".", log_path: str = "", global_loglevel: int = logging.DEBUG):
-    FORMAT = '%(asctime)s -- %(levelname)s: %(message)s'
-    if os.path.exists(log_path):
-        pass
-    elif platform.system() == "Linux":
-        log_path = os.path.join(os.path.expanduser('~'), ".cuvis")
-        os.makedirs(log_path, exist_ok=True)
-    elif platform.system() == "Windows":
-        log_path = "C:\\ProgramData\\cuvis"
-        os.makedirs(log_path, exist_ok=True)
-
-    if os.path.exists(log_path):
-        logging.basicConfig(filename=os.path.join(log_path, "cuvisSDK_python.log"),
-                            format=FORMAT,
-                            encoding='utf-8',
-                            level=global_loglevel,
-                            filemode='w')
-    else:
-        raise SDKException(
-            "path {} does not exist...".format(os.path.abspath(log_path)))
-    logging.info("Logger ready.")
-
-    if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel]):
+def init(settings_path: str = ".", global_loglevel: int = logging.DEBUG, logfile_name: str = ""):
+    if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel], logfile_name):
         raise SDKException()
 
 
