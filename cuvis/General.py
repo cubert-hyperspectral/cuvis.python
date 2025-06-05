@@ -13,7 +13,15 @@ import cuvis.cuvis_types as internal
 from dataclasses import dataclass
 
 
-def init(settings_path: str = ".", global_loglevel: int = logging.DEBUG, logfile_name: str = ""):
+def init(settings_path: str = ".", global_loglevel: int | str = logging.DEBUG, logfile_name: str = ""):
+    if 'CUVIS_SETTINGS' in os.environ and settings_path == ".":
+        # env variable is set and settings path is default kwarg
+        settings_path = os.environ['CUVIS_SETTINGS']
+
+    if isinstance(global_loglevel, str):
+        # also support string as input argument
+        global_loglevel = internal.__strToLogLevel__[global_loglevel]
+
     if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel], logfile_name):
         raise SDKException()
 
@@ -37,21 +45,14 @@ def wrapper_version() -> str:
         return f'{pip_version} {git_hash}'.strip()
 
 
-def set_log_level(lvl):
-    lvl_dict = {"info": {"cuvis": cuvis_il.loglevel_info,
-                         "logging": logging.INFO},
-                "debug": {"cuvis": cuvis_il.loglevel_debug,
-                          "logging": logging.DEBUG},
-                "error": {"cuvis": cuvis_il.loglevel_error,
-                          "logging": logging.ERROR},
-                "fatal": {"cuvis": cuvis_il.loglevel_fatal,
-                          "logging": logging.CRITICAL},
-                "warning": {"cuvis": cuvis_il.loglevel_warning,
-                            "logging": logging.WARNING},
-                }
+def set_log_level(lvl:  int | str):
 
-    cuvis_il.cuvis_set_log_level(lvl_dict[lvl]["cuvis"])
-    logging.basicConfig(level=lvl_dict[lvl]["logging"])
+    if isinstance(lvl, str):
+        # also support string as input argument
+        lvl = internal.__strToLogLevel__[lvl]
+
+    cuvis_il.cuvis_set_log_level(internal.__CuvisLoglevel__[lvl])
+    logging.basicConfig(level=lvl)
 
 
 @dataclass
