@@ -14,6 +14,10 @@ from dataclasses import dataclass
 
 
 def init(settings_path: str = ".", global_loglevel: int = logging.DEBUG, logfile_name: str = ""):
+    if 'CUVIS_SETTINGS' in os.environ and settings_path == ".":
+        # env variable is set and settings path is default kwarg
+        settings_path = os.environ['CUVIS_SETTINGS']
+
     if cuvis_il.status_ok != cuvis_il.cuvis_init(settings_path, internal.__CuvisLoglevel__[global_loglevel], logfile_name):
         raise SDKException()
 
