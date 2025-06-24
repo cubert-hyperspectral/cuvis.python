@@ -13,7 +13,7 @@ import cuvis.cuvis_types as internal
 from dataclasses import dataclass
 
 
-def init(settings_path: str = ".", global_loglevel: int | str = logging.DEBUG, logfile_name: str = ""):
+def init(settings_path: str = ".", global_loglevel: int | str = logging.DEBUG, logfile_name: str | None = None):
     if 'CUVIS_SETTINGS' in os.environ and settings_path == ".":
         # env variable is set and settings path is default kwarg
         settings_path = os.environ['CUVIS_SETTINGS']
