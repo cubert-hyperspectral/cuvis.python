@@ -41,7 +41,7 @@ class GeneralExportSettings(object):
         return ge
 
     @classmethod
-    def _from_internal(cls, ge):
+    def _from_internal(cls, ge: cuvis_il.cuvis_export_general_settings_t):
         return cls(export_dir=ge.export_dir,
                    channel_selection=ge.channel_selection,
                    spectra_multiplier=ge.spectra_multiplier,
@@ -64,7 +64,8 @@ class EnviExportSettings(GeneralExportSettings):
         return ge, es
 
     @classmethod
-    def _from_internal(cls, ge, es):
+    def _from_internal(cls,
+                       ge:  cuvis_il.cuvis_export_general_settings_t, es):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__)
 
@@ -83,7 +84,9 @@ class TiffExportSettings(GeneralExportSettings):
         return ge, ts
 
     @classmethod
-    def _from_internal(cls, ge, ts):
+    def _from_internal(cls,
+                       ge:  cuvis_il.cuvis_export_general_settings_t,
+                       ts: cuvis_il.cuvis_export_tiff_settings_t):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__,
                    compression_mode=internal.__TiffCompressionMode__[
@@ -135,7 +138,9 @@ class ViewExportSettings(GeneralExportSettings):
         return ge, vs
 
     @classmethod
-    def _from_internal(cls, ge, vs):
+    def _from_internal(cls,
+                       ge: cuvis_il.cuvis_export_general_settings_t,
+                       vs: cuvis_il.cuvis_viewer_settings_t):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__,
                    userplugin=vs.userplugin, pan_failback=vs.pan_failback)
@@ -173,7 +178,9 @@ class SaveArgs(GeneralExportSettings):
         return ge, sa
 
     @classmethod
-    def _from_internal(cls, ge, sa):
+    def _from_internal(cls,
+                       ge: cuvis_il.cuvis_export_general_settings_t,
+                       sa: cuvis_il.cuvis_save_args_t):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__,
                    allow_overwrite=bool(sa.allow_overwrite),
@@ -204,7 +211,7 @@ class ProcessingArgs(object):
         return pa
 
     @classmethod
-    def _from_internal(cls, pa):
+    def _from_internal(cls, pa: cuvis_il.cuvis_proc_args_t):
         return cls(allow_recalib=bool(pa.allow_recalib),
                    processing_mode=internal.__ProcessingMode__[pa.processing_mode])
 
