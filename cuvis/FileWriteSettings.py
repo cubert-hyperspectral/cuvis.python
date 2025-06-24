@@ -94,6 +94,7 @@ class TiffExportSettings(GeneralExportSettings):
 @dataclass(repr=False)
 class ViewExportSettings(GeneralExportSettings):
     userplugin: InitVar[str] = None
+    pan_failback: bool = True
 
     def __post_init__(self, userplugin: str):
         if userplugin is not None:
@@ -130,13 +131,14 @@ class ViewExportSettings(GeneralExportSettings):
         ge = super()._get_internal()
         vs = cuvis_il.cuvis_export_view_settings_t()
         vs.userplugin = self.userplugin
+        vs.pan_failback = int(self.pan_failback)
         return ge, vs
 
     @classmethod
     def _from_internal(cls, ge, vs):
         ge = super()._from_internal(ge)
         return cls(**ge.__dict__,
-                   userplugin=vs.userplugin)
+                   userplugin=vs.userplugin, pan_failback=vs.pan_failback)
 
 
 @dataclass
@@ -239,6 +241,7 @@ class ViewerSettings():
     pre_pan_sharpen_cube: bool = False
     complete: bool = False
     blend_opacity: float = 0.0
+    pan_failback: bool = True
 
     def __post_init__(self, userplugin: str):
         if userplugin is not None:
@@ -282,6 +285,7 @@ class ViewerSettings():
         vs.pre_pan_sharpen_cube = int(self.pre_pan_sharpen_cube)
         vs.complete = int(self.complete)
         vs.blend_opacity = float(self.blend_opacity)
+        vs.pan_failback = int(self.pan_failback)
         return vs
 
     @classmethod
@@ -294,4 +298,5 @@ class ViewerSettings():
                        vs.pan_algorithm],
                    pre_pan_sharpen_cube=bool(vs.pre_pan_sharpen_cube),
                    complete=bool(vs.complete),
-                   blend_opacity=float(vs.blend_opacity))
+                   blend_opacity=float(vs.blend_opacity),
+                   pan_failback=bool(vs.pan_failback))
