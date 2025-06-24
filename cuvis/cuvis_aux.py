@@ -97,6 +97,7 @@ class SensorInfo(object):
     height: int
     raw_frame_id: int
     pixel_format: str
+    integration_time: float
 
     @classmethod
     def _from_internal(cls, info):
@@ -108,7 +109,8 @@ class SensorInfo(object):
                    width=info.width,
                    height=info.height,
                    raw_frame_id=info.raw_frame_id,
-                   pixel_format=info.pixel_format)
+                   pixel_format=info.pixel_format,
+                   integration_time=info.integration_time)
 
 
 @dataclass(frozen=True)
