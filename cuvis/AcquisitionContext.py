@@ -463,31 +463,6 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    @property
-    @copydoc(cuvis_il.cuvis_acq_cont_binning_get)
-    def binning(self) -> bool:
-        _ptr = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_binning_get(
-                self._handle, _ptr):
-            raise SDKException()
-        return bool(cuvis_il.p_int_value(_ptr))
-
-    @binning.setter
-    @copydoc(cuvis_il.cuvis_acq_cont_binning_set)
-    def binning(self, val: bool) -> None:
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_binning_set(
-                self._handle, val):
-            raise SDKException()
-        return
-
-    @copydoc(cuvis_il.cuvis_acq_cont_binning_set_async)
-    def set_binning_async(self, val: bool) -> Async:
-        _pasync = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_binning_set_async(
-                self._handle, _pasync, int(val)):
-            raise SDKException()
-        return Async(cuvis_il.p_int_value(_pasync))
-
     def register_ready_callback(self, callback: Callable[None, Awaitable[None]]) -> None:
         self.reset_ready_callback()
 

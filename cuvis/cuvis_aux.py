@@ -97,7 +97,6 @@ class SensorInfo(object):
     height: int
     raw_frame_id: int
     pixel_format: str
-    binning: bool
 
     @classmethod
     def _from_internal(cls, info):
@@ -109,8 +108,7 @@ class SensorInfo(object):
                    width=info.width,
                    height=info.height,
                    raw_frame_id=info.raw_frame_id,
-                   pixel_format=info.pixel_format,
-                   binning=(info.binning != 0))
+                   pixel_format=info.pixel_format)
 
 
 @dataclass(frozen=True)
