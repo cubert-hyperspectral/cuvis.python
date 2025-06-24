@@ -55,15 +55,37 @@ class CalibrationInfo(object):
     annotation_name: str
     unique_id: str
     file_path: str
+    cube_width: int
+    cube_height: int
+    cube_channels: int
+    cube_wavelengths: list[int]
 
     def __repr__(self):
-        return "'Calibration: model: {}, serial no.: {}, calibration date: {}, annotation: {}, unique ID: {}, file: {}'".format(
+        return "'Calibration: model: {}, serial no.: {}, calibration date: {}, annotation: {}, unique ID: {}, file: {}, resolution: {}x{}x{}'".format(
             self.model_name,
             self.serial_no,
             self.calibration_date,
             self.annotation_name,
             self.unique_id,
-            self.file_path)
+            self.file_path,
+            self.cube_width,
+            self.cube_height,
+            self.cube_channels
+        )
+
+    @classmethod
+    def _from_internal(cls, ci: cuvis_il.cuvis_calibration_info_t):
+        return cls(
+            ci.model_name,
+            ci.serial_no,
+            ci.calibration_date,
+            ci.annotation_name,
+            ci.unique_id,
+            ci.file_path,
+            ci.cube_width,
+            ci.cube_height,
+            ci.cube_channels,
+            ci.cube_wavelengths)
 
 
 @dataclass(frozen=True)

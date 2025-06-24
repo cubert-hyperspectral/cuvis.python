@@ -43,13 +43,7 @@ class Calibration(object):
         if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_info(
                 self._handle, ret):
             raise SDKException()
-        return CalibrationInfo(
-            ret.model_name,
-            ret.serial_no,
-            ret.calibration_date,
-            ret.annotation_name,
-            ret.unique_id,
-            ret.file_path)
+        return CalibrationInfo._from_internal(ret)
 
     @property
     def id(self) -> str:
