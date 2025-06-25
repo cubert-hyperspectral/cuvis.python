@@ -157,6 +157,23 @@ class WorkerState(object):
                    isProcessing=bool(state.isProcessing))
 
 
+@dataclass(frozen=True)
+class ComponentInfo(object):
+    type: internal.ComponentType
+    display_name: str
+    sensor_info: str
+    user_field: str
+    pixel_format: str
+
+    @classmethod
+    def _from_internal(cls, ci):
+        return cls(type=internal.__ComponentType__[ci.type],
+                   display_name=ci.displayname,
+                   sensor_info=ci.sensorinfo,
+                   user_field=ci.userfield,
+                   pixel_format=ci.pixelformat)
+
+
 class Bitset(object):
     _translation_dict = {}
     _inverse_dict = {}

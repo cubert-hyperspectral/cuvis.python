@@ -1,10 +1,9 @@
 from ._cuvis_il import cuvis_il
 from .Async import Async, AsyncMesu
 from .Calibration import Calibration
-from .General import ComponentInfo
 from .Measurement import Measurement
 from .SessionFile import SessionFile
-from .cuvis_aux import SDKException, SessionData
+from .cuvis_aux import SDKException, SessionData, ComponentInfo
 from .cuvis_types import HardwareState, OperationMode
 
 from typing import Coroutine, Callable, Awaitable, Union, Iterable, Optional
