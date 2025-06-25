@@ -75,6 +75,7 @@ class CalibrationInfo(object):
 
     @classmethod
     def _from_internal(cls, ci: cuvis_il.cuvis_calibration_info_t):
+        wls = cuvis_il.cuvis_read_calib_info_wl_vec(ci)
         return cls(
             ci.model_name,
             ci.serial_no,
@@ -85,7 +86,7 @@ class CalibrationInfo(object):
             ci.cube_width,
             ci.cube_height,
             ci.cube_channels,
-            ci.cube_wavelengths)
+            wls)
 
 
 @dataclass(frozen=True)
