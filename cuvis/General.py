@@ -5,15 +5,14 @@ import pkg_resources
 
 from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException
-from .cuvis_types import ComponentType
 from pathlib import Path
 
 import cuvis.cuvis_types as internal
 
-from dataclasses import dataclass
+from typing import Union, Optional
 
 
-def init(settings_path: str = ".", global_loglevel: int | str = logging.DEBUG, logfile_name: str | None = None):
+def init(settings_path: str = ".", global_loglevel: Union[int, str] = logging.DEBUG, logfile_name: Optional[str] = None):
     if 'CUVIS_SETTINGS' in os.environ and settings_path == ".":
         # env variable is set and settings path is default kwarg
         settings_path = os.environ['CUVIS_SETTINGS']
@@ -45,7 +44,7 @@ def wrapper_version() -> str:
         return f'{pip_version} {git_hash}'.strip()
 
 
-def set_log_level(lvl:  int | str):
+def set_log_level(lvl:  Union[int, str]):
 
     if isinstance(lvl, str):
         # also support string as input argument
