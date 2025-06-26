@@ -55,15 +55,38 @@ class CalibrationInfo(object):
     annotation_name: str
     unique_id: str
     file_path: str
+    cube_width: int
+    cube_height: int
+    cube_channels: int
+    cube_wavelengths: list[int]
 
     def __repr__(self):
-        return "'Calibration: model: {}, serial no.: {}, calibration date: {}, annotation: {}, unique ID: {}, file: {}'".format(
+        return "'Calibration: model: {}, serial no.: {}, calibration date: {}, annotation: {}, unique ID: {}, file: {}, resolution: {}x{}x{}'".format(
             self.model_name,
             self.serial_no,
             self.calibration_date,
             self.annotation_name,
             self.unique_id,
-            self.file_path)
+            self.file_path,
+            self.cube_width,
+            self.cube_height,
+            self.cube_channels
+        )
+
+    @classmethod
+    def _from_internal(cls, ci: cuvis_il.cuvis_calibration_info_t):
+        wls = cuvis_il.cuvis_read_calib_info_wl_vec(ci)
+        return cls(
+            ci.model_name,
+            ci.serial_no,
+            ci.calibration_date,
+            ci.annotation_name,
+            ci.unique_id,
+            ci.file_path,
+            ci.cube_width,
+            ci.cube_height,
+            ci.cube_channels,
+            wls)
 
 
 @dataclass(frozen=True)
@@ -97,7 +120,7 @@ class SensorInfo(object):
     height: int
     raw_frame_id: int
     pixel_format: str
-    binning: bool
+    integration_time: float
 
     @classmethod
     def _from_internal(cls, info):
@@ -110,7 +133,7 @@ class SensorInfo(object):
                    height=info.height,
                    raw_frame_id=info.raw_frame_id,
                    pixel_format=info.pixel_format,
-                   binning=(info.binning != 0))
+                   integration_time=info.integration_time)
 
 
 @dataclass(frozen=True)
@@ -132,6 +155,23 @@ class WorkerState(object):
                    resultsInQueue=state.resultsInQueue,
                    hasAcquisitionContext=bool(state.hasAcquisitionContext),
                    isProcessing=bool(state.isProcessing))
+
+
+@dataclass(frozen=True)
+class ComponentInfo(object):
+    type: internal.ComponentType
+    display_name: str
+    sensor_info: str
+    user_field: str
+    pixel_format: str
+
+    @classmethod
+    def _from_internal(cls, ci):
+        return cls(type=internal.__ComponentType__[ci.type],
+                   display_name=ci.displayname,
+                   sensor_info=ci.sensorinfo,
+                   user_field=ci.userfield,
+                   pixel_format=ci.pixelformat)
 
 
 class Bitset(object):

@@ -13,7 +13,7 @@ import cuvis.cuvis_types as internal
 from dataclasses import dataclass
 
 
-def init(settings_path: str = ".", global_loglevel: int | str = logging.DEBUG, logfile_name: str = ""):
+def init(settings_path: str = ".", global_loglevel: int | str = logging.DEBUG, logfile_name: str | None = None):
     if 'CUVIS_SETTINGS' in os.environ and settings_path == ".":
         # env variable is set and settings path is default kwarg
         settings_path = os.environ['CUVIS_SETTINGS']
@@ -53,29 +53,3 @@ def set_log_level(lvl:  int | str):
 
     cuvis_il.cuvis_set_log_level(internal.__CuvisLoglevel__[lvl])
     logging.basicConfig(level=lvl)
-
-
-@dataclass
-class ComponentInfo(object):
-    type: ComponentType = None
-    display_name: str = None
-    sensor_info: str = None
-    user_field: str = None
-    pixel_format: str = None
-
-    def _get_internal(self):
-        ci = cuvis_il.cuvis_component_info_t()
-        ci.type = internal.__CuvisComponentType__[self.type]
-        ci.displayname = self.display_name
-        ci.sensorinfo = self.sensor_info
-        ci.userfield = self.user_field
-        ci.pixelformat = self.pixel_format
-        return ci
-
-    @classmethod
-    def _from_internal(cls, ci):
-        return cls(type=internal.__ComponentType__[ci.type],
-                   display_name=ci.displayname,
-                   sensor_info=ci.sensorinfo,
-                   user_field=ci.userfield,
-                   pixel_format=ci.pixelformat)
