@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cuvis"
-version = "3.4.0b1"
+version = "3.4.0"
 description = "CUVIS Python SDK."
 readme = "README.md"
 requires-python = ">=3.9"
