@@ -297,9 +297,11 @@ class Worker(object):
         async def _internal_worker_loop():
             while True:
                 if self.has_next_result():
-                    workerContainer = await self.get_next_result_async(1000)
-                    task = a.create_task(callback(workerContainer))
-
+                    try:
+                        workerContainer = await self.get_next_result_async(1000)
+                        task = a.create_task(callback(workerContainer))
+                    except (Exception, SDKException):
+                        pass
                     # TODO limit number of created task objects like in the cpp wrapper
                 else:
                     await a.sleep(poll_time)
