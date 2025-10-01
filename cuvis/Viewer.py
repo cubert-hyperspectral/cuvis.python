@@ -51,7 +51,7 @@ class Viewer(object):
         else:
             return view_array
 
-    def apply(self, mesu: Measurement) -> dict[str, ImageData]:
+    def apply(self, mesu: Measurement) -> Union[dict[str, ImageData], ImageData]:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_viewer_apply(self._handle,
                                                              mesu._handle, _ptr):
