@@ -14,76 +14,83 @@ import dataclasses
 
 
 class ProcessingContext(object):
-    def __init__(self, base: Union[Calibration, SessionFile, Measurement]):
+    def __init__(
+        self,
+        base: Union[Calibration, SessionFile, Measurement],
+        load_references: bool = True,
+    ):
         self._handle = None
         self._modeArgs = ProcessingArgs()
 
         if isinstance(base, Calibration):
             _ptr = cuvis_il.new_p_int()
             if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_create_from_calib(
-                    base._handle, _ptr):
+                base._handle, _ptr
+            ):
                 raise SDKException()
             self._handle = cuvis_il.p_int_value(_ptr)
         elif isinstance(base, SessionFile):
             _ptr = cuvis_il.new_p_int()
-            if cuvis_il.status_ok != \
-                    cuvis_il.cuvis_proc_cont_create_from_session_file(
-                        base._handle, _ptr):
+            if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_create_from_session_file(
+                base._handle, 1 if load_references else 0, _ptr
+            ):
                 raise SDKException()
             self._handle = cuvis_il.p_int_value(_ptr)
         elif isinstance(base, Measurement):
             _ptr = cuvis_il.new_p_int()
             if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_create_from_mesu(
-                    base._handle, _ptr):
+                base._handle, 1 if load_references else 0, _ptr
+            ):
                 raise SDKException()
             self._handle = cuvis_il.p_int_value(_ptr)
         else:
             raise SDKException(
-                "could not interpret input of type {}.".format(type(base)))
+                "could not interpret input of type {}.".format(type(base))
+            )
         pass
 
     def apply(self, mesu: Measurement) -> Measurement:
         if isinstance(mesu, Measurement):
             if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_apply(
-                    self._handle, mesu._handle):
+                self._handle, mesu._handle
+            ):
                 raise SDKException()
             mesu.refresh()
             return mesu
         else:
-            raise SDKException(
-                "Can only apply ProcessingContext to Measurement!")
+            raise SDKException("Can only apply ProcessingContext to Measurement!")
         pass
 
     def set_reference(self, mesu: Measurement, refType: ReferenceType) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_set_reference(
-                self._handle, mesu._handle,
-                internal.__CuvisReferenceType__[refType]):
+            self._handle, mesu._handle, internal.__CuvisReferenceType__[refType]
+        ):
             raise SDKException()
         pass
 
     def clear_reference(self, refType: ReferenceType) -> None:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_clear_reference(
-                self._handle, internal.__CuvisReferenceType__[refType]):
+            self._handle, internal.__CuvisReferenceType__[refType]
+        ):
             raise SDKException()
         pass
 
     def get_reference(self, refType: ReferenceType) -> Measurement:
-
         has_ref = self.has_reference(refType)
         if not has_ref:
             return None
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_get_reference(
-                self._handle, _ptr,
-                internal.__CuvisReferenceType__[refType]):
+            self._handle, _ptr, internal.__CuvisReferenceType__[refType]
+        ):
             raise SDKException()
         return Measurement(cuvis_il.p_int_value(_ptr))
 
     def has_reference(self, refType: ReferenceType) -> bool:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_has_reference(
-                self._handle, internal.__CuvisReferenceType__[refType],
-                _ptr):
+            self._handle, internal.__CuvisReferenceType__[refType], _ptr
+        ):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
@@ -95,14 +102,16 @@ class ProcessingContext(object):
     def processing_mode(self, pMode: ProcessingMode) -> None:
         self._modeArgs.processing_mode = pMode
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_set_args(
-                self._handle, self._modeArgs._get_internal()):
+            self._handle, self._modeArgs._get_internal()
+        ):
             raise SDKException()
         pass
 
     def set_processing_args(self, pa: ProcessingArgs) -> None:
         self._modeArgs = dataclasses.replace(pa)
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_set_args(
-                self._handle, self._modeArgs._get_internal()):
+            self._handle, self._modeArgs._get_internal()
+        ):
             raise SDKException()
         pass
 
@@ -113,13 +122,15 @@ class ProcessingContext(object):
         args = pa._get_internal()
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_is_capable(
-                self._handle, mesu._handle, args, _ptr):
+            self._handle, mesu._handle, args, _ptr
+        ):
             raise SDKException()
         return bool(cuvis_il.p_int_value(_ptr))
 
     def calc_distance(self, distMM: float) -> bool:
         if cuvis_il.status_ok != cuvis_il.cuvis_proc_cont_calc_distance(
-                self._handle, distMM):
+            self._handle, distMM
+        ):
             raise SDKException()
         return True
 
@@ -136,10 +147,9 @@ class ProcessingContext(object):
         pass
 
     def __deepcopy__(self, memo):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError('Deep copying is not supported for ProcessingContext')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Deep copying is not supported for ProcessingContext")
 
     def __copy__(self):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError(
-            'Shallow copying is not supported for ProcessingContext')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Shallow copying is not supported for ProcessingContext")
