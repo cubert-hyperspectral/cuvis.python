@@ -136,14 +136,14 @@ class PanSharpeningAlgorithm(Enum):
     Noop = 1
     CubertMacroPixel = 2
     CubertPanRatio = 3
-    AlphaBlendOverlay = 4
+    PCAFusion = 4
 
 
 __CuvisPanSharpeningAlgorithm__ = {
-    PanSharpeningAlgorithm.Noop: cuvis_il.pan_sharpening_algorithm_Noop,
-    PanSharpeningAlgorithm.CubertMacroPixel: cuvis_il.pan_sharpening_algorithm_CubertMacroPixel,
-    PanSharpeningAlgorithm.CubertPanRatio: cuvis_il.pan_sharpening_algorithm_CubertPanRatio,
-    PanSharpeningAlgorithm.AlphaBlendOverlay: cuvis_il.pan_sharpening_algorithm_AlphablendPanOverlay,
+    PanSharpeningAlgorithm.Noop : cuvis_il.pan_sharpening_algorithm_Noop,
+    PanSharpeningAlgorithm.CubertMacroPixel : cuvis_il.pan_sharpening_algorithm_CubertMacroPixel,
+    PanSharpeningAlgorithm.CubertPanRatio : cuvis_il.pan_sharpening_algorithm_CubertPanRatio,
+    PanSharpeningAlgorithm.PCAFusion : cuvis_il.pan_sharpening_algorithm_PCAFusion
 }
 
 __PanSharpeningAlgorithm__ = __inverseTranslationDict(__CuvisPanSharpeningAlgorithm__)
