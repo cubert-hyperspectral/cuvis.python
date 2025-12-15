@@ -82,6 +82,34 @@ class AcquisitionContext(object):
         return ComponentInfo._from_internal(ci)
 
     @property
+    @copydoc(cuvis_il.cuvis_acq_cont_dead_pixel_correction_available_get)
+    def dead_pixel_correction_available(self) -> bool:
+        val = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_dead_pixel_correction_available_get(
+                self._handle, val):
+            raise SDKException()
+        return bool(cuvis_il.p_int_value(val))
+    
+    
+    @dead_pixel_correction.getter
+    @copydoc(cuvis_il.cuvis_acq_cont_dead_pixel_correction_enabled_get)
+    def dead_pixel_correction(self) -> bool:
+        val = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_dead_pixel_correction_enabled_get(
+                self._handle, val):
+            raise SDKException()
+        return bool(cuvis_il.p_int_value(val))
+    
+    
+    @dead_pixel_correction.setter
+    @copydoc(cuvis_il.cuvis_acq_cont_dead_pixel_correction_enabled_set)
+    def dead_pixel_correction(self, value: bool):
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_dead_pixel_correction_enabled_set(
+                self._handle, 1 if value else 0):
+            raise SDKException()
+        pass
+
+    @property
     @copydoc(cuvis_il.cuvis_acq_cont_queue_size_get)
     def queue_size(self) -> int:
         val = cuvis_il.new_p_int()

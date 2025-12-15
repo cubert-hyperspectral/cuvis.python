@@ -17,8 +17,7 @@ from dataclasses import dataclass, fields, InitVar
 
 
 @dataclass
-class GeneralExportSettings(object):
-    export_dir: str = "."
+class PanSharpeningSettings(object):
     channel_selection: str = "all"
     spectra_multiplier: int = 1
     pan_scale: float = 0.0
@@ -30,45 +29,127 @@ class GeneralExportSettings(object):
     )
     pre_pan_sharpen_cube: bool = False
     add_pan: bool = False
+
+    def _get_internal(self) -> cuvis_il.cuvis_pansharpening_settings_t:
+        ps = cuvis_il.cuvis_pansharpening_settings_t()
+        ps.channel_selection = self.channel_selection
+        ps.spectra_multiplier = self.spectra_multiplier
+        ps.pan_scale = float(self.pan_scale)
+        ps.pan_interpolation_type = internal.__CuvisPanSharpeningInterpolationType__[
+            self.pan_sharpening_interpolation_type
+        ]
+        ps.pan_algorithm = internal.__CuvisPanSharpeningAlgorithm__[
+            self.pan_sharpening_algorithm
+        ]
+        ps.pre_pan_sharpen_cube = int(self.pre_pan_sharpen_cube)
+        ps.add_pan = int(self.add_pan)
+        return ps
+
+    @classmethod
+    def _from_internal(cls, ps: cuvis_il.cuvis_pansharpening_settings_t):
+        if ps is None:
+            return cls()
+        return cls(
+            channel_selection=ps.channel_selection,
+            spectra_multiplier=ps.spectra_multiplier,
+            pan_scale=ps.pan_scale,
+            pan_sharpening_interpolation_type=internal.__PanSharpeningInterpolationType__[
+                ps.pan_interpolation_type
+            ],
+            pan_sharpening_algorithm=internal.__PanSharpeningAlgorithm__[
+                ps.pan_algorithm
+            ],
+            pre_pan_sharpen_cube=bool(ps.pre_pan_sharpen_cube),
+            add_pan=bool(ps.add_pan),
+        )
+
+@dataclass
+class GeneralExportSettings(object):
+    export_dir: str = "."
+    pan_sharpening: PanSharpeningSettings = field(
+        default_factory=PanSharpeningSettings
+    )
     add_fullscale_pan: bool = False
     permissive: bool = False
 
-    def _get_internal(self):
+    # ---- Backwards compatible “flat” attributes ----
+    @property
+    def channel_selection(self) -> str:
+        return self.pan_sharpening.channel_selection
+
+    @channel_selection.setter
+    def channel_selection(self, value: str) -> None:
+        self.pan_sharpening.channel_selection = value
+
+    @property
+    def spectra_multiplier(self) -> int:
+        return self.pan_sharpening.spectra_multiplier
+
+    @spectra_multiplier.setter
+    def spectra_multiplier(self, value: int) -> None:
+        self.pan_sharpening.spectra_multiplier = value
+
+    @property
+    def pan_scale(self) -> float:
+        return self.pan_sharpening.pan_scale
+
+    @pan_scale.setter
+    def pan_scale(self, value: float) -> None:
+        self.pan_sharpening.pan_scale = value
+
+    @property
+    def pan_sharpening_interpolation_type(self) -> PanSharpeningInterpolationType:
+        return self.pan_sharpening.pan_sharpening_interpolation_type
+
+    @pan_sharpening_interpolation_type.setter
+    def pan_sharpening_interpolation_type(
+        self, value: PanSharpeningInterpolationType
+    ) -> None:
+        self.pan_sharpening.pan_sharpening_interpolation_type = value
+
+    @property
+    def pan_sharpening_algorithm(self) -> PanSharpeningAlgorithm:
+        return self.pan_sharpening.pan_sharpening_algorithm
+
+    @pan_sharpening_algorithm.setter
+    def pan_sharpening_algorithm(self, value: PanSharpeningAlgorithm) -> None:
+        self.pan_sharpening.pan_sharpening_algorithm = value
+
+    @property
+    def pre_pan_sharpen_cube(self) -> bool:
+        return self.pan_sharpening.pre_pan_sharpen_cube
+
+    @pre_pan_sharpen_cube.setter
+    def pre_pan_sharpen_cube(self, value: bool) -> None:
+        self.pan_sharpening.pre_pan_sharpen_cube = value
+
+    @property
+    def add_pan(self) -> bool:
+        return self.pan_sharpening.add_pan
+
+    @add_pan.setter
+    def add_pan(self, value: bool) -> None:
+        self.pan_sharpening.add_pan = value
+
+    def _get_internal(self) -> cuvis_il.cuvis_export_general_settings_t:
         ge = cuvis_il.cuvis_export_general_settings_t()
         ge.export_dir = self.export_dir
-        ge.channel_selection = self.channel_selection
-        ge.spectra_multiplier = int(self.spectra_multiplier)
-        ge.pan_scale = float(self.pan_scale)
-        ge.pan_interpolation_type = internal.__CuvisPanSharpeningInterpolationType__[
-            self.pan_sharpening_interpolation_type
-        ]
-        ge.pan_algorithm = internal.__CuvisPanSharpeningAlgorithm__[
-            self.pan_sharpening_algorithm
-        ]
-        ge.pre_pan_sharpen_cube = int(self.pre_pan_sharpen_cube)
-        ge.add_pan = int(self.add_pan)
         ge.add_fullscale_pan = int(self.add_fullscale_pan)
         ge.permissive = int(self.permissive)
+        # nested pansharpening struct
+        ge.pansharpening_settings = self.pan_sharpening._get_internal()
         return ge
 
     @classmethod
     def _from_internal(cls, ge: cuvis_il.cuvis_export_general_settings_t):
+        ps = getattr(ge, "pansharpening_settings", None)
+        pan_sharpening = PanSharpeningSettings._from_internal(ps)
         return cls(
             export_dir=ge.export_dir,
-            channel_selection=ge.channel_selection,
-            spectra_multiplier=ge.spectra_multiplier,
-            pan_sharpening_interpolation_type=internal.__PanSharpeningInterpolationType__[
-                ge.pan_interpolation_type
-            ],
-            pan_sharpening_algorithm=internal.__PanSharpeningAlgorithm__[
-                ge.pan_algorithm
-            ],
-            pre_pan_sharpen_cube=ge.pre_pan_sharpen_cube,
-            add_pan=bool(ge.add_pan),
+            pan_sharpening=pan_sharpening,
             add_fullscale_pan=bool(ge.add_fullscale_pan),
             permissive=bool(ge.permissive),
         )
-
 
 @dataclass
 class EnviExportSettings(GeneralExportSettings):
@@ -164,7 +245,7 @@ class ViewExportSettings(GeneralExportSettings):
     def _from_internal(
         cls,
         ge: cuvis_il.cuvis_export_general_settings_t,
-        vs: cuvis_il.cuvis_viewer_settings_t,
+        vs: cuvis_il.cuvis_export_view_settings_t,
     ):
         ge = super()._from_internal(ge)
         return cls(
@@ -269,17 +350,11 @@ class WorkerSettings(object):
 @dataclass(repr=False)
 class ViewerSettings:
     userplugin: InitVar[str] = None
-    pan_scale: float = 0.0
-    pan_sharpening_interpolation_type: PanSharpeningInterpolationType = (
-        PanSharpeningInterpolationType.Linear
-    )
-    pan_sharpening_algorithm: PanSharpeningAlgorithm = (
-        PanSharpeningAlgorithm.CubertMacroPixel
-    )
-    pre_pan_sharpen_cube: bool = False
-    complete: bool = False
-    blend_opacity: float = 0.0
     pan_failback: bool = True
+    complete: bool = False
+    pan_sharpening: PanSharpeningSettings = field(
+        default_factory=PanSharpeningSettings
+    )
 
     def __post_init__(self, userplugin: str):
         if userplugin is not None:
@@ -307,6 +382,65 @@ class ViewerSettings:
     def userplugin(self, v: str) -> None:
         self.__post_init__(v)
 
+    # ---- Backwards compatible “flat” attributes ----
+    @property
+    def channel_selection(self) -> str:
+        return self.pan_sharpening.channel_selection
+
+    @channel_selection.setter
+    def channel_selection(self, value: str) -> None:
+        self.pan_sharpening.channel_selection = value
+
+    @property
+    def spectra_multiplier(self) -> int:
+        return self.pan_sharpening.spectra_multiplier
+
+    @spectra_multiplier.setter
+    def spectra_multiplier(self, value: int) -> None:
+        self.pan_sharpening.spectra_multiplier = value
+
+    @property
+    def pan_scale(self) -> float:
+        return self.pan_sharpening.pan_scale
+
+    @pan_scale.setter
+    def pan_scale(self, value: float) -> None:
+        self.pan_sharpening.pan_scale = value
+
+    @property
+    def pan_sharpening_interpolation_type(self) -> PanSharpeningInterpolationType:
+        return self.pan_sharpening.pan_sharpening_interpolation_type
+
+    @pan_sharpening_interpolation_type.setter
+    def pan_sharpening_interpolation_type(
+        self, value: PanSharpeningInterpolationType
+    ) -> None:
+        self.pan_sharpening.pan_sharpening_interpolation_type = value
+
+    @property
+    def pan_sharpening_algorithm(self) -> PanSharpeningAlgorithm:
+        return self.pan_sharpening.pan_sharpening_algorithm
+
+    @pan_sharpening_algorithm.setter
+    def pan_sharpening_algorithm(self, value: PanSharpeningAlgorithm) -> None:
+        self.pan_sharpening.pan_sharpening_algorithm = value
+
+    @property
+    def pre_pan_sharpen_cube(self) -> bool:
+        return self.pan_sharpening.pre_pan_sharpen_cube
+
+    @pre_pan_sharpen_cube.setter
+    def pre_pan_sharpen_cube(self, value: bool) -> None:
+        self.pan_sharpening.pre_pan_sharpen_cube = value
+
+    @property
+    def add_pan(self) -> bool:
+        return self.pan_sharpening.add_pan
+
+    @add_pan.setter
+    def add_pan(self, value: bool) -> None:
+        self.pan_sharpening.add_pan = value
+
     def __repr__(self):
         def short_str(s: str, l: int) -> str:
             return (s[:l] + "...") if len(s) > l else s
@@ -321,17 +455,10 @@ class ViewerSettings:
     def _get_internal(self):
         vs = cuvis_il.cuvis_viewer_settings_t()
         vs.userplugin = self.userplugin
-        vs.pan_scale = float(self.pan_scale)
-        vs.pan_interpolation_type = internal.__CuvisPanSharpeningInterpolationType__[
-            self.pan_sharpening_interpolation_type
-        ]
-        vs.pan_algorithm = internal.__CuvisPanSharpeningAlgorithm__[
-            self.pan_sharpening_algorithm
-        ]
-        vs.pre_pan_sharpen_cube = int(self.pre_pan_sharpen_cube)
-        vs.complete = int(self.complete)
-        vs.blend_opacity = float(self.blend_opacity)
         vs.pan_failback = int(self.pan_failback)
+        vs.complete = int(self.complete)
+        # nested pansharpening struct
+        vs.pansharpening_settings = self.pan_sharpening._get_internal()
         return vs
 
     @classmethod
@@ -339,14 +466,7 @@ class ViewerSettings:
         return cls(
             userplugin=vs.userplugin,
             pan_scale=float(vs.pan_scale),
-            pan_sharpening_interpolation_type=internal.__PanSharpeningInterpolationType__[
-                vs.pan_interpolation_type
-            ],
-            pan_sharpening_algorithm=internal.__PanSharpeningAlgorithm__[
-                vs.pan_algorithm
-            ],
-            pre_pan_sharpen_cube=bool(vs.pre_pan_sharpen_cube),
-            complete=bool(vs.complete),
-            blend_opacity=float(vs.blend_opacity),
             pan_failback=bool(vs.pan_failback),
+            complete=bool(vs.complete),
+            pan_sharpening=pan_sharpening,
         )
