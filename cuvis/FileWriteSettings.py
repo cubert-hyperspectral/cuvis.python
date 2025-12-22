@@ -13,7 +13,7 @@ from .cuvis_types import (
 import cuvis.cuvis_types as internal
 import os
 
-from dataclasses import dataclass, fields, InitVar
+from dataclasses import dataclass, fields, field, InitVar
 
 
 @dataclass
@@ -63,12 +63,11 @@ class PanSharpeningSettings(object):
             add_pan=bool(ps.add_pan),
         )
 
+
 @dataclass
 class GeneralExportSettings(object):
     export_dir: str = "."
-    pan_sharpening: PanSharpeningSettings = field(
-        default_factory=PanSharpeningSettings
-    )
+    pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
     add_fullscale_pan: bool = False
     permissive: bool = False
 
@@ -150,6 +149,7 @@ class GeneralExportSettings(object):
             add_fullscale_pan=bool(ge.add_fullscale_pan),
             permissive=bool(ge.permissive),
         )
+
 
 @dataclass
 class EnviExportSettings(GeneralExportSettings):
@@ -352,9 +352,7 @@ class ViewerSettings:
     userplugin: InitVar[str] = None
     pan_failback: bool = True
     complete: bool = False
-    pan_sharpening: PanSharpeningSettings = field(
-        default_factory=PanSharpeningSettings
-    )
+    pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
 
     def __post_init__(self, userplugin: str):
         if userplugin is not None:
@@ -468,5 +466,5 @@ class ViewerSettings:
             pan_scale=float(vs.pan_scale),
             pan_failback=bool(vs.pan_failback),
             complete=bool(vs.complete),
-            pan_sharpening=pan_sharpening,
+            pan_sharpening=PanSharpeningSettings._from_internal(vs.pan_sharpening),
         )
