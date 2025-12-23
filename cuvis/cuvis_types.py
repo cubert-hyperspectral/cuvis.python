@@ -20,7 +20,7 @@ __CuvisLoglevel__ = {
     logging.WARNING: cuvis_il.loglevel_warning,
     logging.ERROR: cuvis_il.loglevel_error,
     logging.FATAL: cuvis_il.loglevel_fatal,
-    logging.CRITICAL: cuvis_il.loglevel_fatal
+    logging.CRITICAL: cuvis_il.loglevel_fatal,
 }
 
 
@@ -62,7 +62,7 @@ __CuvisProcessingMode__ = {
     ProcessingMode.Raw: cuvis_il.Cube_Raw,
     ProcessingMode.DarkSubtract: cuvis_il.Cube_DarkSubtract,
     ProcessingMode.Reflectance: cuvis_il.Cube_Reflectance,
-    ProcessingMode.SpectralRadiance: cuvis_il.Cube_SpectralRadiance
+    ProcessingMode.SpectralRadiance: cuvis_il.Cube_SpectralRadiance,
 }
 
 __ProcessingMode__ = __inverseTranslationDict(__CuvisProcessingMode__)
@@ -92,7 +92,7 @@ __CuvisReferenceType__ = {
     ReferenceType.White: cuvis_il.Reference_White,
     ReferenceType.WhiteDark: cuvis_il.Reference_WhiteDark,
     ReferenceType.SpRad: cuvis_il.Reference_SpRad,
-    ReferenceType.Distance: cuvis_il.Reference_Distance
+    ReferenceType.Distance: cuvis_il.Reference_Distance,
 }
 
 __ReferenceType__ = __inverseTranslationDict(__CuvisReferenceType__)
@@ -107,15 +107,10 @@ class SessionItemType(Enum):
 __CuvisSessionItemType__ = {
     SessionItemType.all_frames: cuvis_il.session_item_type_frames,
     SessionItemType.no_gaps: cuvis_il.session_item_type_frames_no_gaps,
-    SessionItemType.references: cuvis_il.session_item_type_references
+    SessionItemType.references: cuvis_il.session_item_type_references,
 }
 
-DataFormat = dict({
-    (1, np.uint8),
-    (2, np.uint16),
-    (3, np.uint32),
-    (4, np.float32)
-})
+DataFormat = dict({(1, np.uint8), (2, np.uint16), (3, np.uint32), (4, np.float32)})
 
 
 class PanSharpeningInterpolationType(Enum):
@@ -126,33 +121,32 @@ class PanSharpeningInterpolationType(Enum):
 
 
 __CuvisPanSharpeningInterpolationType__ = {
-    PanSharpeningInterpolationType.NearestNeighbour:
-    cuvis_il.pan_sharpening_interpolation_type_NearestNeighbor,
+    PanSharpeningInterpolationType.NearestNeighbour: cuvis_il.pan_sharpening_interpolation_type_NearestNeighbor,
     PanSharpeningInterpolationType.Linear: cuvis_il.pan_sharpening_interpolation_type_Linear,
     PanSharpeningInterpolationType.Cubic: cuvis_il.pan_sharpening_interpolation_type_Cubic,
     PanSharpeningInterpolationType.Lanczos: cuvis_il.pan_sharpening_interpolation_type_Lanczos,
 }
 
 __PanSharpeningInterpolationType__ = __inverseTranslationDict(
-    __CuvisPanSharpeningInterpolationType__)
+    __CuvisPanSharpeningInterpolationType__
+)
 
 
 class PanSharpeningAlgorithm(Enum):
     Noop = 1
     CubertMacroPixel = 2
     CubertPanRatio = 3
-    AlphaBlendOverlay = 4
+    PCAFusion = 4
 
 
 __CuvisPanSharpeningAlgorithm__ = {
-    PanSharpeningAlgorithm.Noop: cuvis_il.pan_sharpening_algorithm_Noop,
-    PanSharpeningAlgorithm.CubertMacroPixel: cuvis_il.pan_sharpening_algorithm_CubertMacroPixel,
-    PanSharpeningAlgorithm.CubertPanRatio: cuvis_il.pan_sharpening_algorithm_CubertPanRatio,
-    PanSharpeningAlgorithm.AlphaBlendOverlay: cuvis_il.pan_sharpening_algorithm_AlphablendPanOverlay
+    PanSharpeningAlgorithm.Noop : cuvis_il.pan_sharpening_algorithm_Noop,
+    PanSharpeningAlgorithm.CubertMacroPixel : cuvis_il.pan_sharpening_algorithm_CubertMacroPixel,
+    PanSharpeningAlgorithm.CubertPanRatio : cuvis_il.pan_sharpening_algorithm_CubertPanRatio,
+    PanSharpeningAlgorithm.PCAFusion : cuvis_il.pan_sharpening_algorithm_PCAFusion
 }
 
-__PanSharpeningAlgorithm__ = __inverseTranslationDict(
-    __CuvisPanSharpeningAlgorithm__)
+__PanSharpeningAlgorithm__ = __inverseTranslationDict(__CuvisPanSharpeningAlgorithm__)
 
 
 class TiffCompressionMode(Enum):
@@ -165,8 +159,7 @@ __CuvisTiffCompressionMode__ = {
     TiffCompressionMode.LZW: cuvis_il.tiff_compression_mode_LZW,
 }
 
-__TiffCompressionMode__ = __inverseTranslationDict(
-    __CuvisTiffCompressionMode__)
+__TiffCompressionMode__ = __inverseTranslationDict(__CuvisTiffCompressionMode__)
 
 
 class TiffFormat(Enum):
@@ -229,6 +222,21 @@ __CuvisComponentType__ = {
 __ComponentType__ = __inverseTranslationDict(__CuvisComponentType__)
 
 
+class SessionMergeMode(Enum):
+    Default = 0
+    Fragmentation = 1
+    Merge = 2
+
+
+__CuvisSessionMergeMode__ = {
+    SessionMergeMode.Default: cuvis_il.session_merge_mode_Default,
+    SessionMergeMode.Fragmentation: cuvis_il.session_merge_mode_Fragmentation,
+    SessionMergeMode.Merge: cuvis_il.session_merge_mode_Merge,
+}
+
+__SessionMergeMode__ = __inverseTranslationDict(__CuvisSessionMergeMode__)
+
+
 class AsyncResult(Enum):
     done = 0
     timeout = 1
@@ -236,59 +244,43 @@ class AsyncResult(Enum):
     deferred = 3
 
 
-CUVIS_imbuffer_format = dict({
-    ("imbuffer_format_uint8", cuvis_il.imbuffer_format_uint8),
-    ("imbuffer_format_uint16", cuvis_il.imbuffer_format_uint16),
-    ("imbuffer_format_uint32", cuvis_il.imbuffer_format_uint32),
-    ("imbuffer_format_float", cuvis_il.imbuffer_format_float),
-})
+CUVIS_imbuffer_format = dict(
+    {
+        ("imbuffer_format_uint8", cuvis_il.imbuffer_format_uint8),
+        ("imbuffer_format_uint16", cuvis_il.imbuffer_format_uint16),
+        ("imbuffer_format_uint32", cuvis_il.imbuffer_format_uint32),
+        ("imbuffer_format_float", cuvis_il.imbuffer_format_float),
+    }
+)
 
 __CuvisCapabilities__ = {
     "AcquisitionCapture": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_CAPTURE,
-    "AcquisitionTimelapse":
-    cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_TIMELAPSE,
-    "AcquisitionContinuous":
-    cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_CONTINUOUS,
-
-        "AcquisitionSnapshot":
-        cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_SNAPSHOT,
-    "AcquisitionSetIntegrationtime":
-    cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_SETINTEGRATIONTIME,
+    "AcquisitionTimelapse": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_TIMELAPSE,
+    "AcquisitionContinuous": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_CONTINUOUS,
+    "AcquisitionSnapshot": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_SNAPSHOT,
+    "AcquisitionSetIntegrationtime": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_SETINTEGRATIONTIME,
     "AcquisitionSetGain": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_SETGAIN,
-    "AcquisitionAveraging":
-    cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_AVERAGING,
-    "ProcessingSensorRaw":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SENSOR_RAW,
+    "AcquisitionAveraging": cuvis_il.CUVIS_MODE_CAPABILITY_ACQUISITION_AVERAGING,
+    "ProcessingSensorRaw": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SENSOR_RAW,
     "ProcessingCubeRaw": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_RAW,
     "ProcessingCubeRef": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_REF,
-    "ProcessingCubeDarkSubtract":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_DARKSUBTRACT,
-    "ProcessingCubeFlatFielding":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_FLATFIELDING,
-    "ProcessingCubeSpectralRadiance":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_SPECTRALRADIANCE,
+    "ProcessingCubeDarkSubtract": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_DARKSUBTRACT,
+    "ProcessingCubeFlatFielding": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_FLATFIELDING,
+    "ProcessingCubeSpectralRadiance": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CUBE_SPECTRALRADIANCE,
     "ProcessingSaveFile": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SAVE_FILE,
     "ProcessingClearRaw": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CLEAR_RAW,
     "ProcessingCalcLive": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_CALC_LIVE,
-    "ProcessingAutoExposure":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_AUTOEXPOSURE,
-    "ProcessingOrientation":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_ORIENTATION,
+    "ProcessingAutoExposure": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_AUTOEXPOSURE,
+    "ProcessingOrientation": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_ORIENTATION,
     "ProcessingSetWhite": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_WHITE,
     "ProcessingSetDark": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_DARK,
-    "ProcessingSetSprad":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_SPRADCALIB,
-    "ProcessingSetDistanceCalib":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_DISTANCECALIB,
-    "ProcessingSetDistanceValue":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_DISTANCE_VALUE,
-    "ProcessingUseDarkSpradcalib":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_USE_DARK_SPRADCALIB,
-    "ProcessingUseWhiteSpradCalib":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_USE_WHITE_SPRADCALIB,
-    "ProcessingRequireWhiteDarkReflectance":
-    cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_REQUIRE_WHITEDARK_REFLECTANCE,
-    "UNDEFINED": 2 ** 26
+    "ProcessingSetSprad": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_SPRADCALIB,
+    "ProcessingSetDistanceCalib": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_DISTANCECALIB,
+    "ProcessingSetDistanceValue": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_SET_DISTANCE_VALUE,
+    "ProcessingUseDarkSpradcalib": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_USE_DARK_SPRADCALIB,
+    "ProcessingUseWhiteSpradCalib": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_USE_WHITE_SPRADCALIB,
+    "ProcessingRequireWhiteDarkReflectance": cuvis_il.CUVIS_MODE_CAPABILITY_PROCESSING_REQUIRE_WHITEDARK_REFLECTANCE,
+    "UNDEFINED": 2**26,
 }
 
 __Capabilities__ = __inverseTranslationDict(__CuvisCapabilities__)
