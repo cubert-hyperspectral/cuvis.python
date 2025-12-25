@@ -270,7 +270,7 @@ class SaveArgs(GeneralExportSettings):
     def _get_internal(self):
         ge = super()._get_internal()
         sa = cuvis_il.cuvis_save_args_t()
-        sa.merge_mode = internal.__CuvisSessionMergeMode__(self.merge_mode)
+        sa.merge_mode = internal.__CuvisSessionMergeMode__[self.merge_mode]
         sa.allow_drop = int(self.allow_drop)
         sa.allow_session_file = int(self.allow_session_file)
         sa.allow_info_file = int(self.allow_info_file)
