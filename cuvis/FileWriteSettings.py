@@ -12,8 +12,10 @@ from .cuvis_types import (
 
 import cuvis.cuvis_types as internal
 import os
+import warnings
 
 from dataclasses import dataclass, fields, field, InitVar
+from typing import Optional
 
 
 @dataclass
@@ -70,6 +72,49 @@ class GeneralExportSettings(object):
     pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
     add_fullscale_pan: bool = False
     permissive: bool = False
+    channel_selection: InitVar[Optional[str]] = None
+    spectra_multiplier: InitVar[Optional[int]] = None
+    pan_scale: InitVar[Optional[float]] = None
+    pan_sharpening_interpolation_type: InitVar[
+        Optional[PanSharpeningInterpolationType]
+    ] = None
+    pan_sharpening_algorithm: InitVar[Optional[PanSharpeningAlgorithm]] = None
+    pre_pan_sharpen_cube: InitVar[Optional[bool]] = None
+    add_pan: InitVar[Optional[bool]] = None
+
+    def __post_init__(
+        self,
+        channel_selection: Optional[str],
+        spectra_multiplier: Optional[int],
+        pan_scale: Optional[float],
+        pan_sharpening_interpolation_type: Optional[PanSharpeningInterpolationType],
+        pan_sharpening_algorithm: Optional[PanSharpeningAlgorithm],
+        pre_pan_sharpen_cube: Optional[bool],
+        add_pan: Optional[bool],
+    ) -> None:
+        updates = (
+            ("channel_selection", channel_selection),
+            ("spectra_multiplier", spectra_multiplier),
+            ("pan_scale", pan_scale),
+            ("pan_sharpening_interpolation_type", pan_sharpening_interpolation_type),
+            ("pan_sharpening_algorithm", pan_sharpening_algorithm),
+            ("pre_pan_sharpen_cube", pre_pan_sharpen_cube),
+            ("add_pan", add_pan),
+        )
+        owner = type(self)
+        used_deprecated = False
+        for name, value in updates:
+            if value is None or value is getattr(owner, name):
+                continue
+            setattr(self, name, value)
+            used_deprecated = True
+        if used_deprecated:
+            warnings.warn(
+                "Passing flat pan-sharpening attributes directly is deprecated; "
+                "use pan_sharpening=PanSharpeningSettings(...) instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
     # ---- Backwards compatible “flat” attributes ----
     @property
@@ -129,6 +174,8 @@ class GeneralExportSettings(object):
     @add_pan.setter
     def add_pan(self, value: bool) -> None:
         self.pan_sharpening.add_pan = value
+
+    # ---- End of Backwards compatible “flat” attributes ----
 
     def _get_internal(self) -> cuvis_il.cuvis_export_general_settings_t:
         ge = cuvis_il.cuvis_export_general_settings_t()
@@ -197,18 +244,40 @@ class ViewExportSettings(GeneralExportSettings):
     userplugin: InitVar[str] = None
     pan_failback: bool = True
 
-    def __post_init__(self, userplugin: str):
-        if userplugin is not None:
+    def __post_init__(
+        self,
+        channel_selection: Optional[str],
+        spectra_multiplier: Optional[int],
+        pan_scale: Optional[float],
+        pan_sharpening_interpolation_type: Optional[PanSharpeningInterpolationType],
+        pan_sharpening_algorithm: Optional[PanSharpeningAlgorithm],
+        pre_pan_sharpen_cube: Optional[bool],
+        add_pan: Optional[bool],
+        userplugin: str,
+    ):
+        super().__post_init__(
+            channel_selection,
+            spectra_multiplier,
+            pan_scale,
+            pan_sharpening_interpolation_type,
+            pan_sharpening_algorithm,
+            pre_pan_sharpen_cube,
+            add_pan,
+        )
+        self._set_userplugin(userplugin)
+
+    def _set_userplugin(self, up: str):
+        if up is not None:
             if (
                 '<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">'
-                in userplugin
+                in up
             ):
                 # Seems to be a valid plugin
-                self._userplugin = userplugin
+                self._userplugin = up
                 return
-            if os.path.exists(userplugin):
+            if os.path.exists(up):
                 # Seems to be a valid path to a file, read in
-                with open(userplugin) as f:
+                with open(up) as f:
                     self._userplugin = "".join(f.readlines())
             else:
                 raise SDKException(
@@ -221,7 +290,7 @@ class ViewExportSettings(GeneralExportSettings):
 
     @userplugin.setter
     def userplugin(self, v: str) -> None:
-        self.__post_init__(v)
+        self._set_userplugin(userplugin=v)
 
     def __repr__(self):
         def short_str(s: str, l: int) -> str:
@@ -270,7 +339,7 @@ class SaveArgs(GeneralExportSettings):
     def _get_internal(self):
         ge = super()._get_internal()
         sa = cuvis_il.cuvis_save_args_t()
-        sa.merge_mode = internal.__CuvisSessionMergeMode__(self.merge_mode)
+        sa.merge_mode = internal.__CuvisSessionMergeMode__[self.merge_mode]
         sa.allow_drop = int(self.allow_drop)
         sa.allow_session_file = int(self.allow_session_file)
         sa.allow_info_file = int(self.allow_info_file)
@@ -349,23 +418,67 @@ class WorkerSettings(object):
 
 @dataclass(repr=False)
 class ViewerSettings:
-    userplugin: InitVar[str] = None
     pan_failback: bool = True
     complete: bool = False
     pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
+    channel_selection: InitVar[Optional[str]] = None
+    spectra_multiplier: InitVar[Optional[int]] = None
+    pan_scale: InitVar[Optional[float]] = None
+    pan_sharpening_interpolation_type: InitVar[
+        Optional[PanSharpeningInterpolationType]
+    ] = None
+    pan_sharpening_algorithm: InitVar[Optional[PanSharpeningAlgorithm]] = None
+    pre_pan_sharpen_cube: InitVar[Optional[bool]] = None
+    add_pan: InitVar[Optional[bool]] = None
+    userplugin: InitVar[str] = None
 
-    def __post_init__(self, userplugin: str):
-        if userplugin is not None:
+    def __post_init__(
+        self,
+        channel_selection: Optional[str],
+        spectra_multiplier: Optional[int],
+        pan_scale: Optional[float],
+        pan_sharpening_interpolation_type: Optional[PanSharpeningInterpolationType],
+        pan_sharpening_algorithm: Optional[PanSharpeningAlgorithm],
+        pre_pan_sharpen_cube: Optional[bool],
+        add_pan: Optional[bool],
+        userplugin: str,
+    ):
+        updates = (
+            ("channel_selection", channel_selection),
+            ("spectra_multiplier", spectra_multiplier),
+            ("pan_scale", pan_scale),
+            ("pan_sharpening_interpolation_type", pan_sharpening_interpolation_type),
+            ("pan_sharpening_algorithm", pan_sharpening_algorithm),
+            ("pre_pan_sharpen_cube", pre_pan_sharpen_cube),
+            ("add_pan", add_pan),
+        )
+        used_deprecated = False
+        for name, value in updates:
+            if value is None:
+                continue
+            setattr(self, name, value)
+            used_deprecated = True
+        if used_deprecated:
+            warnings.warn(
+                "Passing flat pan-sharpening attributes directly is deprecated; "
+                "use pan_sharpening=PanSharpeningSettings(...) instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        self._set_userplugin(userplugin)
+
+    def _set_userplugin(self, up: str):
+        if up is not None:
             if (
                 '<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">'
-                in userplugin
+                in up
             ):
                 # Seems to be a valid plugin
-                self._userplugin = userplugin
+                self._userplugin = up
                 return
-            if os.path.exists(userplugin):
+            if os.path.exists(up):
                 # Seems to be a valid path to a file, read in
-                with open(userplugin) as f:
+                with open(up) as f:
                     self._userplugin = "".join(f.readlines())
             else:
                 raise SDKException(
@@ -378,7 +491,7 @@ class ViewerSettings:
 
     @userplugin.setter
     def userplugin(self, v: str) -> None:
-        self.__post_init__(v)
+        self._set_userplugin(v)
 
     # ---- Backwards compatible “flat” attributes ----
     @property
