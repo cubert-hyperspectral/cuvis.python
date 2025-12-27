@@ -266,18 +266,18 @@ class ViewExportSettings(GeneralExportSettings):
         )
         self._set_userplugin(userplugin)
 
-    def _set_userplugin(self, userplugin: str):
-        if userplugin is not None:
+    def _set_userplugin(self, up: str):
+        if up is not None:
             if (
                 '<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">'
-                in userplugin
+                in up
             ):
                 # Seems to be a valid plugin
-                self._userplugin = userplugin
+                self._userplugin = up
                 return
-            if os.path.exists(userplugin):
+            if os.path.exists(up):
                 # Seems to be a valid path to a file, read in
-                with open(userplugin) as f:
+                with open(up) as f:
                     self._userplugin = "".join(f.readlines())
             else:
                 raise SDKException(
@@ -418,7 +418,6 @@ class WorkerSettings(object):
 
 @dataclass(repr=False)
 class ViewerSettings:
-    userplugin: InitVar[str] = None
     pan_failback: bool = True
     complete: bool = False
     pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
@@ -431,6 +430,7 @@ class ViewerSettings:
     pan_sharpening_algorithm: InitVar[Optional[PanSharpeningAlgorithm]] = None
     pre_pan_sharpen_cube: InitVar[Optional[bool]] = None
     add_pan: InitVar[Optional[bool]] = None
+    userplugin: InitVar[str] = None
 
     def __post_init__(
         self,
@@ -467,18 +467,18 @@ class ViewerSettings:
             )
         self._set_userplugin(userplugin)
 
-    def _set_userplugin(self, userplugin: str):
-        if userplugin is not None:
+    def _set_userplugin(self, up: str):
+        if up is not None:
             if (
                 '<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">'
-                in userplugin
+                in up
             ):
                 # Seems to be a valid plugin
-                self._userplugin = userplugin
+                self._userplugin = up
                 return
-            if os.path.exists(userplugin):
+            if os.path.exists(up):
                 # Seems to be a valid path to a file, read in
-                with open(userplugin) as f:
+                with open(up) as f:
                     self._userplugin = "".join(f.readlines())
             else:
                 raise SDKException(
