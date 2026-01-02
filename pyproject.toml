@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cuvis"
-version = "3.5.0"
+version = "3.5.0.1"
 description = "CUVIS Python SDK."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -44,3 +44,10 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 cuvis = ["git-hash.txt"]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-xdist>=3.0.0",
+]
