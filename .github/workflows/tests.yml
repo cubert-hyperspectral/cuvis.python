@@ -12,6 +12,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install test dependencies
-        run: python -m pip install -e ".[test]"
+        run: python3 -m pip install -e ".[test]"
       - name: Run tests
         run: pytest
