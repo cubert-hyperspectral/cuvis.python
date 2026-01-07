@@ -14,8 +14,12 @@ class ImageData(object):
             self.channels = None
             self.array = None
             self.wavelength = None
+            self._img_buf = None
 
         elif isinstance(img_buf, cuvis_il.cuvis_imbuffer_t):
+            # Keep a reference to the underlying buffer so the NumPy view
+            # remains valid for the lifetime of this ImageData instance.
+            self._img_buf = img_buf
 
             if dformat is None:
                 raise TypeError("Missing format for reading image buffer")
@@ -108,4 +112,5 @@ class ImageData(object):
         instance.height = height
         instance.channels = channels
         instance.wavelength = wavelength
+        instance._img_buf = None
         return instance

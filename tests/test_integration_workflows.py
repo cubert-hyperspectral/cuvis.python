@@ -15,9 +15,9 @@ import cuvis
 
 
 @pytest.mark.integration
-def test_workflow_notebook_example_2_load_and_extract(aquarium_session_file, processing_context_from_session):
+def test_load_and_extract(aquarium_session_file, processing_context_from_session):
     """
-    Mirror Example 2 notebook: Load Measurement workflow.
+    Load Measurement workflow.
 
     Steps:
     1. Load SessionFile
@@ -51,9 +51,9 @@ def test_workflow_notebook_example_2_load_and_extract(aquarium_session_file, pro
 
 @pytest.mark.integration
 @pytest.mark.slow
-def test_workflow_notebook_example_3_reprocessing_modes(aquarium_session_file, processing_context_from_session):
+def test_reprocessing_modes(aquarium_session_file, processing_context_from_session):
     """
-    Mirror Example 3 notebook: Reprocess workflow.
+    Reprocess workflow.
 
     Steps:
     1. Load measurement
@@ -68,25 +68,25 @@ def test_workflow_notebook_example_3_reprocessing_modes(aquarium_session_file, p
     # Raw mode
     pc.processing_mode = cuvis.ProcessingMode.Raw
     pc.apply(mesu)
-    raw_cube = mesu.data['cube']
+    raw_cube = mesu.data["cube"]
     assert raw_cube is not None
 
     # DarkSubtract mode
     pc.processing_mode = cuvis.ProcessingMode.DarkSubtract
     pc.apply(mesu)
-    dark_cube = mesu.data['cube']
+    dark_cube = mesu.data["cube"]
     assert dark_cube is not None
 
     # Reflectance mode
     pc.processing_mode = cuvis.ProcessingMode.Reflectance
     pc.apply(mesu)
-    refl_cube = mesu.data['cube']
+    refl_cube = mesu.data["cube"]
     assert refl_cube is not None
 
     # SpectralRadiance mode
     pc.processing_mode = cuvis.ProcessingMode.SpectralRadiance
     pc.apply(mesu)
-    radiance_cube = mesu.data['cube']
+    radiance_cube = mesu.data["cube"]
     assert radiance_cube is not None
 
     # Verify all cubes were generated
@@ -95,9 +95,11 @@ def test_workflow_notebook_example_3_reprocessing_modes(aquarium_session_file, p
 
 @pytest.mark.integration
 @pytest.mark.slow
-def test_workflow_notebook_example_4_export_formats(aquarium_session_file, processing_context_from_session, temp_output_dir):
+def test_export_formats(
+    aquarium_session_file, processing_context_from_session, temp_output_dir
+):
     """
-    Mirror Example 4 notebook: Exporters workflow.
+    Exporters workflow.
 
     Steps:
     1. Load and process measurement
@@ -122,8 +124,7 @@ def test_workflow_notebook_example_4_export_formats(aquarium_session_file, proce
     tiff_dir = temp_output_dir / "tiff"
     tiff_dir.mkdir()
     tiff_settings = cuvis.TiffExportSettings(
-        export_dir=str(tiff_dir),
-        format=cuvis.TiffFormat.MultiChannel
+        export_dir=str(tiff_dir), format=cuvis.TiffFormat.MultiChannel
     )
     tiff_exporter = cuvis.TiffExporter(tiff_settings)
     tiff_exporter.apply(mesu)
@@ -140,16 +141,20 @@ def test_workflow_notebook_example_4_export_formats(aquarium_session_file, proce
     # Verify all exports created files
     assert len(list(cube_dir.glob("*.cu3s"))) > 0, "SessionFile export failed"
     assert len(list(tiff_dir.glob("*.tif*"))) > 0, "TIFF export failed"
-    assert (len(list(envi_dir.glob("*.hdr"))) > 0 or
-            len(list(envi_dir.glob("*.bin"))) > 0 or
-            len(list(envi_dir.glob("*.raw"))) > 0), "ENVI export failed"
+    assert (
+        len(list(envi_dir.glob("*.hdr"))) > 0
+        or len(list(envi_dir.glob("*.bin"))) > 0
+        or len(list(envi_dir.glob("*.raw"))) > 0
+    ), "ENVI export failed"
 
 
 @pytest.mark.integration
 @pytest.mark.slow
-def test_workflow_simulated_acquisition_snapshot(simulated_acquisition_context, processing_context_from_session, temp_output_dir):
+def test_simulated_acquisition_snapshot(
+    simulated_acquisition_context, processing_context_from_session, temp_output_dir
+):
     """
-    Mirror Example 1 notebook: Take Snapshot workflow.
+    Take Snapshot workflow.
 
     Steps:
     1. Initialize simulated camera
@@ -181,7 +186,7 @@ def test_workflow_simulated_acquisition_snapshot(simulated_acquisition_context, 
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
     pc.apply(mesu)
-    assert 'cube' in mesu.data
+    assert "cube" in mesu.data
 
     # Step 6: Save to file
     save_args = cuvis.SaveArgs(export_dir=str(temp_output_dir))
@@ -194,7 +199,9 @@ def test_workflow_simulated_acquisition_snapshot(simulated_acquisition_context, 
 
 @pytest.mark.integration
 @pytest.mark.slow
-def test_workflow_complete_pipeline(aquarium_session_file, processing_context_from_session, temp_output_dir):
+def test_complete_pipeline(
+    aquarium_session_file, processing_context_from_session, temp_output_dir
+):
     """
     Complete end-to-end pipeline test.
 
@@ -219,9 +226,24 @@ def test_workflow_complete_pipeline(aquarium_session_file, processing_context_fr
 
     # Export in all formats
     formats = {
-        'session': ('.cu3s', cuvis.CubeExporter(cuvis.SaveArgs(export_dir=str(temp_output_dir / 'session')))),
-        'tiff': ('*.tif*', cuvis.TiffExporter(cuvis.TiffExportSettings(export_dir=str(temp_output_dir / 'tiff')))),
-        'envi': ('*.hdr', cuvis.EnviExporter(cuvis.EnviExportSettings(export_dir=str(temp_output_dir / 'envi')))),
+        "session": (
+            ".cu3s",
+            cuvis.CubeExporter(
+                cuvis.SaveArgs(export_dir=str(temp_output_dir / "session"))
+            ),
+        ),
+        "tiff": (
+            "*.tif*",
+            cuvis.TiffExporter(
+                cuvis.TiffExportSettings(export_dir=str(temp_output_dir / "tiff"))
+            ),
+        ),
+        "envi": (
+            "*.hdr",
+            cuvis.EnviExporter(
+                cuvis.EnviExportSettings(export_dir=str(temp_output_dir / "envi"))
+            ),
+        ),
     }
 
     for format_name, (pattern, exporter) in formats.items():
@@ -231,10 +253,14 @@ def test_workflow_complete_pipeline(aquarium_session_file, processing_context_fr
         exporter.flush()
 
     # Verify all exports succeeded
-    assert len(list((temp_output_dir / 'session').glob('.cu3s'))) >= 0  # May be in subdirs
-    assert len(list((temp_output_dir / 'tiff').glob('*.tif*'))) > 0
+    assert (
+        len(list((temp_output_dir / "session").glob(".cu3s"))) >= 0
+    )  # May be in subdirs
+    assert len(list((temp_output_dir / "tiff").glob("*.tif*"))) > 0
     # ENVI creates .hdr or .raw or .bin
-    envi_files = (list((temp_output_dir / 'envi').glob('*.hdr')) +
-                  list((temp_output_dir / 'envi').glob('*.raw')) +
-                  list((temp_output_dir / 'envi').glob('*.bin')))
+    envi_files = (
+        list((temp_output_dir / "envi").glob("*.hdr"))
+        + list((temp_output_dir / "envi").glob("*.raw"))
+        + list((temp_output_dir / "envi").glob("*.bin"))
+    )
     assert len(envi_files) > 0
