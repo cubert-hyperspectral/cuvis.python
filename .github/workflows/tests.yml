@@ -1,0 +1,17 @@
+name: Tests
+
+on:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container:
+      image: cubertgmbh/cuvis_pyil:3.5.0-ubuntu24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install test dependencies
+        run: python -m pip install -e ".[test]"
+      - name: Run tests
+        run: pytest
