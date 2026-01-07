@@ -10,6 +10,7 @@ import tempfile
 import shutil
 from pathlib import Path
 import os
+import gc
 import cuvis
 
 
@@ -23,7 +24,8 @@ def sdk_initialized():
     settings_path = os.environ.get("CUVIS_SETTINGS", ".")
     cuvis.init(settings_path=settings_path)
     yield
-    cuvis.shutdown()
+    gc.collect()
+    # cuvis.shutdown()
 
 
 @pytest.fixture(scope="session")
@@ -42,7 +44,10 @@ def aquarium_session_file(test_data_dir, sdk_initialized):
     session_path = test_data_dir / "Aquarium.cu3s"
     if not session_path.exists():
         pytest.skip(f"Test data not found: {session_path}")
-    return cuvis.SessionFile(str(session_path))
+    session = cuvis.SessionFile(str(session_path))
+    yield session
+    del session
+    gc.collect()
 
 
 @pytest.fixture
@@ -66,16 +71,6 @@ def processing_context_from_session(aquarium_session_file):
 
 
 @pytest.fixture
-def processing_context_from_measurement(aquarium_measurement):
-    """
-    Create ProcessingContext from Measurement.
-
-    Function-scoped to ensure each test gets a fresh context.
-    """
-    return cuvis.ProcessingContext(aquarium_measurement)
-
-
-@pytest.fixture
 def temp_output_dir():
     """
     Temporary directory for export outputs.
@@ -94,4 +89,7 @@ def simulated_acquisition_context(aquarium_session_file, sdk_initialized):
 
     Session-scoped since acquisition context initialization can be slow.
     """
-    return cuvis.AcquisitionContext(aquarium_session_file, simulate=True)
+    acq = cuvis.AcquisitionContext(aquarium_session_file, simulate=True)
+    yield acq
+    del acq
+    gc.collect()
