@@ -4,7 +4,11 @@ from pathlib import Path
 
 def get_git_commit_hash():
     try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+        return (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("ascii")
+            .strip()
+        )
     except subprocess.CalledProcessError:
         return "unknown"
 
