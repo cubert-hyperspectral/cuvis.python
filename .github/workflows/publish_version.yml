@@ -21,7 +21,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     container:
-      image: cubertgmbh/cuvis_pyil:3.5.0-ubuntu24.04
+      image: cubertgmbh/cuvis_pyil:3.5.0-ubuntu22.04
 
     environment: ${{ inputs.repository }}
 
@@ -117,7 +117,9 @@ jobs:
           PY
 
       - name: Build sdist and wheel
-        run: python3 -m build
+        run: |
+          python3 ./prebuild.py
+          python3 -m build
 
       - name: Publish
         uses: pypa/gh-action-pypi-publish@v1.13.0
