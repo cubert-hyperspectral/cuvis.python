@@ -55,7 +55,7 @@ jobs:
 
 
       - name: Install build tooling
-        run: python3 -m pip install --upgrade build
+        run: python3 -m pip install
 
       - name: Read package name/version from pyproject.toml
         id: meta
@@ -123,5 +123,4 @@ jobs:
       - name: Publish
         uses: pypa/gh-action-pypi-publish@v1.11.0
         with:
-          verify-metadata: false
           repository-url: ${{ inputs.repository == 'pypi' && 'https://upload.pypi.org/legacy/' || 'https://test.pypi.org/legacy/' }}

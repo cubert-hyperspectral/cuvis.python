@@ -1,6 +1,6 @@
 /dist
 /build
-/.venv
+/.venv*
 /.eggs
 /cuvis.egg-info
 /MANIFEST.in
@@ -8,6 +8,7 @@
 /cuvis/_cuvis_pyil.pyd
 /venv
 /cuvis/__pycache__
-/.venv310
+
 /tests/__pycache__
 /.claude
+
