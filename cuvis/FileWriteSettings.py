@@ -452,9 +452,10 @@ class ViewerSettings:
             ("pre_pan_sharpen_cube", pre_pan_sharpen_cube),
             ("add_pan", add_pan),
         )
+        owner = type(self)
         used_deprecated = False
         for name, value in updates:
-            if value is None:
+            if value is None or value is getattr(owner, name):
                 continue
             setattr(self, name, value)
             used_deprecated = True
