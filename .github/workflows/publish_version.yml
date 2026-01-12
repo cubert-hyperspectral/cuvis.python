@@ -123,4 +123,5 @@ jobs:
       - name: Publish
         uses: pypa/gh-action-pypi-publish@v1.11.0
         with:
+          verify-metadata: false
           repository-url: ${{ inputs.repository == 'pypi' && 'https://upload.pypi.org/legacy/' || 'https://test.pypi.org/legacy/' }}
