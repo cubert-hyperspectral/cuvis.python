@@ -48,14 +48,14 @@ def test_processing_mode_reflectance(processing_context_from_session, test_measu
 
 
 def test_processing_mode_spectral_radiance(
-    processing_context_from_session, aquarium_measurement
+    processing_context_from_session, test_measurement
 ):
     """Test SpectralRadiance processing mode generates cube."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.SpectralRadiance
-    pc.apply(aquarium_measurement)
-    assert "cube" in aquarium_measurement.data
-    cube = aquarium_measurement.data["cube"]
+    pc.apply(test_measurement)
+    assert "cube" in test_measurement.data
+    cube = test_measurement.data["cube"]
     assert cube is not None
 
 

@@ -49,9 +49,9 @@ def test_session_file_get_measurement(test_session_file):
     assert isinstance(mesu, cuvis.Measurement)
 
 
-# def test_session_file_fps(aquarium_session_file):
+# def test_session_file_fps(test_session_file):
 #     """Test SessionFile FPS property."""
-#     fps = aquarium_session_file.fps
+#     fps = test_session_file.fps
 #     assert isinstance(fps, (int, float))
 #     assert fps >= 0
 

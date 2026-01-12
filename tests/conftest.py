@@ -30,7 +30,7 @@ def sdk_initialized():
 
 @pytest.fixture(scope="session")
 def test_data_dir():
-    """Path to test data directory containing Aquarium.cu3s."""
+    """Path to test data directory containing test_mesu.cu3s."""
     return Path(__file__).parent / "test_data"
 
 
