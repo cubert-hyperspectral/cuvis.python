@@ -17,18 +17,18 @@ def test_cube_exporter_creation(temp_output_dir):
 
 
 def test_cube_export_workflow(
-    processing_context_from_session, aquarium_measurement, temp_output_dir
+    processing_context_from_session, test_measurement, temp_output_dir
 ):
     """Test export measurement as SessionFile (.cu3s)."""
     # Process measurement first
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
     # Export as SessionFile
     save_args = cuvis.SaveArgs(export_dir=str(temp_output_dir))
     exporter = cuvis.CubeExporter(save_args)
-    exporter.apply(aquarium_measurement)
+    exporter.apply(test_measurement)
     exporter.flush()
 
     # Verify output file was created
@@ -44,20 +44,20 @@ def test_tiff_exporter_creation(temp_output_dir):
 
 
 def test_tiff_export_workflow(
-    processing_context_from_session, aquarium_measurement, temp_output_dir
+    processing_context_from_session, test_measurement, temp_output_dir
 ):
     """Test export measurement as TIFF."""
     # Process measurement first
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
     # Export as TIFF
     settings = cuvis.TiffExportSettings(
         export_dir=str(temp_output_dir), format=cuvis.TiffFormat.MultiChannel
     )
     exporter = cuvis.TiffExporter(settings)
-    exporter.apply(aquarium_measurement)
+    exporter.apply(test_measurement)
     exporter.flush()
 
     # Verify output file was created
@@ -66,12 +66,12 @@ def test_tiff_export_workflow(
 
 
 def test_tiff_export_different_formats(
-    processing_context_from_session, aquarium_measurement, temp_output_dir
+    processing_context_from_session, test_measurement, temp_output_dir
 ):
     """Test TIFF export with different format modes."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
     # Test MultiPage format
     multipage_dir = temp_output_dir / "multipage"
@@ -80,7 +80,7 @@ def test_tiff_export_different_formats(
         export_dir=str(multipage_dir), format=cuvis.TiffFormat.MultiPage
     )
     exporter = cuvis.TiffExporter(settings)
-    exporter.apply(aquarium_measurement)
+    exporter.apply(test_measurement)
     exporter.flush()
     assert len(list(multipage_dir.glob("*.tif*"))) > 0
 
@@ -93,18 +93,18 @@ def test_envi_exporter_creation(temp_output_dir):
 
 
 def test_envi_export_workflow(
-    processing_context_from_session, aquarium_measurement, temp_output_dir
+    processing_context_from_session, test_measurement, temp_output_dir
 ):
     """Test export measurement as ENVI format (.hdr + .bin)."""
     # Process measurement first
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
     # Export as ENVI
     settings = cuvis.EnviExportSettings(export_dir=str(temp_output_dir))
     exporter = cuvis.EnviExporter(settings)
-    exporter.apply(aquarium_measurement)
+    exporter.apply(test_measurement)
     exporter.flush()
 
     # Verify output files were created (.hdr and/or .bin)
@@ -129,7 +129,7 @@ def test_view_exporter_creation(temp_output_dir, rgb_userplugin_path):
 
 def test_view_export_workflow(
     processing_context_from_session,
-    aquarium_measurement,
+    test_measurement,
     temp_output_dir,
     rgb_userplugin_path,
 ):
@@ -137,14 +137,14 @@ def test_view_export_workflow(
     # Process measurement first
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
     # Export as View
     settings = cuvis.ViewExportSettings(
         export_dir=str(temp_output_dir), userplugin=rgb_userplugin_path
     )
     exporter = cuvis.ViewExporter(settings)
-    exporter.apply(aquarium_measurement)
+    exporter.apply(test_measurement)
     exporter.flush()
 
     # Verify output was created

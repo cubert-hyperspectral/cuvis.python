@@ -48,13 +48,13 @@ def rgb_userplugin_path(test_data_dir):
 
 
 @pytest.fixture(scope="session")
-def aquarium_session_file(test_data_dir, sdk_initialized):
+def test_session_file(test_data_dir, sdk_initialized):
     """
-    Load Aquarium.cu3s SessionFile once per session.
+    Load test SessionFile once per session.
 
     Skips tests if the file is not found.
     """
-    session_path = test_data_dir / "Aquarium.cu3s"
+    session_path = test_data_dir / "test_mesu.cu3s"
     if not session_path.exists():
         pytest.skip(f"Test data not found: {session_path}")
     session = cuvis.SessionFile(str(session_path))
@@ -64,23 +64,23 @@ def aquarium_session_file(test_data_dir, sdk_initialized):
 
 
 @pytest.fixture
-def aquarium_measurement(aquarium_session_file):
+def test_measurement(test_session_file):
     """
-    Get first measurement from Aquarium session.
+    Get first measurement from Test session.
 
     Function-scoped to ensure each test gets a fresh measurement reference.
     """
-    return aquarium_session_file.get_measurement(0)
+    return test_session_file.get_measurement(0)
 
 
 @pytest.fixture
-def processing_context_from_session(aquarium_session_file):
+def processing_context_from_session(test_session_file):
     """
     Create ProcessingContext from SessionFile.
 
     Function-scoped to ensure each test gets a fresh context.
     """
-    return cuvis.ProcessingContext(aquarium_session_file)
+    return cuvis.ProcessingContext(test_session_file)
 
 
 @pytest.fixture
@@ -96,13 +96,13 @@ def temp_output_dir():
 
 
 @pytest.fixture(scope="session")
-def simulated_acquisition_context(aquarium_session_file, sdk_initialized):
+def simulated_acquisition_context(test_session_file, sdk_initialized):
     """
     Create simulated AcquisitionContext from SessionFile.
 
     Session-scoped since acquisition context initialization can be slow.
     """
-    acq = cuvis.AcquisitionContext(aquarium_session_file, simulate=True)
+    acq = cuvis.AcquisitionContext(test_session_file, simulate=True)
     yield acq
     del acq
     gc.collect()

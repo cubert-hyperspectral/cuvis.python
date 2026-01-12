@@ -15,7 +15,7 @@ import cuvis
 
 
 @pytest.mark.integration
-def test_load_and_extract(aquarium_session_file, processing_context_from_session):
+def test_load_and_extract(test_session_file, processing_context_from_session):
     """
     Load Measurement workflow.
 
@@ -26,10 +26,10 @@ def test_load_and_extract(aquarium_session_file, processing_context_from_session
     4. Extract spectral data
     """
     # Step 1: Load session (already loaded via fixture)
-    assert len(aquarium_session_file) >= 1
+    assert len(test_session_file) >= 1
 
     # Step 2: Get measurement and access metadata
-    mesu = aquarium_session_file[0]
+    mesu = test_session_file[0]
     assert mesu.capture_time is not None
     assert mesu.integration_time > 0
     assert mesu.serial_number is not None
@@ -51,7 +51,7 @@ def test_load_and_extract(aquarium_session_file, processing_context_from_session
 
 @pytest.mark.integration
 @pytest.mark.slow
-def test_reprocessing_modes(aquarium_session_file, processing_context_from_session):
+def test_reprocessing_modes(test_session_file, processing_context_from_session):
     """
     Reprocess workflow.
 
@@ -62,7 +62,7 @@ def test_reprocessing_modes(aquarium_session_file, processing_context_from_sessi
     4. Process with Reflectance mode
     5. Process with SpectralRadiance mode
     """
-    mesu = aquarium_session_file[0]
+    mesu = test_session_file[0]
     pc = processing_context_from_session
 
     # Raw mode
@@ -78,10 +78,10 @@ def test_reprocessing_modes(aquarium_session_file, processing_context_from_sessi
     assert dark_cube is not None
 
     # Reflectance mode
-    # pc.processing_mode = cuvis.ProcessingMode.Reflectance
-    # pc.apply(mesu)
-    # refl_cube = mesu.data["cube"]
-    # assert refl_cube is not None
+    pc.processing_mode = cuvis.ProcessingMode.Reflectance
+    pc.apply(mesu)
+    refl_cube = mesu.data["cube"]
+    assert refl_cube is not None
 
     # SpectralRadiance mode
     pc.processing_mode = cuvis.ProcessingMode.SpectralRadiance
@@ -90,13 +90,13 @@ def test_reprocessing_modes(aquarium_session_file, processing_context_from_sessi
     assert radiance_cube is not None
 
     # Verify all cubes were generated
-    assert all([raw_cube, dark_cube, radiance_cube])
+    assert all([raw_cube, dark_cube, refl_cube, radiance_cube])
 
 
 @pytest.mark.integration
 @pytest.mark.slow
 def test_export_formats(
-    aquarium_session_file, processing_context_from_session, temp_output_dir
+    test_session_file, processing_context_from_session, temp_output_dir
 ):
     """
     Exporters workflow.
@@ -107,7 +107,7 @@ def test_export_formats(
     3. Export as TIFF
     4. Export as ENVI
     """
-    mesu = aquarium_session_file[0]
+    mesu = test_session_file[0]
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
     pc.apply(mesu)
@@ -192,7 +192,9 @@ def test_simulated_acquisition_snapshot(
 
     # Step 6: Save to file
     save_args = cuvis.SaveArgs(export_dir=str(temp_output_dir))
-    mesu.save(save_args)
+    # mesu.save(save_args)
+    export = cuvis.CubeExporter(save_args)
+    export.apply(mesu)
 
     # Verify file was saved
     output_files = list(temp_output_dir.glob("*.cu3s"))
@@ -202,7 +204,7 @@ def test_simulated_acquisition_snapshot(
 @pytest.mark.integration
 @pytest.mark.slow
 def test_complete_pipeline(
-    aquarium_session_file, processing_context_from_session, temp_output_dir
+    test_session_file, processing_context_from_session, temp_output_dir
 ):
     """
     Complete end-to-end pipeline test.
@@ -214,11 +216,12 @@ def test_complete_pipeline(
     - Verify outputs
     """
     # Load measurement
-    mesu = aquarium_session_file[0]
+    mesu = test_session_file[0]
 
-    # Process with Reflectance mode (most common)
+    # TODO Add Testdata with White Reference
+    # Process with DarkSubtract mode
     pc = processing_context_from_session
-    pc.processing_mode = cuvis.ProcessingMode.Reflectance
+    pc.processing_mode = cuvis.ProcessingMode.DarkSubtract
     pc.apply(mesu)
 
     # Verify cube was generated

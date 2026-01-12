@@ -15,38 +15,36 @@ def test_processing_context_creation_from_session(processing_context_from_sessio
     assert isinstance(processing_context_from_session, cuvis.ProcessingContext)
 
 
-def test_processing_mode_raw(processing_context_from_session, aquarium_measurement):
+def test_processing_mode_raw(processing_context_from_session, test_measurement):
     """Test Raw processing mode generates cube."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
-    assert "cube" in aquarium_measurement.data
-    cube = aquarium_measurement.data["cube"]
+    pc.apply(test_measurement)
+    assert "cube" in test_measurement.data
+    cube = test_measurement.data["cube"]
     assert cube is not None
 
 
 def test_processing_mode_dark_subtract(
-    processing_context_from_session, aquarium_measurement
+    processing_context_from_session, test_measurement
 ):
     """Test DarkSubtract processing mode generates cube."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.DarkSubtract
-    pc.apply(aquarium_measurement)
-    assert "cube" in aquarium_measurement.data
-    cube = aquarium_measurement.data["cube"]
+    pc.apply(test_measurement)
+    assert "cube" in test_measurement.data
+    cube = test_measurement.data["cube"]
     assert cube is not None
 
 
-# def test_processing_mode_reflectance(
-#    processing_context_from_session, aquarium_measurement
-# ):
-#    """Test Reflectance processing mode generates cube."""
-#    pc = processing_context_from_session
-#    pc.processing_mode = cuvis.ProcessingMode.Reflectance
-#    pc.apply(aquarium_measurement)
-#    assert "cube" in aquarium_measurement.data
-#    cube = aquarium_measurement.data["cube"]
-#    assert cube is not None
+def test_processing_mode_reflectance(processing_context_from_session, test_measurement):
+    """Test Reflectance processing mode generates cube."""
+    pc = processing_context_from_session
+    pc.processing_mode = cuvis.ProcessingMode.Reflectance
+    pc.apply(test_measurement)
+    assert "cube" in test_measurement.data
+    cube = test_measurement.data["cube"]
+    assert cube is not None
 
 
 def test_processing_mode_spectral_radiance(
@@ -88,25 +86,25 @@ def test_processing_context_get_reference(processing_context_from_session):
         assert isinstance(white_ref, cuvis.Measurement)
 
 
-def test_cube_property_access(processing_context_from_session, aquarium_measurement):
+def test_cube_property_access(processing_context_from_session, test_measurement):
     """Test cube property convenience accessor."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
     # Access cube via property
-    cube = aquarium_measurement.cube
+    cube = test_measurement.cube
     assert cube is not None
     assert hasattr(cube, "array")
 
 
-def test_cube_data_shape(processing_context_from_session, aquarium_measurement):
+def test_cube_data_shape(processing_context_from_session, test_measurement):
     """Test cube has expected 3D shape (height, width, channels)."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
-    cube = aquarium_measurement.cube
+    cube = test_measurement.cube
     assert len(cube.array.shape) == 3  # 3D array: height, width, channels
     height, width, channels = cube.array.shape
     assert height > 0
@@ -114,13 +112,13 @@ def test_cube_data_shape(processing_context_from_session, aquarium_measurement):
     assert channels > 0  # Should have spectral channels
 
 
-def test_cube_wavelength_access(processing_context_from_session, aquarium_measurement):
+def test_cube_wavelength_access(processing_context_from_session, test_measurement):
     """Test cube wavelength information is accessible."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
-    pc.apply(aquarium_measurement)
+    pc.apply(test_measurement)
 
-    cube = aquarium_measurement.cube
+    cube = test_measurement.cube
     # Check if wavelength information is available
     assert hasattr(cube, "wavelength")
     wavelength = cube.wavelength

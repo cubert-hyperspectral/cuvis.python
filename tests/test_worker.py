@@ -18,10 +18,7 @@ def test_worker_creation():
 
 def test_worker_settings_configuration():
     """Test WorkerSettings can be configured."""
-    settings = cuvis.WorkerSettings(
-        mandatory_queue_size=10,
-        output_queue_size=5
-    )
+    settings = cuvis.WorkerSettings(mandatory_queue_size=10, output_queue_size=5)
     assert settings is not None
 
 
@@ -34,7 +31,7 @@ def test_worker_set_processing_context(processing_context_from_session):
     worker.set_processing_context(processing_context_from_session)
 
     # Worker should indicate processing is set
-    assert hasattr(worker, '_processing_set')
+    assert hasattr(worker, "_processing_set")
 
 
 def test_worker_set_exporter(temp_output_dir):
@@ -48,18 +45,20 @@ def test_worker_set_exporter(temp_output_dir):
     worker.set_exporter(exporter)
 
     # Worker should accept the exporter
-    assert hasattr(worker, '_exporter_set')
+    assert hasattr(worker, "_exporter_set")
 
 
 @pytest.mark.slow
-def test_worker_pipeline_session_file(aquarium_session_file, processing_context_from_session, temp_output_dir):
+def test_worker_pipeline_session_file(
+    test_session_file, processing_context_from_session, temp_output_dir
+):
     """Test Worker pipeline with SessionFile ingestion."""
     # Setup worker
     settings = cuvis.WorkerSettings(output_queue_size=5)
     worker = cuvis.Worker(settings)
 
     # Set processing context
-    pc = processing_context_from_session
+    pc: cuvis.ProcessingContext = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
     worker.set_processing_context(pc)
 
@@ -73,7 +72,7 @@ def test_worker_pipeline_session_file(aquarium_session_file, processing_context_
 
     try:
         # Ingest session file (only first measurement)
-        worker.ingest_session_file(aquarium_session_file, frame_selection="0")
+        worker.ingest_session_file(test_session_file, frame_selection="0")
 
         # Check for results
         if worker.has_next_result():
