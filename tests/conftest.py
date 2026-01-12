@@ -35,6 +35,19 @@ def test_data_dir():
 
 
 @pytest.fixture(scope="session")
+def rgb_userplugin_path(test_data_dir):
+    """
+    Path to RGB user plugin file (00_RGB.xml).
+
+    Skips tests if the file is not found.
+    """
+    plugin_path = test_data_dir / "00_RGB.xml"
+    if not plugin_path.exists():
+        pytest.skip(f"RGB user plugin not found: {plugin_path}")
+    return str(plugin_path)
+
+
+@pytest.fixture(scope="session")
 def aquarium_session_file(test_data_dir, sdk_initialized):
     """
     Load Aquarium.cu3s SessionFile once per session.

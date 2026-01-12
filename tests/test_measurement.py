@@ -12,10 +12,10 @@ import cuvis
 
 def test_measurement_metadata_attributes(aquarium_measurement):
     """Test Measurement has expected metadata attributes."""
-    assert hasattr(aquarium_measurement, 'capture_time')
-    assert hasattr(aquarium_measurement, 'integration_time')
-    assert hasattr(aquarium_measurement, 'serial_number')
-    assert hasattr(aquarium_measurement, 'product_name')
+    assert hasattr(aquarium_measurement, "capture_time")
+    assert hasattr(aquarium_measurement, "integration_time")
+    assert hasattr(aquarium_measurement, "serial_number")
+    assert hasattr(aquarium_measurement, "product_name")
 
 
 def test_measurement_capture_time(aquarium_measurement):
@@ -47,7 +47,7 @@ def test_measurement_product_name(aquarium_measurement):
 
 def test_measurement_data_dict(aquarium_measurement):
     """Test measurement data dictionary exists."""
-    assert hasattr(aquarium_measurement, 'data')
+    assert hasattr(aquarium_measurement, "data")
     assert isinstance(aquarium_measurement.data, dict)
 
 

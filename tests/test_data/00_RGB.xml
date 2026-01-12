@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<userplugin xmlns="http://cubert-gmbh.de/user/plugin/userplugin.xsd">
+  <configuration name="RGB" citation="CUBERT" plugin_author="Cubert" plugin_version="1.1.0" required_engine_version="3.2.0">
+    <comment>
+      RGB View with adjustable bandwidths using manual fastmono channels:
+      ---
+      Red   := avg(RedWL ± Width/2)
+      Green := avg(GreenWL ± Width/2)
+      Blue  := avg(BlueWL ± Width/2)
+    </comment>
+
+    <input id="RedWL" type="scalar" min="300" max="1200" tickFreq="1">650</input>
+    <input id="GreenWL" type="scalar" min="300" max="1200" tickFreq="1">550</input>
+    <input id="BlueWL" type="scalar" min="300" max="1200" tickFreq="1">470</input>
+    <input id="Width" type="scalar" min="1" max="200">20</input>
+    <input id="Normalize" type="scalar">0.75</input>
+
+    <!-- Calculate half width -->
+    <evaluate id="HalfWidth">
+      <operator type="divide">
+        <variable ref="Width"/>
+        <value>2</value>
+      </operator>
+    </evaluate>
+
+    <!-- Red bounds -->
+    <evaluate id="RedMin">
+      <operator type="subtract">
+        <variable ref="RedWL"/>
+        <variable ref="HalfWidth"/>
+      </operator>
+    </evaluate>
+    <evaluate id="RedMax">
+      <operator type="add">
+        <variable ref="RedWL"/>
+        <variable ref="HalfWidth"/>
+      </operator>
+    </evaluate>
+
+    <!-- Green bounds -->
+    <evaluate id="GreenMin">
+      <operator type="subtract">
+        <variable ref="GreenWL"/>
+        <variable ref="HalfWidth"/>
+      </operator>
+    </evaluate>
+    <evaluate id="GreenMax">
+      <operator type="add">
+        <variable ref="GreenWL"/>
+        <variable ref="HalfWidth"/>
+      </operator>
+    </evaluate>
+
+    <!-- Blue bounds -->
+    <evaluate id="BlueMin">
+      <operator type="subtract">
+        <variable ref="BlueWL"/>
+        <variable ref="HalfWidth"/>
+      </operator>
+    </evaluate>
+    <evaluate id="BlueMax">
+      <operator type="add">
+        <variable ref="BlueWL"/>
+        <variable ref="HalfWidth"/>
+      </operator>
+    </evaluate>
+
+	<output_image show="true" id="RGB">
+		<fast_rgb red_min="RedMin" red_max="RedMax" green_min="GreenMin" green_max="GreenMax" blue_min="BlueMin" blue_max="BlueMax" normalization="Normalize">
+			<cube/>
+		</fast_rgb>
+	</output_image>
+
+  </configuration>
+</userplugin>
