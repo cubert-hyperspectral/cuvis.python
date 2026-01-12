@@ -21,7 +21,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: cubertgmbh/cuvis_pyil:3.5.0-ubuntu22.04
+      image: cubertgmbh/cuvis_pyil:3.5.0-ubuntu24.04
 
     permissions:
       contents: read
@@ -115,7 +115,6 @@ jobs:
 
       - name: Build sdist and wheel
         run: |
-          python3 ./prebuild.py
           python3 -m build
 
       - name: Upload build artifacts
