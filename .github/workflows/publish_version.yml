@@ -55,7 +55,7 @@ jobs:
 
 
       - name: Install build tooling
-        run: python3 -m pip install --upgrade pip build
+        run: python3 -m pip install --upgrade build
 
       - name: Read package name/version from pyproject.toml
         id: meta
