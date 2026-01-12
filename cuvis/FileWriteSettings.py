@@ -396,7 +396,7 @@ class ProcessingArgs(object):
 
 @dataclass
 class WorkerSettings(object):
-    input_queue_size: int = 0
+    input_queue_size: int = 10
     mandatory_queue_size: int = 4
     supplementary_queue_size: int = 4
     output_queue_size: int = 10
