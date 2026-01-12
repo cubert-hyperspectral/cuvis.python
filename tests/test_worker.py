@@ -75,13 +75,13 @@ def test_worker_pipeline_session_file(
         worker.ingest_session_file(test_session_file, frame_selection="0")
 
         # Check for results
-        if worker.has_next_result():
-            result = worker.get_next_result(timeout=5000)
-            assert isinstance(result, cuvis.WorkerResult)
-            assert isinstance(result.mesu, cuvis.Measurement)
+        result = worker.get_next_result(timeout=5000)
+        assert isinstance(result, cuvis.WorkerResult)
+        assert isinstance(result.mesu, cuvis.Measurement)
     finally:
         # Clean up
         worker.stop_processing()
+        worker.drop_all_queued()
 
 
 def test_worker_state_queries():
