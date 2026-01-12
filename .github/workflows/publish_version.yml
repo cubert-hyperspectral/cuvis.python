@@ -18,16 +18,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     container:
       image: cubertgmbh/cuvis_pyil:3.5.0-ubuntu22.04
 
-    environment: ${{ inputs.repository }}
-
     permissions:
       contents: read
-      id-token: write   # required for PyPI Trusted Publishing (OIDC)
 
     steps:
       - name: Checkout
@@ -121,7 +118,30 @@ jobs:
           python3 ./prebuild.py
           python3 -m build
 
-      - name: Publish
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment: ${{ inputs.repository }}
+
+    permissions:
+      contents: read
+      id-token: write   # required for PyPI Trusted Publishing (OIDC)
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           repository-url: ${{ inputs.repository == 'pypi' && 'https://upload.pypi.org/legacy/' || 'https://test.pypi.org/legacy/' }}
