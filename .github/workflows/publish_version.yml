@@ -120,7 +120,7 @@ jobs:
       - name: Build sdist and wheel
         run: python3 -m build
 
-      - name: Publish (Trusted Publishing / OIDC)
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1.13.0
         with:
           repository-url: ${{ inputs.repository == 'pypi' && 'https://upload.pypi.org/legacy/' || 'https://test.pypi.org/legacy/' }}
