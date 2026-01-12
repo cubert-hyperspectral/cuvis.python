@@ -53,9 +53,8 @@ jobs:
               core.setFailed(`Only repository admins may publish. (${username} has: ${data.permission})`);
             }
 
-
       - name: Install build tooling
-        run: python3 -m pip install
+        run: python3 -m pip install build
 
       - name: Read package name/version from pyproject.toml
         id: meta
