@@ -54,7 +54,7 @@ jobs:
             }
 
       - name: Install build tooling
-        run: python3 -m pip install build
+        run: python3 -m pip install -U build twine
 
       - name: Read package name/version from pyproject.toml
         id: meta
