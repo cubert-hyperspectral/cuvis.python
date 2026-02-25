@@ -30,7 +30,7 @@ def test_wrapper_version(sdk_initialized):
     """Test wrapper version retrieval."""
     version = cuvis.General.wrapper_version()
     assert isinstance(version, str)
-    assert "3.5.0" in version  # Current wrapper version
+    assert "3.5.1" in version  # Current wrapper version
 
 
 # def test_sdk_initialization_and_shutdown():
