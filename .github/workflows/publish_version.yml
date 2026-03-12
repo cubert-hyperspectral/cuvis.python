@@ -50,6 +50,9 @@ jobs:
               core.setFailed(`Only repository admins may publish. (${username} has: ${data.permission})`);
             }
 
+      - name: Remove PEP 668 warning
+        run: rm -rf /usr/lib/python3.12/EXTERNALLY-MANAGED
+
       - name: Install build tooling
         run: python3 -m pip install -U build twine
 
