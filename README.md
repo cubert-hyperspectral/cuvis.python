@@ -19,6 +19,10 @@ source code page.
 
 ## Installation
 
+>**Cuvis C SDK**\
+>Download and install the lastest Cuvis C SDK.\
+>Link: [Cuvis C SDK](https://cloud.cubert-gmbh.de/s/qpxkyWkycrmBK9m)
+
 ### Prerequisites
 
 First, you need to install the Cuvis C SDK from [here](https://cloud.cubert-gmbh.de/s/qpxkyWkycrmBK9m).
