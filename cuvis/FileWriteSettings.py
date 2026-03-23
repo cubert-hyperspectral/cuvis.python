@@ -325,7 +325,6 @@ class ViewExportSettings(GeneralExportSettings):
 @dataclass
 class SaveArgs(GeneralExportSettings):
     merge_mode: SessionMergeMode = SessionMergeMode.Default
-    allow_fragmentation: bool = False
     allow_drop: bool = False
     allow_overwrite: bool = False
     allow_session_file: bool = True
@@ -364,7 +363,6 @@ class SaveArgs(GeneralExportSettings):
             **ge.__dict__,
             allow_overwrite=bool(sa.allow_overwrite),
             merge_mode=internal.__SessionMergeMode__[sa.merge_mode],
-            allow_fragmentation=bool(sa.allow_fragmentation),
             allow_drop=bool(sa.allow_drop),
             allow_session_file=bool(sa.allow_session_file),
             allow_info_file=bool(sa.allow_info_file),
