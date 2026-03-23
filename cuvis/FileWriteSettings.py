@@ -21,7 +21,7 @@ from typing import Optional
 @dataclass
 class PanSharpeningSettings(object):
     channel_selection: str = "all"
-    spectra_multiplier: int = 1
+    spectra_multiplier: float = 1
     pan_scale: float = 0.0
     pan_sharpening_interpolation_type: PanSharpeningInterpolationType = (
         PanSharpeningInterpolationType.Linear
@@ -36,7 +36,7 @@ class PanSharpeningSettings(object):
         ps = cuvis_il.cuvis_pansharpening_settings_t()
         ps.channel_selection = self.channel_selection
         ps.spectra_multiplier = self.spectra_multiplier
-        ps.pan_scale = float(self.pan_scale)
+        ps.pan_scale = self.pan_scale
         ps.pan_interpolation_type = internal.__CuvisPanSharpeningInterpolationType__[
             self.pan_sharpening_interpolation_type
         ]
@@ -327,6 +327,7 @@ class SaveArgs(GeneralExportSettings):
     merge_mode: SessionMergeMode = SessionMergeMode.Default
     allow_fragmentation: bool = False
     allow_drop: bool = False
+    allow_overwrite: bool = False
     allow_session_file: bool = True
     allow_info_file: bool = True
     operation_mode: OperationMode = OperationMode.Software
@@ -341,6 +342,7 @@ class SaveArgs(GeneralExportSettings):
         sa = cuvis_il.cuvis_save_args_t()
         sa.merge_mode = internal.__CuvisSessionMergeMode__[self.merge_mode]
         sa.allow_drop = int(self.allow_drop)
+        sa.allow_overwrite = int(self.allow_overwrite)
         sa.allow_session_file = int(self.allow_session_file)
         sa.allow_info_file = int(self.allow_info_file)
         sa.operation_mode = internal.__CuvisOperationMode__[self.operation_mode]
