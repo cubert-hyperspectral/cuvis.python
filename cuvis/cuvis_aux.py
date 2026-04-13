@@ -113,7 +113,7 @@ class GPSData(object):
 @dataclass(frozen=True)
 class SensorInfo(object):
     averages: int
-    temperature: int
+    temperature: float
     gain: float
     readout_time: datetime.datetime
     width: int
