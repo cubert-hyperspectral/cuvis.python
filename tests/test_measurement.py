@@ -18,9 +18,19 @@ def test_measurement_metadata_attributes(test_measurement):
 
 
 def test_measurement_capture_time(test_measurement):
-    """Test capture time is a datetime object."""
+    """Test capture time is a timezone-aware UTC datetime object."""
     capture_time = test_measurement.capture_time
     assert isinstance(capture_time, datetime.datetime)
+    # capture_time originates from a UTC epoch timestamp and must be
+    # explicitly marked as UTC (see issue cuvis.pyil#29).
+    assert capture_time.tzinfo is not None
+    assert capture_time.utcoffset() == datetime.timedelta(0)
+
+
+def test_measurement_capture_time_value(test_measurement):
+    """Test capture time has the expected exact UTC value (see cuvis.pyil#29)."""
+    assert test_measurement.capture_time == datetime.datetime(
+        2023, 11, 24, 11, 13, 5, 356000, tzinfo=datetime.timezone.utc)
 
 
 def test_measurement_integration_time(test_measurement):
