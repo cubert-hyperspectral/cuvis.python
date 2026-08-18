@@ -125,7 +125,10 @@ class Measurement(object):
                                                                 key, info)
                 self.data.update({key: SensorInfo._from_internal(info)})
             else:
-                self.data.update({key: "Not Implemented!"})
+                # The C API reports entries it cannot hand out with an empty key,
+                # so they need a distinct one here or they overwrite each other.
+                self.data.update({key or "unsupported_data_{}".format(ind):
+                                  "Not Implemented! (data type {})".format(cdtype)})
 
     def save(self, saveargs: SaveArgs) -> None:
         ge, sa = saveargs._get_internal()
