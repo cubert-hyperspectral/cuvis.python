@@ -1,13 +1,16 @@
 """
-Unit tests for the ImageData helper.
+Tests for the ImageData helper.
 
-These build ImageData from plain arrays, so they cover the point spectrum layout
-(1, 1, channels) produced by a QMini without needing such a measurement at hand.
+The first half builds ImageData from plain arrays, which is what lets the point
+spectrum layout (1, 1, channels) of a QMini be covered without such a measurement
+at hand. The second half runs the same behaviour against the committed test
+measurement, so the contract is checked against data the SDK really produces.
 """
 
 import numpy as np
 import pytest
 
+import cuvis
 from cuvis import ImageData
 
 
@@ -35,6 +38,17 @@ def preview():
 def test_from_array_derives_geometry(spectrum, cube):
     assert (spectrum.height, spectrum.width, spectrum.channels) == (1, 1, 2500)
     assert (cube.height, cube.width, cube.channels) == (4, 3, 5)
+
+
+def test_from_array_reshapes_to_the_documented_layout():
+    """array is always (height, width, channels), whatever came in."""
+    from_vector = ImageData.from_array(np.arange(7))
+    assert from_vector.array.shape == (1, 1, 7)
+    assert from_vector.is_spectrum
+
+    from_image = ImageData.from_array(np.zeros((4, 3)))
+    assert from_image.array.shape == (4, 3, 1)
+    assert (from_image.height, from_image.width, from_image.channels) == (4, 3, 1)
 
 
 def test_spectrum_is_one_dimensional(spectrum):
@@ -85,6 +99,24 @@ def test_strided_and_negative_band_slices(cube):
     assert cube[:, :, -2:].wavelength == [400, 500]
 
 
+def test_band_index_lists_and_masks(cube):
+    assert cube[:, :, [0, 2]].wavelength == [100, 300]
+    mask = np.array([True, False, True, False, False])
+    assert cube[:, :, mask].wavelength == [100, 300]
+
+
+def test_ellipsis_is_expanded_before_reading_the_band_axis(cube):
+    assert cube[..., 1:3].wavelength == [200, 300]
+    assert cube[1, 2, ...][1] == [100, 200, 300, 400, 500]
+
+
+def test_wavelengths_are_dropped_rather_than_guessed(cube):
+    """A slice down the spatial axis selects one band, not len(result) of them."""
+    values, wavelength = cube[0, :, 2]
+    assert values.shape == (3,)
+    assert wavelength is None
+
+
 def test_wavelength_is_none_without_band_information(preview):
     """Accessing wavelength used to raise AttributeError for such images."""
     assert preview.wavelength is None
@@ -122,3 +154,116 @@ def test_empty_image_data():
     assert empty.shape is None
     with pytest.raises(ValueError):
         empty[0, 0]
+    with pytest.raises(ValueError):
+        np.asarray(empty)
+    with pytest.raises(ValueError):
+        empty.spectrum
+
+
+# The same contract, against the measurement committed to the repository.
+
+
+@pytest.fixture
+def real_cube(processing_context_from_session, test_measurement):
+    """The processed cube of the test measurement, with wavelengths."""
+    processing_context_from_session.processing_mode = cuvis.ProcessingMode.Raw
+    processing_context_from_session.apply(test_measurement)
+    return test_measurement.cube
+
+
+@pytest.fixture
+def real_view(test_measurement):
+    """The view image, which the SDK delivers without any band information."""
+    return test_measurement.data["view"]
+
+
+def test_real_cube_geometry_matches_its_metadata(real_cube):
+    assert real_cube.array.ndim == 3
+    assert real_cube.array.shape == (real_cube.height, real_cube.width, real_cube.channels)
+    assert not real_cube.is_spectrum
+
+
+def test_real_cube_wavelengths_line_up_with_the_bands(real_cube):
+    assert len(real_cube.wavelength) == real_cube.channels
+    assert real_cube.wavelength == sorted(real_cube.wavelength)
+
+
+def test_real_cube_pixel_access(real_cube):
+    values, wavelength = real_cube[real_cube.height // 2, real_cube.width // 2]
+    assert values.shape == (real_cube.channels,)
+    assert wavelength == real_cube.wavelength
+
+
+def test_real_cube_band_slice_keeps_wavelengths_in_step(real_cube):
+    sliced = real_cube[:, :, 2:5]
+    assert isinstance(sliced, ImageData)
+    assert sliced.channels == 3
+    assert sliced.wavelength == real_cube.wavelength[2:5]
+    np.testing.assert_array_equal(sliced.array, real_cube.array[:, :, 2:5])
+
+
+def test_real_cube_single_band_slice_stays_image_data(real_cube):
+    """This slice used to fall through every branch and return None."""
+    sliced = real_cube[:, :, 0:1]
+    assert isinstance(sliced, ImageData)
+    assert sliced.wavelength == real_cube.wavelength[:1]
+
+
+def test_real_cube_index_forms(real_cube):
+    assert real_cube[:, :, 0].shape == (real_cube.height, real_cube.width)
+    assert np.ndim(real_cube[0, 0, 0]) == 0
+    assert real_cube[..., 1:3].wavelength == real_cube.wavelength[1:3]
+    assert real_cube[:, :, [0, 2]].wavelength == [real_cube.wavelength[0],
+                                                  real_cube.wavelength[2]]
+
+
+def test_real_view_has_no_wavelengths(real_view):
+    """Reading wavelength on such an image used to raise AttributeError."""
+    assert real_view.wavelength is None
+    assert real_view.channels == real_view.array.shape[2]
+
+    values, wavelength = real_view[0, 0]
+    assert values.shape == (real_view.channels,)
+    assert wavelength is None
+    assert real_view[:, :, 0:1].wavelength is None
+
+
+def test_real_cube_arithmetic_preserves_metadata(real_cube):
+    doubled = real_cube * 2
+    assert isinstance(doubled, ImageData)
+    assert doubled.wavelength == real_cube.wavelength
+    assert doubled.shape == real_cube.shape
+    np.testing.assert_array_equal(doubled.array, real_cube.array * 2)
+    np.testing.assert_array_equal((real_cube - real_cube).array,
+                                  np.zeros_like(real_cube.array))
+
+
+def test_real_cube_numpy_interop(real_cube):
+    assert np.asarray(real_cube) is real_cube.array
+    assert np.asarray(real_cube, dtype=np.float32).dtype == np.float32
+    assert np.mean(real_cube) == pytest.approx(real_cube.array.mean())
+
+
+def test_real_pixel_spectrum_behaves_like_a_point_measurement(real_cube):
+    """
+    The committed measurement has no point spectrometer, so take a real pixel and
+    check it works in the (1, 1, channels) layout a QMini arrives in.
+    """
+    values, wavelength = real_cube[10, 10]
+    point = ImageData.from_array(values, wavelength=wavelength)
+
+    assert point.is_spectrum
+    assert point.array.shape == (1, 1, real_cube.channels)
+    np.testing.assert_array_equal(point.spectrum, values)
+    assert (point / 2)[0, 0][1] == wavelength
+
+
+def test_unsupported_data_entries_do_not_overwrite_each_other(test_measurement):
+    """
+    The C API reports entries it cannot hand out with an empty key. They all used to
+    land under the same dictionary key and so collapsed into a single one.
+    """
+    unsupported = {key: value for key, value in test_measurement.data.items()
+                   if isinstance(value, str) and value.startswith("Not Implemented!")}
+    assert len(unsupported) == len(set(unsupported))
+    assert "" not in test_measurement.data
