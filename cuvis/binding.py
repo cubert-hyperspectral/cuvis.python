@@ -75,10 +75,12 @@ class BindingInfo:
     Obtained from :func:`info`; printing it yields a short report suitable for
     pasting into a bug report.
 
-    :ivar built_against: version of the cuvis SDK the binding was compiled against,
-        for example ``"3.5.3"``. Empty if the binding predates this feature.
-    :ivar library_version: full version banner reported by the library that was
-        actually loaded, for example ``"CUBERT SDK v. 3.4.1 build: d20de35..."``.
+    :ivar built_against: version banner of the cuvis SDK the binding was compiled
+        against, for example ``"CUBERT SDK v. 3.5.3 build: 0f416fb..."``. Reported in
+        the same form as :attr:`library_version` so the two can be read side by side:
+        the build hash is what tells apart two libraries that report the same version.
+        Empty if the binding predates this feature.
+    :ivar library_version: the same banner, from the library that was actually loaded.
         Empty if it could not be read.
     :ivar library_path: file the binding loaded, for example
         ``"/lib/cuvis/libcuvis.so"``. Useful when several copies are installed.
