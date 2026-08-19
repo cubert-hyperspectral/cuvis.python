@@ -53,6 +53,9 @@ class SessionData(object):
 class CalibrationInfo(object):
     model_name: str
     serial_no: str
+    # Only the day carries meaning. The SDK derives this as midnight in the reading
+    # machine's standard local time, so the time component is an artifact and the
+    # value shifts by the local UTC offset from one host to the next.
     calibration_date: datetime.datetime
     annotation_name: str
     unique_id: str

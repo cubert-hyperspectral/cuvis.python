@@ -179,7 +179,13 @@ class Measurement(object):
 
     @property
     def factory_calibration(self) -> Optional[datetime.datetime]:
-        """Timezone-aware UTC instant, or None if the SDK reported a value datetime cannot hold."""
+        """The calibration day, or None if the SDK reported a value datetime cannot hold.
+
+        Timezone-aware UTC, but only the day carries meaning. The SDK stores the day as
+        midnight in the local time of the machine that wrote the file, so the time
+        component is an artifact of that machine and the day can be off by one when the
+        file is read in another timezone.
+        """
         return self._factory_calibration
 
     @property

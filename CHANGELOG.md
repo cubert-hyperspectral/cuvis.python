@@ -44,7 +44,9 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.Measurement.capture_time`, `cuvis.Measurement.factory_calibration`, `cuvis.GPSData.time`, `cuvis.SensorInfo.readout_time` - type changed from a naive `datetime.datetime` to one carrying `tzinfo=datetime.timezone.utc`.
   The instant is unchanged, only the `+00:00` label is added; comparing or subtracting against a naive `datetime` now raises `TypeError`, so use `datetime.datetime.now(datetime.timezone.utc)` or `.astimezone()` for local time.
 - `cuvis.CalibrationInfo.calibration_date` - type changed from `int` to a `datetime.datetime` carrying `tzinfo=datetime.timezone.utc`; the field was annotated as a `datetime` but returned the raw epoch milliseconds unconverted.
+  The SDK derives this value as midnight on the calibration day in the host's standard local time, so unlike the other timestamps the instant it denotes shifts with the reading machine; treat it as a day, not as an exact moment.
 - `cuvis.Measurement.factory_calibration` - type changed from `datetime.datetime` to `Optional[datetime.datetime]`, matching the existing fallback to `None` for SDK values the `datetime` range cannot represent.
+  Only the day carries meaning: the SDK stores it as midnight in the local time of the machine that wrote the file, so the time component is an artifact of that machine and the day can be off by one when the file is read in another timezone.
 
 ### Removed
 
