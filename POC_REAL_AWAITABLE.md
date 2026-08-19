@@ -124,6 +124,37 @@ The 108 ms figure is not a coincidence - it is the 100 ms poll interval, and it 
 
 Full suite: 123 passed against the rebuilt extension on Python 3.12.
 
+### Linux
+
+The same thing, built and run inside `cubertgmbh/cuvis_pyil:3.5.3-ubuntu24.04` on Python
+3.12, against the SDK the image ships. The build needs no CMake change; SWIG emits the
+GIL release at 311 call sites there against 325 on Windows, the difference being the
+entry points the two platforms wrap.
+
+| | before | after |
+| --- | --- | --- |
+| worker result, blocking | 21.6 ms | 21.6 ms |
+| worker result, awaited | **101.5 ms** | **22.6 ms** |
+| awaited / blocking | 4.70x | 1.05x |
+| registered callback, idle | 2.9 % of a core | 0.1 % of a core |
+
+The blocking floor is identical across the two runs, which is what makes this pair
+trustworthy: only the awaited number moved. Linux lands closer to the floor than Windows
+does, and its idle cost was the higher of the two to begin with.
+
+Full suite: 134 passed.
+
+The mismatch case behaves as it does on Windows. A binding built in the 3.5.3 image and
+run against `cubertgmbh/cuvis_pyil:3.4.1-ubuntu24.04` reports the three functions 3.4.1
+does not export, warns once, and turns a call to one of them into a `RuntimeError` rather
+than a crash, with the GIL released throughout.
+
+That image pairing does segfault, in `cuvis_proc_cont_create_from_session_file`, but the
+fault is not this branch's: a control binding built from the same tree with `%exception`
+restored to its `develop` form crashes at the same line with the same exit code. It is
+the SDK version mismatch itself, present before any of this work, and worth its own
+ticket rather than a mention here.
+
 ## What the SDK would need for this to be finished
 
 The executor approach is a real improvement but it is not free, and both costs are the SDK's to remove:
