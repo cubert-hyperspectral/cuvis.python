@@ -73,6 +73,17 @@ def test_measurement(test_session_file):
     return test_session_file.get_measurement(0)
 
 
+@pytest.fixture(scope="session")
+def test_calibration(test_session_file):
+    """
+    Load the Calibration of the Test session once per session.
+    """
+    calibration = cuvis.Calibration(test_session_file)
+    yield calibration
+    del calibration
+    gc.collect()
+
+
 @pytest.fixture
 def processing_context_from_session(test_session_file):
     """

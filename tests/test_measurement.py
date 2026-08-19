@@ -34,6 +34,26 @@ def test_measurement_capture_time_value(test_measurement):
     )
 
 
+def test_measurement_factory_calibration_is_utc_aware(test_measurement):
+    """Test factory calibration is a timezone-aware UTC datetime with the expected value."""
+    factory_calibration = test_measurement.factory_calibration
+    assert isinstance(factory_calibration, datetime.datetime)
+    assert factory_calibration.tzinfo is not None
+    assert factory_calibration.utcoffset() == datetime.timedelta(0)
+    assert factory_calibration == datetime.datetime(
+        2023, 7, 26, 23, 0, tzinfo=datetime.timezone.utc
+    )
+
+
+def test_measurement_sensor_info_readout_time_is_utc_aware(test_measurement):
+    """Test the sensor readout time is timezone-aware UTC and matches the capture time."""
+    readout_time = test_measurement.data["IMAGE_info"].readout_time
+    assert isinstance(readout_time, datetime.datetime)
+    assert readout_time.tzinfo is not None
+    assert readout_time.utcoffset() == datetime.timedelta(0)
+    assert readout_time == test_measurement.capture_time
+
+
 def test_measurement_integration_time(test_measurement):
     """Test integration time is positive."""
     integration_time = test_measurement.integration_time

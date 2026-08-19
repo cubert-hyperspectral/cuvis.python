@@ -41,6 +41,10 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.General.init` - parameter `settings_path` type changed from `str` to `Union[str, Path, SdkSettings]`.
   An `SdkSettings` is written to a temporary directory that exists only for the duration of the call, since the SDK reads the settings once during initialisation.
 - `cuvis.FileWriteSettings.GeneralExportSettings.__repr__`, `cuvis.FileWriteSettings.ViewerSettings.__repr__` - the docstring that sat below the nested helper, where it was a dead expression rather than a docstring, moved to the top of the method.
+- `cuvis.Measurement.capture_time`, `cuvis.Measurement.factory_calibration`, `cuvis.GPSData.time`, `cuvis.SensorInfo.readout_time` - type changed from a naive `datetime.datetime` to one carrying `tzinfo=datetime.timezone.utc`.
+  The instant is unchanged, only the `+00:00` label is added; comparing or subtracting against a naive `datetime` now raises `TypeError`, so use `datetime.datetime.now(datetime.timezone.utc)` or `.astimezone()` for local time.
+- `cuvis.CalibrationInfo.calibration_date` - type changed from `int` to a `datetime.datetime` carrying `tzinfo=datetime.timezone.utc`; the field was annotated as a `datetime` but returned the raw epoch milliseconds unconverted.
+- `cuvis.Measurement.factory_calibration` - type changed from `datetime.datetime` to `Optional[datetime.datetime]`, matching the existing fallback to `None` for SDK values the `datetime` range cannot represent.
 
 ### Removed
 

@@ -4,7 +4,12 @@ from ._cuvis_il import cuvis_il
 import logging
 import datetime
 
-base_datetime = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+_EPOCH_UTC = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+
+
+def _utc_from_epoch_ms(milliseconds: int) -> datetime.datetime:
+    """The SDK reports instants as milliseconds since the Unix epoch in UTC."""
+    return _EPOCH_UTC + datetime.timedelta(milliseconds=milliseconds)
 
 
 def _fn_bits(n):
@@ -76,7 +81,7 @@ class CalibrationInfo(object):
         return cls(
             ci.model_name,
             ci.serial_no,
-            ci.calibration_date,
+            _utc_from_epoch_ms(ci.calibration_date),
             ci.annotation_name,
             ci.unique_id,
             ci.file_path,
@@ -105,7 +110,7 @@ class GPSData(object):
             longitude=gps.longitude,
             latitude=gps.latitude,
             altitude=gps.altitude,
-            time=base_datetime + datetime.timedelta(milliseconds=gps.time),
+            time=_utc_from_epoch_ms(gps.time),
         )
 
 
@@ -127,8 +132,7 @@ class SensorInfo(object):
             averages=info.averages,
             temperature=info.temperature,
             gain=info.gain,
-            readout_time=base_datetime
-            + datetime.timedelta(milliseconds=info.readout_time),
+            readout_time=_utc_from_epoch_ms(info.readout_time),
             width=info.width,
             height=info.height,
             raw_frame_id=info.raw_frame_id,
