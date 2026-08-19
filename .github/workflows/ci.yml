@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  meta:
+    name: Resolve versions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      sdk: ${{ steps.meta.outputs.sdk }}
+      ruff: ${{ steps.meta.outputs.ruff }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Read pyproject.toml
+        id: meta
+        run: python scripts/release_meta.py >> "$GITHUB_OUTPUT"
+
+  lint:
+    name: Lint
+    needs: meta
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install ruff
+        run: python -m pip install "${{ needs.meta.outputs.ruff }}"
+
+      - name: Check formatting
+        run: ruff format --check --diff .
+
+      - name: Check lint rules
+        run: ruff check --output-format github .
+
+  changelog:
+    name: Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Validate CHANGELOG.md structure
+        run: python scripts/check_changelog.py
+
+      - name: Require a changelog entry
+        if: >
+          github.event_name == 'pull_request'
+          && !contains(github.event.pull_request.labels.*.name, 'no-changelog')
+        run: |
+          if ! git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -qx CHANGELOG.md; then
+            echo "This pull request does not touch CHANGELOG.md."
+            echo "Add an entry under '## [Unreleased]' following CONTRIBUTING.md,"
+            echo "or label the pull request 'no-changelog' if the change is genuinely invisible to users."
+            exit 1
+          fi
+
+  tests:
+    name: Tests
+    needs: meta
+    runs-on: ubuntu-latest
+    container:
+      image: cubertgmbh/cuvis_pyil:${{ needs.meta.outputs.sdk }}-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install the wrapper with test dependencies
+        run: python3 -m pip install -e ".[test]"
+
+      - name: Run tests
+        run: python3 -m pytest
