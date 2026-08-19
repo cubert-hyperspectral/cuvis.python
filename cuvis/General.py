@@ -1,6 +1,5 @@
 import logging
 import os
-import platform
 from contextlib import ExitStack
 from importlib.metadata import version as imp_version
 
