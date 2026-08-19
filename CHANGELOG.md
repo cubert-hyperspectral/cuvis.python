@@ -20,6 +20,13 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
 - `CONTRIBUTING.md` - documents the branch model, the version scheme, the changelog conventions and the release checklist.
 - `cuvis.BindingInfo` - new frozen dataclass with the fields `built_against: str`, `library_version: str`, `library_path: str` and `missing_symbols: Tuple[str, ...]`, the read-only property `is_complete: bool`, and a `__str__` rendering a report fit for a bug report.
+- `cuvis.CudaImageData` - new class, device-resident image data backed by a shareable CUDA buffer, exposed zero-copy through DLPack or `__cuda_array_interface__` with no host copy.
+- `cuvis.CudaImageData.export_payload` - new method, returns `bytes`.
+- `cuvis.CudaImageData.make_ipc` - new method, returns `bytes`.
+- `cuvis.CudaImageData.to_torch` - new method, returns `torch.Tensor`.
+- `cuvis.Measurement.get_cube` - new method, returns `Union[ImageData, CudaImageData]` depending on whether `cuvis.cuda.enable` was called.
+- `cuvis.Measurement.get_cube_cuda` - new method, returns `CudaImageData`.
+- `cuvis.Measurement.get_cube_cuda_ipc` - new method, returns `CudaImageData`.
 - `cuvis.SdkSettings` - new class, a `MutableMapping` of setting id to value that writes the SDK's `cuvis.settings` file, so the SDK configuration can be built in Python instead of maintained by hand.
   Values are stored as strings: `bool` becomes `true`/`false`, an `Enum` becomes its value, anything else goes through `str()`, and `None` drops the entry.
 - `cuvis.SdkSettings.__enter__`, `cuvis.SdkSettings.__exit__` - new methods; entering the context serializes the settings into a temporary directory and returns its path as `str`, leaving the context removes the directory.
@@ -32,6 +39,25 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.binding.info` - new function, returns `BindingInfo`.
 - `cuvis.binding.missing_symbols` - new function, returns `FrozenSet[str]`.
 - `cuvis.binding.require` - new function, raises `UnavailableSDKFunction` naming whichever of the given functions the installed cuvis library does not provide.
+- `cuvis.binding.unavailable` - new function, returns `Tuple[str, ...]`.
+  A function the binding never exposed is unusable as well, so availability cannot be answered from the reported-missing list alone.
+- `cuvis.cuda` - new module gating the optional CUDA feature surface; CUDA stays off until `cuvis.cuda.enable` is called.
+- `cuvis.cuda.BACKEND_NONE`, `cuvis.cuda.BACKEND_POOL`, `cuvis.cuda.BACKEND_LEGACY`, `cuvis.cuda.BACKEND_VMM` - new constants, the IPC backend codes from `cuvis.h`.
+- `cuvis.cuda.CudaCapabilities` - new `NamedTuple` with the `bool` fields `same_process`, `ipc_pool`, `ipc_legacy`, `ipc_vmm`, `torch` and `cuda_python`, and the read-only property `any_ipc: bool`.
+- `cuvis.cuda.capabilities` - new function, returns `CudaCapabilities`.
+- `cuvis.cuda.disable` - new function.
+- `cuvis.cuda.enable` - new function.
+- `cuvis.cuda.is_enabled` - new function, returns `bool`.
+- `cuvis.cuda.require_device` - new function, raises `UnavailableSDKFunction` unless the installed library provides the same-process device path.
+- `cuvis.cuda.require_ipc` - new function, raises `UnavailableSDKFunction` unless the installed library provides the cross-process export path.
+- `cuvis_ipc` - new top-level module, the consumer side of cross-process CUDA IPC.
+  It sits outside the `cuvis` package because importing `cuvis` requires the SDK and a consumer process does not have one; its only import is `struct`.
+- `cuvis_ipc.ImportedCube` - new class, a mapped IPC buffer in the consumer process, usable as a context manager.
+- `cuvis_ipc.open` - new function, returns `ImportedCube`.
+- `cuvis_ipc.open_descriptor` - new function, returns `ImportedCube`.
+- `cuvis_ipc.pack_payload` - new function, returns `bytes`.
+- `pyproject.toml` - `py-modules` declaring the top-level `cuvis_ipc`.
+- `tests/` - `test_binding.py`, `test_cuda.py` and `test_cuvis_ipc.py`.
 
 ### Changed
 
