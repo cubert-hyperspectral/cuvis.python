@@ -6,7 +6,7 @@ from .SessionFile import SessionFile
 from .cuvis_aux import SDKException, SessionData, ComponentInfo
 from .cuvis_types import HardwareState, OperationMode
 
-from typing import Callable, Awaitable, Union, Optional
+from collections.abc import Callable, Awaitable
 from .doc import copydoc
 
 import cuvis.cuvis_types as internal
@@ -15,9 +15,7 @@ import asyncio as a
 
 
 class AcquisitionContext(object):
-    def __init__(
-        self, base: Union[Calibration, SessionFile], *, simulate: bool = False
-    ):
+    def __init__(self, base: Calibration | SessionFile, *, simulate: bool = False):
         self._handle = None
         self._simulate = simulate
         self._state_poll_task = None
@@ -251,7 +249,7 @@ class AcquisitionContext(object):
         return Async(cuvis_il.p_int_value(_pasync))
 
     @copydoc(cuvis_il.cuvis_acq_cont_capture_async)
-    def capture(self, to_interal=False) -> Optional[AsyncMesu]:
+    def capture(self, to_interal=False) -> AsyncMesu | None:
         if not to_interal:
             _pasync = cuvis_il.new_p_int()
             if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
@@ -538,9 +536,7 @@ class AcquisitionContext(object):
             raise SDKException()
         return Async(cuvis_il.p_int_value(_pasync))
 
-    def register_ready_callback(
-        self, callback: Callable[None, Awaitable[None]]
-    ) -> None:
+    def register_ready_callback(self, callback: Callable[[], Awaitable[None]]) -> None:
         self.reset_ready_callback()
 
         async def _internal_ready_loop():

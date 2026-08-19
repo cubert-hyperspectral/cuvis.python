@@ -10,13 +10,11 @@ from pathlib import Path
 
 import cuvis.cuvis_types as internal
 
-from typing import Union, Optional
-
 
 def init(
-    settings_path: Union[str, Path, SdkSettings] = ".",
-    global_loglevel: Union[int, str] = logging.DEBUG,
-    logfile_name: Optional[str] = None,
+    settings_path: str | Path | SdkSettings = ".",
+    global_loglevel: int | str = logging.DEBUG,
+    logfile_name: str | None = None,
 ):
     with ExitStack() as stack:
         if isinstance(settings_path, SdkSettings):
@@ -62,7 +60,7 @@ def wrapper_version() -> str:
     return f"{pip_version} {git_hash.read_text().splitlines()[0]}".strip()
 
 
-def set_log_level(lvl: Union[int, str]):
+def set_log_level(lvl: int | str):
     if isinstance(lvl, str):
         # also support string as input argument
         lvl = internal.__strToLogLevel__[lvl]

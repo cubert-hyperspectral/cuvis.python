@@ -8,7 +8,6 @@ from .cuvis_types import ReferenceType, ProcessingMode
 
 import cuvis.cuvis_types as internal
 
-from typing import Union
 
 import dataclasses
 
@@ -16,7 +15,7 @@ import dataclasses
 class ProcessingContext(object):
     def __init__(
         self,
-        base: Union[Calibration, SessionFile, Measurement],
+        base: Calibration | SessionFile | Measurement,
         load_references: bool = True,
     ):
         self._handle = None

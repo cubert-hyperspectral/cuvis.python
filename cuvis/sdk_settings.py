@@ -3,7 +3,7 @@ import tempfile
 from collections.abc import Iterator, MutableMapping
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 from xml.etree import ElementTree as ET
 
 SETTINGS_NAMESPACE = "http://cubert-gmbh.de/core/settings.xsd"
@@ -14,7 +14,7 @@ _SETTINGS_TAG = "{{{}}}settings".format(SETTINGS_NAMESPACE)
 _PROPERTY_TAG = "{{{}}}property".format(SETTINGS_NAMESPACE)
 
 
-def _resolve_source(source: Union[str, Path]) -> Path:
+def _resolve_source(source: str | Path) -> Path:
     source = Path(source)
     if not source.is_dir():
         return source
@@ -132,7 +132,7 @@ class SdkSettings(MutableMapping):
         id is empty or contains whitespace.
     """
 
-    def __init__(self, source: Optional[Union[str, Path]] = None, /, **kwargs):
+    def __init__(self, source: str | Path | None = None, /, **kwargs):
         self._tmpdir = None
         ET.register_namespace("", SETTINGS_NAMESPACE)
 
@@ -198,7 +198,7 @@ class SdkSettings(MutableMapping):
         self._tree.write(buf, xml_declaration=True, encoding="utf-8")
         return buf.getvalue().decode("utf-8")
 
-    def save(self, path: Union[str, Path]) -> None:
+    def save(self, path: str | Path) -> None:
         path = Path(path)
         if path.is_dir():
             path = path / SETTINGS_FILENAME

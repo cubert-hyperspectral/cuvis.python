@@ -12,7 +12,7 @@ import asyncio as a
 from .doc import copydoc
 
 from dataclasses import dataclass
-from typing import Callable, Awaitable
+from collections.abc import Callable, Awaitable
 
 
 @dataclass

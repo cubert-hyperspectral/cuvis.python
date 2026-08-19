@@ -1,4 +1,3 @@
-from typing import Optional, Union
 from .FileWriteSettings import SaveArgs
 import datetime
 from pathlib import Path
@@ -25,7 +24,7 @@ class Measurement(object):
     measurement_flags: MeasurementFlags  # read-only
     path: str  # read-only
     comment: str
-    factory_calibration: Optional[datetime.datetime]  # read-only
+    factory_calibration: datetime.datetime | None  # read-only
     assembly: str  # read-only
     integration_time: int  # read-only
     averages: int  # read-only
@@ -37,7 +36,7 @@ class Measurement(object):
     session_info: SessionData  # read-only
     frame_id: int  # read-only
 
-    def __init__(self, base: Union[int, str, Path]):
+    def __init__(self, base: int | str | Path):
         self._handle = None
         self._session = None
 
@@ -178,7 +177,7 @@ class Measurement(object):
         pass
 
     @property
-    def factory_calibration(self) -> Optional[datetime.datetime]:
+    def factory_calibration(self) -> datetime.datetime | None:
         """The calibration day, or None if the SDK reported a value datetime cannot hold.
 
         Timezone-aware UTC, but only the day carries meaning. The SDK stores the day as

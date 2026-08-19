@@ -8,11 +8,9 @@ from .cuvis_types import OperationMode
 
 import cuvis.cuvis_types as internal
 
-from typing import Union
-
 
 class Calibration(object):
-    def __init__(self, base: Union[Path, str, SessionFile]):
+    def __init__(self, base: Path | str | SessionFile):
         self._handle = None
         _ptr = cuvis_il.new_p_int()
         if isinstance(base, SessionFile):

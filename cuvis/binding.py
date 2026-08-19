@@ -35,7 +35,6 @@ and :func:`require` never raises. Absence of evidence, not evidence of absence.
 """
 
 from dataclasses import dataclass, field
-from typing import FrozenSet, Tuple
 
 from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException
@@ -94,7 +93,7 @@ class BindingInfo:
     built_against: str
     library_version: str
     library_path: str
-    missing_symbols: Tuple[str, ...] = field(default_factory=tuple)
+    missing_symbols: tuple[str, ...] = field(default_factory=tuple)
 
     @property
     def is_complete(self) -> bool:
@@ -152,7 +151,7 @@ def info() -> BindingInfo:
     )
 
 
-def missing_symbols() -> FrozenSet[str]:
+def missing_symbols() -> frozenset[str]:
     """Functions the binding imports that the installed cuvis library does not export.
 
     :return: the set of C function names, empty when the SDK matches the binding and

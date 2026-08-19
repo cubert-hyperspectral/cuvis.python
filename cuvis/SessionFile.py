@@ -12,11 +12,9 @@ from .cuvis_types import (
 
 import cuvis.cuvis_types as internal
 
-from typing import Union, Optional
-
 
 class SessionFile(object):
-    def __init__(self, base: Union[Path, str]):
+    def __init__(self, base: Path | str):
         base = Path(base)
         self._handle = None
         self._pc = None
@@ -30,7 +28,7 @@ class SessionFile(object):
 
     def get_measurement(
         self, frameNo: int = 0, itemtype: SessionItemType = SessionItemType.no_gaps
-    ) -> Optional[Measurement]:
+    ) -> Measurement | None:
         _ptr = cuvis_il.new_p_int()
         ret = cuvis_il.cuvis_session_file_get_mesu(
             self._handle, frameNo, internal.__CuvisSessionItemType__[itemtype], _ptr
@@ -43,9 +41,7 @@ class SessionFile(object):
         mesu._session = self
         return mesu
 
-    def get_reference(
-        self, frameNo: int, reftype: ReferenceType
-    ) -> Optional[Measurement]:
+    def get_reference(self, frameNo: int, reftype: ReferenceType) -> Measurement | None:
         _ptr = cuvis_il.new_p_int()
         ret = cuvis_il.cuvis_session_file_get_reference_mesu(
             self._handle, frameNo, internal.__CuvisReferenceType__[reftype], _ptr
