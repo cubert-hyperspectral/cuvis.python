@@ -25,6 +25,7 @@ from .SessionFile import SessionFile
 from .ProcessingContext import ProcessingContext
 from .Measurement import Measurement
 from .General import init, shutdown, version, set_log_level
+from .sdk_settings import SdkSettings
 from .FileWriteSettings import (
     GeneralExportSettings,
     SaveArgs,

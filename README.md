@@ -84,6 +84,42 @@ covering some basic applications.
 Further, we provide a set of example measurements to explore [here](https://cloud.cubert-gmbh.de/s/SrkSRja5FKGS2Tw).
 These measurements are also used by the examples mentioned above.
 
+### Configuring the SDK from code
+
+The SDK reads its configuration from a `cuvis.settings` file in the directory passed to `cuvis.init()`.
+`SdkSettings` lets you write that configuration in Python instead of maintaining the file by hand.
+
+```python
+import cuvis
+
+settings = cuvis.SdkSettings(force_gpu_mode="cuda", processing_thread_count=8)
+cuvis.init(settings)
+```
+
+It behaves like a dict, so you can inspect and edit it before applying it:
+
+```python
+settings["verbose"] = True          # booleans become "true" / "false"
+del settings["force_gpu_mode"]
+print(dict(settings))               # {'processing_thread_count': '8', 'verbose': 'true'}
+print(settings.xml_str)             # the exact file that will be written
+```
+
+An existing configuration can be loaded from a settings file or from the directory containing one, and keyword arguments override what was loaded:
+
+```python
+settings = cuvis.SdkSettings("/path/to/settings_dir", processing_thread_count=4)
+```
+
+Used as a context manager it serializes itself into a temporary directory, which is useful for pointing other tools at the same configuration:
+
+```python
+with settings as settings_dir:
+    cuvis.init(settings_dir)
+```
+
+Use `settings.save(path)` to write the file to a permanent location instead.
+
 ### Getting involved
 
 cuvis.hub welcomes your enthusiasm and expertise!
