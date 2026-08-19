@@ -143,10 +143,12 @@ class ImageData(object):
         """
         Whether this covers a single pixel, as a point spectrometer reading does.
 
-        True when both :attr:`width` and :attr:`height` are 1, which is the layout
-        the SDK uses for a QMini and other point measurements.
+        True when :attr:`array` covers a single pixel, which is the layout the SDK
+        uses for a QMini and other point measurements. Derived from the array rather
+        than from :attr:`width` and :attr:`height`, so it cannot disagree with what
+        :attr:`spectrum` hands out.
         """
-        return self.width == 1 and self.height == 1
+        return self.shape is not None and self.shape[:2] == (1, 1)
 
     @property
     def spectrum(self) -> np.ndarray:
@@ -170,7 +172,7 @@ class ImageData(object):
         if not self.is_spectrum:
             raise ValueError(
                 "Not a single pixel measurement ({}x{}); index a pixel first, "
-                "for example image[y, x].".format(self.width, self.height))
+                "for example image[y, x].".format(self.shape[1], self.shape[0]))
         return self.array.reshape(-1)
 
     def __repr__(self) -> str:
