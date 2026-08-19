@@ -266,7 +266,9 @@ class ImageData(object):
 
     def _wrap(self, result):
         """Keep the metadata when an operation preserved the image geometry."""
-        if isinstance(result, np.ndarray) and result.shape == self.array.shape:
+        # A boolean result is a mask, not image data; wavelengths would not describe it.
+        if (isinstance(result, np.ndarray) and result.shape == self.array.shape
+                and result.dtype != bool):
             return ImageData.from_array(
                 result, self.width, self.height, self.channels, self.wavelength)
         return result

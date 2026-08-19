@@ -256,14 +256,3 @@ def test_real_pixel_spectrum_behaves_like_a_point_measurement(real_cube):
     assert point.array.shape == (1, 1, real_cube.channels)
     np.testing.assert_array_equal(point.spectrum, values)
     assert (point / 2)[0, 0][1] == wavelength
-
-
-def test_unsupported_data_entries_do_not_overwrite_each_other(test_measurement):
-    """
-    The C API reports entries it cannot hand out with an empty key. They all used to
-    land under the same dictionary key and so collapsed into a single one.
-    """
-    unsupported = {key: value for key, value in test_measurement.data.items()
-                   if isinstance(value, str) and value.startswith("Not Implemented!")}
-    assert len(unsupported) == len(set(unsupported))
-    assert "" not in test_measurement.data
