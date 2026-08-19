@@ -33,6 +33,7 @@ Against a binding too old to report any of this (an older ``cuvis_il`` wheel), e
 query answers empty: :func:`missing_symbols` is empty, :func:`available` is ``True``
 and :func:`require` never raises. Absence of evidence, not evidence of absence.
 """
+
 from dataclasses import dataclass, field
 from typing import FrozenSet, Tuple
 
@@ -61,7 +62,9 @@ class UnavailableSDKFunction(SDKException, RuntimeError):
             "against {}".format(
                 current.library_version or "unknown version",
                 ", ".join(self.names) or "a required function",
-                current.built_against or "an unknown version"))
+                current.built_against or "an unknown version",
+            )
+        )
         # Deliberately not SDKException.__init__: that reads the SDK's last-error
         # string, and here the library was never reached to set one.
         Exception.__init__(self, message)
@@ -120,10 +123,14 @@ class BindingInfo:
         elif self.is_complete:
             lines.append("  status        : complete")
         else:
-            lines.append("  status        : {} function(s) not provided by this SDK"
-                         .format(len(self.missing_symbols)))
-            lines.extend("                  {}".format(name)
-                         for name in self.missing_symbols)
+            lines.append(
+                "  status        : {} function(s) not provided by this SDK".format(
+                    len(self.missing_symbols)
+                )
+            )
+            lines.extend(
+                "                  {}".format(name) for name in self.missing_symbols
+            )
         return "\n".join(lines)
 
 
@@ -191,5 +198,11 @@ def require(*names: str) -> None:
         raise UnavailableSDKFunction(*unavailable)
 
 
-__all__ = ["BindingInfo", "UnavailableSDKFunction", "info", "missing_symbols",
-           "available", "require"]
+__all__ = [
+    "BindingInfo",
+    "UnavailableSDKFunction",
+    "info",
+    "missing_symbols",
+    "available",
+    "require",
+]
