@@ -1,4 +1,5 @@
-from typing import Optional, Sequence, Union
+from typing import Union
+from collections.abc import Sequence
 from ._cuvis_il import cuvis_il
 import numpy as np
 import operator
@@ -131,7 +132,7 @@ class ImageData(object):
             ]
 
     @property
-    def shape(self) -> Optional[tuple]:
+    def shape(self) -> tuple | None:
         """Shape of :attr:`array`, ``(height, width, channels)``, or ``None`` when empty."""
         return None if self.array is None else self.array.shape
 
@@ -241,7 +242,7 @@ class ImageData(object):
             return sliced_array, self._wavelengths_at(bands, len(sliced_array))
         return sliced_array
 
-    def _band_indices(self, key) -> Optional[Sequence[int]]:
+    def _band_indices(self, key) -> Sequence[int] | None:
         """
         The band indices a key selects, in the order they appear in the result.
 
@@ -271,8 +272,8 @@ class ImageData(object):
         return None
 
     def _wavelengths_at(
-        self, bands: Optional[Sequence[int]], expected: int
-    ) -> Optional[list]:
+        self, bands: Sequence[int] | None, expected: int
+    ) -> list | None:
         """The wavelengths of the selected bands, or None if they do not line up."""
         if self.wavelength is None or bands is None or len(bands) != expected:
             return None

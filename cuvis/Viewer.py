@@ -4,11 +4,9 @@ from .cuvis_aux import SDKException
 
 from .FileWriteSettings import ViewerSettings
 
-from typing import Union
-
 
 class Viewer(object):
-    def __init__(self, settings: Union[int, ViewerSettings]):
+    def __init__(self, settings: int | ViewerSettings):
         self._handle = None
         if isinstance(settings, int):
             self._handle = settings
@@ -25,9 +23,7 @@ class Viewer(object):
             )
         pass
 
-    def _create_view_data(
-        self, new_handle: int
-    ) -> Union[dict[str, ImageData], ImageData]:
+    def _create_view_data(self, new_handle: int) -> dict[str, ImageData] | ImageData:
 
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_view_get_data_count(new_handle, _ptr):
@@ -54,7 +50,7 @@ class Viewer(object):
         else:
             return view_array
 
-    def apply(self, mesu: Measurement) -> Union[dict[str, ImageData], ImageData]:
+    def apply(self, mesu: Measurement) -> dict[str, ImageData] | ImageData:
         _ptr = cuvis_il.new_p_int()
         if cuvis_il.status_ok != cuvis_il.cuvis_viewer_apply(
             self._handle, mesu._handle, _ptr

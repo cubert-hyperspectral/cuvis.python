@@ -5,11 +5,10 @@ from .cuvis_types import AsyncResult
 
 import asyncio as a
 
-from typing import Optional, Union
 from datetime import timedelta
 
 
-def _to_ms(value: Union[int, timedelta]) -> int:
+def _to_ms(value: int | timedelta) -> int:
     if isinstance(value, timedelta):
         return int(value / timedelta(milliseconds=1))
     elif isinstance(value, int):
@@ -25,8 +24,8 @@ class AsyncMesu(object):
     pass
 
     def get(
-        self, timeout_ms: Union[int, timedelta]
-    ) -> tuple[Optional[Measurement], AsyncResult]:
+        self, timeout_ms: int | timedelta
+    ) -> tuple[Measurement | None, AsyncResult]:
         _ptr = cuvis_il.new_p_int()
         _pmesu = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
@@ -45,7 +44,7 @@ class AsyncMesu(object):
 
     # Python Magic Methods
 
-    def __await__(self) -> Optional[Measurement]:
+    def __await__(self) -> Measurement | None:
         async def _wait_for_return():
             _status_ptr = cuvis_il.new_p_cuvis_status_t()
             while True:
@@ -80,7 +79,7 @@ class Async(object):
     def __init__(self, handle):
         self._handle = handle
 
-    def get(self, timeout_ms: Union[int, timedelta]) -> AsyncResult:
+    def get(self, timeout_ms: int | timedelta) -> AsyncResult:
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         res = cuvis_il.cuvis_async_call_get(_ptr, _to_ms(timeout_ms))

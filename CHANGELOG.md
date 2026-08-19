@@ -47,12 +47,17 @@ Pre-releases (`b*`, `rc*`) are not listed.
   The SDK derives this value as midnight on the calibration day in the host's standard local time, so unlike the other timestamps the instant it denotes shifts with the reading machine; treat it as a day, not as an exact moment.
 - `cuvis.Measurement.factory_calibration` - type changed from `datetime.datetime` to `Optional[datetime.datetime]`, matching the existing fallback to `None` for SDK values the `datetime` range cannot represent.
   Only the day carries meaning: the SDK stores it as midnight in the local time of the machine that wrote the file, so the time component is an artifact of that machine and the day can be off by one when the file is read in another timezone.
+- `pyproject.toml` - `requires-python` raised from `>=3.9` to `>=3.10`, Python 3.9 having reached end of life in October 2025.
+- Annotations throughout `cuvis` restated in the forms Python 3.10 provides: `Union[A, B]` and `Optional[A]` became `A | B` and `A | None`, and `Tuple`, `FrozenSet`, `Sequence`, `Callable` and `Awaitable` now come from `builtins` and `collections.abc` rather than `typing`.
+  Every signature denotes what it denoted before; `cuvis.cube_utils.ImageData.__getitem__` keeps `Union`, because its member list contains a forward reference and `|` cannot join a type to a string at runtime.
 
 ### Removed
 
 - `CI` - `.github/workflows/tests.yml` and `.github/workflows/publish_version.yml` removed; their jobs moved into `ci.yml` and `release.yml`.
 - `git-hash.txt` at the repository root - removed; the file is generated into `cuvis/` by `prebuild.py` and is no longer tracked.
 - Unused imports and locals dropped from `cuvis.AcquisitionContext`, `cuvis.Export`, `cuvis.General`, `cuvis.Measurement`, `cuvis.Viewer`, `cuvis.Worker`, `cuvis.cuvis_aux`, `cuvis.doc` and the test modules; no public name was removed.
+- `pyproject.toml` - the `typing_extensions` dependency removed; `ParamSpec` and `TypeAlias` are in `typing` from Python 3.10.
+- `pyproject.toml` - the `Programming Language :: Python :: 3.9` classifier removed.
 
 ### Fixed
 
@@ -60,6 +65,7 @@ Pre-releases (`b*`, `rc*`) are not listed.
   The hash is now read from `cuvis/git-hash.txt`, which the wheel and the sdist do ship, and a missing file degrades to reporting the version alone instead of raising.
 - `tests/test_general.py` - `test_wrapper_version` asserted the literal `3.5.3`, so it had to be edited on every SDK bump and passed only because an editable install exposed the untracked root `git-hash.txt`.
   It now compares against the installed distribution version.
+- `cuvis.AcquisitionContext.register_ready_callback` - parameter `callback` was annotated `Callable[None, Awaitable[None]]`, which is not a valid `Callable` form; it is now `Callable[[], Awaitable[None]]`, matching the no-argument call the implementation makes.
 
 ## [3.5.3.2] - 2026-08-19
 

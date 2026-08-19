@@ -15,7 +15,6 @@ import os
 import warnings
 
 from dataclasses import dataclass, fields, field, InitVar
-from typing import Optional
 
 
 @dataclass
@@ -72,25 +71,25 @@ class GeneralExportSettings(object):
     pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
     add_fullscale_pan: bool = False
     permissive: bool = False
-    channel_selection: InitVar[Optional[str]] = None
-    spectra_multiplier: InitVar[Optional[int]] = None
-    pan_scale: InitVar[Optional[float]] = None
+    channel_selection: InitVar[str | None] = None
+    spectra_multiplier: InitVar[int | None] = None
+    pan_scale: InitVar[float | None] = None
     pan_sharpening_interpolation_type: InitVar[
-        Optional[PanSharpeningInterpolationType]
+        PanSharpeningInterpolationType | None
     ] = None
-    pan_sharpening_algorithm: InitVar[Optional[PanSharpeningAlgorithm]] = None
-    pre_pan_sharpen_cube: InitVar[Optional[bool]] = None
-    add_pan: InitVar[Optional[bool]] = None
+    pan_sharpening_algorithm: InitVar[PanSharpeningAlgorithm | None] = None
+    pre_pan_sharpen_cube: InitVar[bool | None] = None
+    add_pan: InitVar[bool | None] = None
 
     def __post_init__(
         self,
-        channel_selection: Optional[str],
-        spectra_multiplier: Optional[int],
-        pan_scale: Optional[float],
-        pan_sharpening_interpolation_type: Optional[PanSharpeningInterpolationType],
-        pan_sharpening_algorithm: Optional[PanSharpeningAlgorithm],
-        pre_pan_sharpen_cube: Optional[bool],
-        add_pan: Optional[bool],
+        channel_selection: str | None,
+        spectra_multiplier: int | None,
+        pan_scale: float | None,
+        pan_sharpening_interpolation_type: PanSharpeningInterpolationType | None,
+        pan_sharpening_algorithm: PanSharpeningAlgorithm | None,
+        pre_pan_sharpen_cube: bool | None,
+        add_pan: bool | None,
     ) -> None:
         updates = (
             ("channel_selection", channel_selection),
@@ -246,13 +245,13 @@ class ViewExportSettings(GeneralExportSettings):
 
     def __post_init__(
         self,
-        channel_selection: Optional[str],
-        spectra_multiplier: Optional[int],
-        pan_scale: Optional[float],
-        pan_sharpening_interpolation_type: Optional[PanSharpeningInterpolationType],
-        pan_sharpening_algorithm: Optional[PanSharpeningAlgorithm],
-        pre_pan_sharpen_cube: Optional[bool],
-        add_pan: Optional[bool],
+        channel_selection: str | None,
+        spectra_multiplier: int | None,
+        pan_scale: float | None,
+        pan_sharpening_interpolation_type: PanSharpeningInterpolationType | None,
+        pan_sharpening_algorithm: PanSharpeningAlgorithm | None,
+        pre_pan_sharpen_cube: bool | None,
+        add_pan: bool | None,
         userplugin: str,
     ):
         super().__post_init__(
@@ -422,26 +421,26 @@ class ViewerSettings:
     pan_failback: bool = True
     complete: bool = False
     pan_sharpening: PanSharpeningSettings = field(default_factory=PanSharpeningSettings)
-    channel_selection: InitVar[Optional[str]] = None
-    spectra_multiplier: InitVar[Optional[int]] = None
-    pan_scale: InitVar[Optional[float]] = None
+    channel_selection: InitVar[str | None] = None
+    spectra_multiplier: InitVar[int | None] = None
+    pan_scale: InitVar[float | None] = None
     pan_sharpening_interpolation_type: InitVar[
-        Optional[PanSharpeningInterpolationType]
+        PanSharpeningInterpolationType | None
     ] = None
-    pan_sharpening_algorithm: InitVar[Optional[PanSharpeningAlgorithm]] = None
-    pre_pan_sharpen_cube: InitVar[Optional[bool]] = None
-    add_pan: InitVar[Optional[bool]] = None
+    pan_sharpening_algorithm: InitVar[PanSharpeningAlgorithm | None] = None
+    pre_pan_sharpen_cube: InitVar[bool | None] = None
+    add_pan: InitVar[bool | None] = None
     userplugin: InitVar[str] = None
 
     def __post_init__(
         self,
-        channel_selection: Optional[str],
-        spectra_multiplier: Optional[int],
-        pan_scale: Optional[float],
-        pan_sharpening_interpolation_type: Optional[PanSharpeningInterpolationType],
-        pan_sharpening_algorithm: Optional[PanSharpeningAlgorithm],
-        pre_pan_sharpen_cube: Optional[bool],
-        add_pan: Optional[bool],
+        channel_selection: str | None,
+        spectra_multiplier: int | None,
+        pan_scale: float | None,
+        pan_sharpening_interpolation_type: PanSharpeningInterpolationType | None,
+        pan_sharpening_algorithm: PanSharpeningAlgorithm | None,
+        pre_pan_sharpen_cube: bool | None,
+        add_pan: bool | None,
         userplugin: str,
     ):
         updates = (
