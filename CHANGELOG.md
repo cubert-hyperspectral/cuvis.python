@@ -32,11 +32,6 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.binding.info` - new function, returns `BindingInfo`.
 - `cuvis.binding.missing_symbols` - new function, returns `FrozenSet[str]`.
 - `cuvis.binding.require` - new function, raises `UnavailableSDKFunction` naming whichever of the given functions the installed cuvis library does not provide.
-- `cuvis.sdk_settings` - new module implementing `SdkSettings`, using only the standard library, so no dependency was added.
-- `cuvis.sdk_settings.SETTINGS_FILENAME` - new constant, `str`, the `cuvis.settings` file name the SDK looks for.
-- `cuvis.sdk_settings.SETTINGS_NAMESPACE` - new constant, `str`, the XML namespace of the settings document.
-- `cuvis.sdk_settings.SETTINGS_VERSION` - new constant, `str`, the settings document version written to the file.
-- `pyproject.toml` - `dev` extra pinning `ruff==0.16.3`, plus `[tool.ruff]` configuration selecting the `E4`, `E7`, `E9` and `F` rule sets.
 
 ### Changed
 
