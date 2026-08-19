@@ -22,13 +22,23 @@ class _DLDevice(ctypes.Structure):
 
 
 class _DLDataType(ctypes.Structure):
-    _fields_ = [("code", ctypes.c_uint8), ("bits", ctypes.c_uint8), ("lanes", ctypes.c_uint16)]
+    _fields_ = [
+        ("code", ctypes.c_uint8),
+        ("bits", ctypes.c_uint8),
+        ("lanes", ctypes.c_uint16),
+    ]
 
 
 class _DLTensor(ctypes.Structure):
-    _fields_ = [("data", ctypes.c_void_p), ("device", _DLDevice), ("ndim", ctypes.c_int),
-                ("dtype", _DLDataType), ("shape", ctypes.POINTER(ctypes.c_int64)),
-                ("strides", ctypes.POINTER(ctypes.c_int64)), ("byte_offset", ctypes.c_uint64)]
+    _fields_ = [
+        ("data", ctypes.c_void_p),
+        ("device", _DLDevice),
+        ("ndim", ctypes.c_int),
+        ("dtype", _DLDataType),
+        ("shape", ctypes.POINTER(ctypes.c_int64)),
+        ("strides", ctypes.POINTER(ctypes.c_int64)),
+        ("byte_offset", ctypes.c_uint64),
+    ]
 
 
 class _DLManagedTensor(ctypes.Structure):
@@ -36,8 +46,11 @@ class _DLManagedTensor(ctypes.Structure):
 
 
 _DELETER = ctypes.CFUNCTYPE(None, ctypes.POINTER(_DLManagedTensor))
-_DLManagedTensor._fields_ = [("dl_tensor", _DLTensor), ("manager_ctx", ctypes.c_void_p),
-                             ("deleter", _DELETER)]
+_DLManagedTensor._fields_ = [
+    ("dl_tensor", _DLTensor),
+    ("manager_ctx", ctypes.c_void_p),
+    ("deleter", _DELETER),
+]
 
 _pycapsule_new = ctypes.pythonapi.PyCapsule_New
 _pycapsule_new.restype = ctypes.py_object

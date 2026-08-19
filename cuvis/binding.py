@@ -29,9 +29,11 @@ Which error you get depends on how the unavailable function is reached:
   derives from :class:`RuntimeError`, so a single ``except RuntimeError`` covers
   both, while ``except SDKException`` still catches it as an ordinary cuvis error.
 
-Against a binding too old to report any of this (an older ``cuvis_il`` wheel), every
-query answers empty: :func:`missing_symbols` is empty, :func:`available` is ``True``
-and :func:`require` never raises. Absence of evidence, not evidence of absence.
+Against a binding too old to report any of this (an older ``cuvis_il`` wheel),
+:func:`missing_symbols` is empty and :func:`info` reports unknown throughout: absence of
+evidence, not evidence of absence. :func:`available` and :func:`require` stay meaningful
+there, because a function such an old binding never exposed is unusable whether or not
+anything reports it missing.
 """
 
 from dataclasses import dataclass, field
@@ -160,8 +162,25 @@ def missing_symbols() -> frozenset[str]:
     return frozenset(getattr(cuvis_il, "missing_symbols", ()))
 
 
+def unavailable(*names: str) -> Tuple[str, ...]:
+    """Which of the named functions cannot be called, in the order given.
+
+    A function is unusable for either of two reasons, and callers care about neither:
+    the binding never exposed it, which is what an older ``cuvis_il`` wheel looks like,
+    or the binding exposes it but the loaded library does not export it. Checking only
+    the second would report a function the binding does not even have as available.
+
+    :param names: C function names as they appear in ``cuvis.h``.
+    :return: the subset that is unusable, empty when all of them can be called.
+    """
+    absent = missing_symbols()
+    return tuple(
+        name for name in names if name in absent or not hasattr(cuvis_il, name)
+    )
+
+
 def available(*names: str) -> bool:
-    """Whether every named function is provided by the installed cuvis library.
+    """Whether every named function can actually be called.
 
     .. code-block:: python3
 
@@ -169,16 +188,14 @@ def available(*names: str) -> bool:
             cube = mesu.get_cube_cuda()
 
     :param names: C function names as they appear in ``cuvis.h``.
-    :return: ``True`` if none of them is reported missing. With a binding too old to
-        report anything this is always ``True``, so treat it as "nothing known to be
-        missing" rather than a guarantee.
+    :return: ``True`` if the binding exposes every one of them and none is reported
+        missing from the loaded library.
     """
-    absent = missing_symbols()
-    return not any(name in absent for name in names)
+    return not unavailable(*names)
 
 
 def require(*names: str) -> None:
-    """Raise unless every named function is provided by the installed cuvis library.
+    """Raise unless every named function can actually be called.
 
     Use it at the start of an operation to fail with a clear explanation, instead of
     letting a call fail deeper in with less context.
@@ -188,13 +205,12 @@ def require(*names: str) -> None:
         binding.require("cuvis_cuda_mem_get_view", "cuvis_cuda_mem_free")
 
     :param names: C function names as they appear in ``cuvis.h``.
-    :raises UnavailableSDKFunction: naming whichever of them are missing; the message
+    :raises UnavailableSDKFunction: naming whichever of them are unusable; the message
         also states the loaded SDK version and the one the binding expects.
     """
-    absent = missing_symbols()
-    unavailable = tuple(name for name in names if name in absent)
-    if unavailable:
-        raise UnavailableSDKFunction(*unavailable)
+    missing = unavailable(*names)
+    if missing:
+        raise UnavailableSDKFunction(*missing)
 
 
 __all__ = [
@@ -202,6 +218,7 @@ __all__ = [
     "UnavailableSDKFunction",
     "info",
     "missing_symbols",
+    "unavailable",
     "available",
     "require",
 ]

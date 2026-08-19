@@ -5,6 +5,8 @@ import numpy as np
 import operator
 from .cuvis_aux import SDKException
 from .cuvis_types import DataFormat
+from . import cuda
+import cuvis_ipc
 
 _IMBUF_READERS = {
     1: cuvis_il.cuvis_read_imbuf_uint8,
@@ -419,6 +421,8 @@ ImageData.__neg__ = lambda self: self._wrap(-self.array)
 ImageData.__abs__ = lambda self: self._wrap(abs(self.array))
 
 del _op, _reflected, _method
+
+
 class CudaImageData(object):
     """Device-resident image data backed by a shareable CUDA buffer.
 
@@ -443,9 +447,10 @@ class CudaImageData(object):
     def __init__(self, cuda_buf):
         if not isinstance(cuda_buf, cuvis_il.cuvis_cuda_imbuffer_t):
             raise TypeError(
-                "Wrong data type for cuda image buffer: {}".format(type(cuda_buf)))
-        self._handle = cuda_buf.handle          # CUVIS_CUDA_MEM (int), owned
-        self._ipc_handle = None                 # CUVIS_CUDA_IPC (int), set by make_ipc()
+                "Wrong data type for cuda image buffer: {}".format(type(cuda_buf))
+            )
+        self._handle = cuda_buf.handle  # CUVIS_CUDA_MEM (int), owned
+        self._ipc_handle = None  # CUVIS_CUDA_IPC (int), set by make_ipc()
         self._format = cuda_buf.format
         self.width = cuda_buf.width
         self.height = cuda_buf.height
@@ -455,7 +460,8 @@ class CudaImageData(object):
         if cuda_buf.wavelength is not None:
             self.wavelength = [
                 cuvis_il.p_unsigned_int_getitem(cuda_buf.wavelength, z)
-                for z in range(self.channels)]
+                for z in range(self.channels)
+            ]
         # bytes of the transportable IPC descriptor, filled by make_ipc()
         self.descriptor = None
 
@@ -472,6 +478,7 @@ class CudaImageData(object):
         # a pointer with NO lifecycle tie: the caller must keep this CudaImageData alive for
         # as long as the resulting array is used, or it reads freed device memory.
         import warnings
+
         warnings.warn(
             "CudaImageData.__cuda_array_interface__ has no lifecycle management; the buffer "
             "is freed when this CudaImageData is dropped. Prefer to_torch() (DLPack), which "
@@ -499,16 +506,20 @@ class CudaImageData(object):
             import torch
         except ImportError as e:
             raise ImportError(
-                "torch is required for CudaImageData.to_torch(); install 'cuvis[torch]'") from e
+                "torch is required for CudaImageData.to_torch(); install 'cuvis[torch]'"
+            ) from e
         from ._dlpack import make_cuda_dlpack
 
         ptr, size, dev = self._view()
         pref = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_mem_copy_handle(self._handle, pref):
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_mem_copy_handle(
+            self._handle, pref
+        ):
             raise SDKException()
         ref = cuvis_il.p_int_value(pref)
         producer = make_cuda_dlpack(
-            ptr, size, dev, on_delete=lambda: cuvis_il.cuvis_cuda_mem_free(ref))
+            ptr, size, dev, on_delete=lambda: cuvis_il.cuvis_cuda_mem_free(ref)
+        )
         t = torch.from_dlpack(producer)  # flat uint8
         t = t.view(getattr(torch, self._TORCH_DTYPE[self._format]))
         return t.reshape(self.height, self.width, self.channels)
@@ -523,12 +534,17 @@ class CudaImageData(object):
         The IPC handle is an independent reference kept until __del__; while it is open,
         freeing the mem handle does not release the device memory. Returns .descriptor.
         """
+        cuda.require_ipc()
         pipc = cuvis_il.new_p_int()
-        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_ipc_handle_create(self._handle, int(backend), pipc):
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_ipc_handle_create(
+            self._handle, int(backend), pipc
+        ):
             raise SDKException()
         self._ipc_handle = cuvis_il.p_int_value(pipc)
         desc = cuvis_il.cuvis_cuda_ipc_descriptor_t()
-        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_ipc_get_descriptor(self._ipc_handle, desc):
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_ipc_get_descriptor(
+            self._ipc_handle, desc
+        ):
             raise SDKException()
         self.descriptor = cuvis_il.cuvis_cuda_descriptor_bytes(desc)
         return self.descriptor
@@ -536,15 +552,16 @@ class CudaImageData(object):
     def export_payload(self, backend: int = 0) -> bytes:
         """A single transportable blob (IPC descriptor + geometry) for a consumer process.
 
-        Send these bytes out-of-band; the consumer opens them with cuvis.ipc.open(payload)
+        Send these bytes out-of-band; the consumer opens them with cuvis_ipc.open(payload)
         and gets a correctly shaped/typed tensor. Calls make_ipc(backend) if not already done
         (backend: 0=auto, 1=pool, 2=legacy, 3=VMM). Keep this CudaImageData alive until the
         consumer is finished (legacy IPC has no cross-process refcount).
         """
         if self.descriptor is None:
             self.make_ipc(backend)
-        from . import ipc
-        return ipc.pack_payload(self.descriptor, self.width, self.height, self.channels, self._format)
+        return cuvis_ipc.pack_payload(
+            self.descriptor, self.width, self.height, self.channels, self._format
+        )
 
     def __del__(self):
         try:

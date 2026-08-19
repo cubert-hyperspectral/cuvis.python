@@ -14,6 +14,7 @@ from .cuvis_aux import (
 )
 from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
 from .cube_utils import ImageData, CudaImageData
+from . import cuda
 
 
 import cuvis.cuvis_types as internal
@@ -292,9 +293,11 @@ class Measurement(object):
         .to_torch() (DLPack) or __cuda_array_interface__. The underlying image data
         must be backed by CUDA device memory (raises SDKException otherwise).
         """
+        cuda.require_device()
         buf = cuvis_il.cuvis_cuda_imbuffer_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_measurement_get_data_image_cuda(
-                self._handle, key, buf):
+            self._handle, key, buf
+        ):
             raise SDKException()
         return CudaImageData(buf)
 
@@ -303,7 +306,7 @@ class Measurement(object):
 
         Fetches the device buffer (get_cube_cuda) and then creates an IPC export on it,
         filling .descriptor with the transportable bytes; send those out-of-band to
-        another process and open them with cuvis.ipc.open. Keep the returned object alive
+        another process and open them with cuvis_ipc.open. Keep the returned object alive
         until the importer is done: it is the in-process pin (legacy IPC has no cross-process
         refcount). backend selects the mechanism (0=auto, 1=pool, 2=legacy, 3=VMM);
         make_ipc raises SDKException if the requested backend is unavailable on this device.
@@ -319,8 +322,7 @@ class Measurement(object):
         CudaImageData and raises SDKException if the device path is unavailable (no
         silent host fallback). Otherwise returns the host ImageData.
         """
-        from . import cuda as _cuda  # lazy: avoids an import cycle, cheap (no torch)
-        if _cuda.is_enabled():
+        if cuda.is_enabled():
             return self.get_cube_cuda(key)
         return self.cube
 
