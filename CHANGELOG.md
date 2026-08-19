@@ -20,6 +20,11 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
 - `CONTRIBUTING.md` - documents the branch model, the version scheme, the changelog conventions and the release checklist.
 - `cuvis.BindingInfo` - new frozen dataclass with the fields `built_against: str`, `library_version: str`, `library_path: str` and `missing_symbols: Tuple[str, ...]`, the read-only property `is_complete: bool`, and a `__str__` rendering a report fit for a bug report.
+- `cuvis.SdkSettings` - new class, a `MutableMapping` of setting id to value that writes the SDK's `cuvis.settings` file, so the SDK configuration can be built in Python instead of maintained by hand.
+  Values are stored as strings: `bool` becomes `true`/`false`, an `Enum` becomes its value, anything else goes through `str()`, and `None` drops the entry.
+- `cuvis.SdkSettings.__enter__`, `cuvis.SdkSettings.__exit__` - new methods; entering the context serializes the settings into a temporary directory and returns its path as `str`, leaving the context removes the directory.
+- `cuvis.SdkSettings.save` - new method, writes the settings to a file, or into a directory as `cuvis.settings`.
+- `cuvis.SdkSettings.xml_str` - new read-only property, returns the serialized settings document as `str`.
 - `cuvis.UnavailableSDKFunction` - new exception deriving from both `cuvis.cuvis_aux.SDKException` and `RuntimeError`, with the field `names: Tuple[str, ...]`.
 - `cuvis.binding` - new module reporting the compiled binding, the cuvis library loaded beside it, and the functions that library does not provide.
   Nothing in it needs the SDK to be initialised, so it can be called before `cuvis.init`.
@@ -27,13 +32,14 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.binding.info` - new function, returns `BindingInfo`.
 - `cuvis.binding.missing_symbols` - new function, returns `FrozenSet[str]`.
 - `cuvis.binding.require` - new function, raises `UnavailableSDKFunction` naming whichever of the given functions the installed cuvis library does not provide.
-- `pyproject.toml` - `dev` extra pinning `ruff==0.16.3`, plus `[tool.ruff]` configuration selecting the `E4`, `E7`, `E9` and `F` rule sets.
 
 ### Changed
 
 - Whole tree reformatted with `ruff format`; no behaviour change.
 - `README.md` - documents the version scheme, and lists Python 3.14 among the supported interpreters as `pyproject.toml` already did.
 - `prebuild.py` - writes `cuvis/git-hash.txt` instead of `git-hash.txt` at the repository root, so the file lands inside the package that declares it as package data.
+- `cuvis.General.init` - parameter `settings_path` type changed from `str` to `Union[str, Path, SdkSettings]`.
+  An `SdkSettings` is written to a temporary directory that exists only for the duration of the call, since the SDK reads the settings once during initialisation.
 - `cuvis.FileWriteSettings.GeneralExportSettings.__repr__`, `cuvis.FileWriteSettings.ViewerSettings.__repr__` - the docstring that sat below the nested helper, where it was a dead expression rather than a docstring, moved to the top of the method.
 
 ### Removed

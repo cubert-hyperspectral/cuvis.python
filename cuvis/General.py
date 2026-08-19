@@ -1,9 +1,11 @@
 import logging
 import os
+from contextlib import ExitStack
 from importlib.metadata import version as imp_version
 
 from ._cuvis_il import cuvis_il
 from .cuvis_aux import SDKException
+from .sdk_settings import SdkSettings
 from pathlib import Path
 
 import cuvis.cuvis_types as internal
@@ -12,22 +14,30 @@ from typing import Union, Optional
 
 
 def init(
-    settings_path: str = ".",
+    settings_path: Union[str, Path, SdkSettings] = ".",
     global_loglevel: Union[int, str] = logging.DEBUG,
     logfile_name: Optional[str] = None,
 ):
-    if "CUVIS_SETTINGS" in os.environ and settings_path == ".":
-        # env variable is set and settings path is default kwarg
-        settings_path = os.environ["CUVIS_SETTINGS"]
+    with ExitStack() as stack:
+        if isinstance(settings_path, SdkSettings):
+            # The SDK reads the settings once here, so the temporary directory
+            # only has to exist for the duration of the cuvis_init call.
+            settings_path = stack.enter_context(settings_path)
+        elif isinstance(settings_path, Path):
+            settings_path = str(settings_path)
 
-    if isinstance(global_loglevel, str):
-        # also support string as input argument
-        global_loglevel = internal.__strToLogLevel__[global_loglevel]
+        if "CUVIS_SETTINGS" in os.environ and settings_path == ".":
+            # env variable is set and settings path is default kwarg
+            settings_path = os.environ["CUVIS_SETTINGS"]
 
-    if cuvis_il.status_ok != cuvis_il.cuvis_init(
-        settings_path, internal.__CuvisLoglevel__[global_loglevel], logfile_name
-    ):
-        raise SDKException()
+        if isinstance(global_loglevel, str):
+            # also support string as input argument
+            global_loglevel = internal.__strToLogLevel__[global_loglevel]
+
+        if cuvis_il.status_ok != cuvis_il.cuvis_init(
+            settings_path, internal.__CuvisLoglevel__[global_loglevel], logfile_name
+        ):
+            raise SDKException()
 
 
 def shutdown():
