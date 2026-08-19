@@ -139,6 +139,8 @@ class ProcessingContext(object):
         return _id
 
     def __del__(self):
+        if self._handle is None:
+            return
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         cuvis_il.cuvis_proc_cont_free(_ptr)

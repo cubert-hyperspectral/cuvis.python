@@ -50,6 +50,7 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `pyproject.toml` - `requires-python` raised from `>=3.9` to `>=3.10`, Python 3.9 having reached end of life in October 2025.
 - Annotations throughout `cuvis` restated in the forms Python 3.10 provides: `Union[A, B]` and `Optional[A]` became `A | B` and `A | None`, and `Tuple`, `FrozenSet`, `Sequence`, `Callable` and `Awaitable` now come from `builtins` and `collections.abc` rather than `typing`.
   Every signature denotes what it denoted before; `cuvis.cube_utils.ImageData.__getitem__` keeps `Union`, because its member list contains a forward reference and `|` cannot join a type to a string at runtime.
+- `cuvis.AcquisitionContext.capture` - parameter `to_interal` renamed to `to_internal`.
 
 ### Removed
 
@@ -66,6 +67,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `tests/test_general.py` - `test_wrapper_version` asserted the literal `3.5.3`, so it had to be edited on every SDK bump and passed only because an editable install exposed the untracked root `git-hash.txt`.
   It now compares against the installed distribution version.
 - `cuvis.AcquisitionContext.register_ready_callback` - parameter `callback` was annotated `Callable[None, Awaitable[None]]`, which is not a valid `Callable` form; it is now `Callable[[], Awaitable[None]]`, matching the no-argument call the implementation makes.
+- `cuvis.AcquisitionContext.capture` - `to_internal=True` raised `TypeError` instead of queueing the measurement, because it passed a Python `0` where SWIG requires a null pointer.
+- `cuvis.Calibration`, `cuvis.AcquisitionContext`, `cuvis.ProcessingContext`, `cuvis.SessionFile`, `cuvis.Measurement`, `cuvis.Viewer`, `cuvis.Worker`, `cuvis.CubeExporter`, `cuvis.EnviExporter`, `cuvis.TiffExporter`, `cuvis.ViewExporter` - `__del__` raised `TypeError` after a failed construction, because it freed a handle that was still `None`.
 
 ## [3.5.3.2] - 2026-08-19
 

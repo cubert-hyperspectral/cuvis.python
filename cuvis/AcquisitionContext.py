@@ -249,20 +249,22 @@ class AcquisitionContext(object):
         return Async(cuvis_il.p_int_value(_pasync))
 
     @copydoc(cuvis_il.cuvis_acq_cont_capture_async)
-    def capture(self, to_interal=False) -> AsyncMesu | None:
-        if not to_interal:
-            _pasync = cuvis_il.new_p_int()
+    def capture(self, to_internal: bool = False) -> AsyncMesu | None:
+        if to_internal:
+            # A null result handle is what routes the measurement to the acquisition
+            # context's internal queue, to be picked up with get_next_measurement.
+            # SWIG marshals None to NULL; a Python 0 is rejected as not a pointer.
             if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
-                self._handle, _pasync
-            ):
-                raise SDKException()
-            return AsyncMesu(cuvis_il.p_int_value(_pasync))
-        else:
-            if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
-                self._handle, 0
+                self._handle, None
             ):
                 raise SDKException()
             return None
+        _pasync = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_acq_cont_capture_async(
+            self._handle, _pasync
+        ):
+            raise SDKException()
+        return AsyncMesu(cuvis_il.p_int_value(_pasync))
 
     @copydoc(cuvis_il.cuvis_acq_cont_capture)
     def capture_at(self, timeout_ms: int) -> Measurement:
@@ -608,6 +610,8 @@ class AcquisitionContext(object):
         pass
 
     def __del__(self):
+        if self._handle is None:
+            return
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         cuvis_il.cuvis_acq_cont_free(_ptr)
