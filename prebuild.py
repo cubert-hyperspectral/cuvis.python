@@ -13,7 +13,7 @@ def get_git_commit_hash():
         return "unknown"
 
 
-with open(Path(__file__).parent / "git-hash.txt", "w") as f:
+with open(Path(__file__).parent / "cuvis" / "git-hash.txt", "w") as f:
     f.write(f"{get_git_commit_hash()}\n")
 
-print("git-hash.txt created.")
+print("cuvis/git-hash.txt created.")

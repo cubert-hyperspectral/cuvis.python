@@ -15,7 +15,7 @@ def _to_ms(value: Union[int, timedelta]) -> int:
     elif isinstance(value, int):
         return value
     else:
-        raise SDKException('Unknown type for converting to ms')
+        raise SDKException("Unknown type for converting to ms")
 
 
 class AsyncMesu(object):
@@ -24,15 +24,13 @@ class AsyncMesu(object):
 
     pass
 
-    def get(self, timeout_ms: Union[int, timedelta]) -> tuple[Optional[Measurement], AsyncResult]:
-        """
-
-        """
+    def get(
+        self, timeout_ms: Union[int, timedelta]
+    ) -> tuple[Optional[Measurement], AsyncResult]:
         _ptr = cuvis_il.new_p_int()
         _pmesu = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
-        res = cuvis_il.cuvis_async_capture_get(
-            _ptr, _to_ms(timeout_ms), _pmesu)
+        res = cuvis_il.cuvis_async_capture_get(_ptr, _to_ms(timeout_ms), _pmesu)
 
         if res == cuvis_il.status_ok:
             return Measurement(cuvis_il.p_int_value(_pmesu)), AsyncResult.done
@@ -51,13 +49,16 @@ class AsyncMesu(object):
         async def _wait_for_return():
             _status_ptr = cuvis_il.new_p_cuvis_status_t()
             while True:
-                if cuvis_il.status_ok != cuvis_il.cuvis_async_capture_status(self._handle, _status_ptr):
+                if cuvis_il.status_ok != cuvis_il.cuvis_async_capture_status(
+                    self._handle, _status_ptr
+                ):
                     raise SDKException()
                 status = cuvis_il.p_cuvis_status_t_value(_status_ptr)
                 if status == cuvis_il.status_ok:
                     return self.get(0)[0]
                 else:
                     await a.sleep(10.0 / 1000)
+
         return _wait_for_return().__await__()
 
     def __del__(self):
@@ -67,13 +68,12 @@ class AsyncMesu(object):
         self._handle = cuvis_il.p_int_value(_ptr)
 
     def __deepcopy__(self, memo):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError('Deep copying is not supported for AsyncMesu')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Deep copying is not supported for AsyncMesu")
 
     def __copy__(self):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError(
-            'Shallow copying is not supported for AsyncMesu')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Shallow copying is not supported for AsyncMesu")
 
 
 class Async(object):
@@ -81,9 +81,6 @@ class Async(object):
         self._handle = handle
 
     def get(self, timeout_ms: Union[int, timedelta]) -> AsyncResult:
-        """
-
-        """
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         res = cuvis_il.cuvis_async_call_get(_ptr, _to_ms(timeout_ms))
@@ -106,13 +103,16 @@ class Async(object):
         async def _wait_for_return():
             _status_ptr = cuvis_il.new_p_cuvis_status_t()
             while True:
-                if cuvis_il.status_ok != cuvis_il.cuvis_async_call_status(self._handle, _status_ptr):
+                if cuvis_il.status_ok != cuvis_il.cuvis_async_call_status(
+                    self._handle, _status_ptr
+                ):
                     raise SDKException()
                 status = cuvis_il.p_cuvis_status_t_value(_status_ptr)
                 if status == cuvis_il.status_ok:
                     return self.get(0)
                 else:
                     await a.sleep(10.0 / 1000)
+
         return _wait_for_return().__await__()
 
     def __del__(self):
@@ -122,10 +122,9 @@ class Async(object):
         self._handle = cuvis_il.p_int_value(_ptr)
 
     def __deepcopy__(self, memo):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError('Deep copying is not supported for Async')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Deep copying is not supported for Async")
 
     def __copy__(self):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError(
-            'Shallow copying is not supported for Async')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Shallow copying is not supported for Async")

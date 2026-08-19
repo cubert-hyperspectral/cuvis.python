@@ -1,0 +1,250 @@
+name: Release
+
+# Pushing a vMAJOR.MINOR.PATCH.TWEAK tag on main releases that commit.
+# workflow_dispatch runs the same validation, build and TestPyPI publish as a
+# dry run, and stops before PyPI.
+on:
+  push:
+    tags: ['v*.*.*.*']
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      sdk: ${{ steps.meta.outputs.sdk }}
+      ruff: ${{ steps.meta.outputs.ruff }}
+      is_tag: ${{ startsWith(github.ref, 'refs/tags/') }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Restrict manual dry runs to repository admins
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.actor,
+            });
+            if (data.permission !== "admin") {
+              core.setFailed(`Only repository admins may publish. (${context.actor} has: ${data.permission})`);
+            }
+
+      - name: Read pyproject.toml
+        id: meta
+        run: python scripts/release_meta.py >> "$GITHUB_OUTPUT"
+
+      - name: Verify the tag points at a commit on main
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "Tag ${GITHUB_REF_NAME} is not an ancestor of main."
+            echo "Releases are cut from main; merge the release pull request first."
+            exit 1
+          fi
+
+      - name: Verify tag, version and changelog agree
+        if: startsWith(github.ref, 'refs/tags/')
+        run: python scripts/check_changelog.py --tag "${GITHUB_REF_NAME}"
+
+      - name: Validate CHANGELOG.md structure
+        if: github.event_name == 'workflow_dispatch'
+        run: python scripts/check_changelog.py
+
+      - name: Verify the version is not published yet
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          python - <<'PY'
+          import json, os, sys, urllib.error, urllib.request
+
+          version = os.environ["VERSION"]
+          try:
+              with urllib.request.urlopen("https://pypi.org/pypi/cuvis/json") as response:
+                  released = json.load(response)["releases"]
+          except urllib.error.HTTPError as error:
+              if error.code != 404:
+                  raise
+              released = {}
+
+          if released.get(version):
+              sys.exit(
+                  f"cuvis=={version} is already on PyPI and cannot be replaced. "
+                  "Bump TWEAK, move the CHANGELOG.md section, and tag again."
+              )
+          print(f"cuvis=={version} is not published yet.")
+          PY
+
+      - name: Install ruff
+        run: python -m pip install "${{ steps.meta.outputs.ruff }}"
+
+      - name: Check formatting and lint rules
+        run: |
+          ruff format --check .
+          ruff check .
+
+  tests:
+    name: Tests
+    needs: validate
+    runs-on: ubuntu-latest
+    container:
+      image: cubertgmbh/cuvis_pyil:${{ needs.validate.outputs.sdk }}-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install the wrapper with test dependencies
+        run: python3 -m pip install -e ".[test]"
+
+      - name: Run tests
+        run: python3 -m pytest
+
+  build:
+    name: Build distributions
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install build tooling
+        run: python -m pip install build twine
+
+      - name: Record the commit hash in the package
+        run: python prebuild.py
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Validate metadata
+        run: twine check dist/*
+
+      - name: Verify the commit hash shipped in the wheel
+        run: |
+          python - <<'PY'
+          import glob, subprocess, zipfile
+          wheel = glob.glob("dist/*.whl")[0]
+          shipped = zipfile.ZipFile(wheel).read("cuvis/git-hash.txt").decode().strip()
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          assert shipped == head, f"{wheel} carries {shipped}, expected {head}"
+          print(f"{wheel} carries {shipped}")
+          PY
+
+      - name: List contents
+        run: |
+          ls -lh dist/
+          tar tzf dist/*.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: [validate, tests, build]
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@v1.13.0
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Confirm the version is downloadable from TestPyPI
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if python -m pip download --no-deps --dest /tmp/smoke \
+                --index-url https://test.pypi.org/simple/ \
+                "cuvis==${{ needs.validate.outputs.version }}"; then
+              ls -lh /tmp/smoke
+              exit 0
+            fi
+            echo "Not indexed yet, retrying in 30s (attempt ${attempt}/6)."
+            sleep 30
+          done
+          echo "cuvis==${{ needs.validate.outputs.version }} never appeared on TestPyPI."
+          exit 1
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [validate, publish-testpypi]
+    if: needs.validate.outputs.is_tag == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@v1.13.0
+
+  github-release:
+    name: Create GitHub release
+    needs: [validate, publish-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+      - name: Extract the changelog section
+        id: notes
+        run: |
+          {
+            echo 'body<<CHANGELOG_SECTION'
+            python scripts/check_changelog.py --extract "${{ needs.validate.outputs.version }}"
+            echo CHANGELOG_SECTION
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: cuvis ${{ needs.validate.outputs.version }}
+          body: ${{ steps.notes.outputs.body }}
+          files: dist/*
+          draft: false
+          prerelease: false

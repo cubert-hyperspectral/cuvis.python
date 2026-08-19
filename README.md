@@ -42,7 +42,7 @@ pip install cuvis
 ```
 
 or add `cuvis` to your project `requirements.txt` or `setup.py`.
-We currently provide pre-compiled binaries for Python 3.9, 3.10, 3.11, 3.12 and 3.13 for Windows, Ubuntu 20.04 and Ubuntu 22.04 (all 64-bit).
+We currently provide pre-compiled binaries for Python 3.9, 3.10, 3.11, 3.12, 3.13 and 3.14 for Windows, Ubuntu 20.04 and Ubuntu 22.04 (all 64-bit).
 
 To access the newest python cuvis version (for use with SDK beta versions, etc) you can install it with
 
@@ -64,6 +64,16 @@ If you wish to use the version compatible to the available Cuvis SDK download, c
 
 For building the python bindings refer to [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil).
 
+## Versioning
+
+Wrapper versions are `MAJOR.MINOR.PATCH.TWEAK`.
+`MAJOR.MINOR.PATCH` is the Cuvis C SDK release this wrapper targets, and `TWEAK` counts wrapper-only
+revisions against that same SDK; `3.5.3.1` is a wrapper fix on top of `3.5.3.0`, both for SDK 3.5.3.
+
+`main` always points at the latest released wrapper state, `develop` at the next release.
+Every release is listed in [CHANGELOG.md](CHANGELOG.md).
+The scheme and the release process are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## How to ...
 
 ### Getting started
@@ -83,6 +93,8 @@ source application development by a diverse group of contributors.
 Cubert GmbH aims for creating an open, inclusive, and positive community.
 Feel free to branch/fork this repository for later merge requests, open 
 issues or point us to your application specific projects.
+Before opening a pull request, please read [CONTRIBUTING.md](CONTRIBUTING.md); it covers the branch 
+model, the version scheme, the changelog conventions and the checks CI runs.
 Contact us, if you want your open source project to be included and shared 
 on this hub; either if you search for direct support, collaborators or any 
 other input or simply want your project being used by this community.

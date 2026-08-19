@@ -12,18 +12,17 @@ from typing import Union
 
 
 class Calibration(object):
-
     def __init__(self, base: Union[Path, str, SessionFile]):
         self._handle = None
         _ptr = cuvis_il.new_p_int()
         if isinstance(base, SessionFile):
-            retval = cuvis_il.cuvis_calib_create_from_session_file(
-                base._handle, _ptr)
+            retval = cuvis_il.cuvis_calib_create_from_session_file(base._handle, _ptr)
         elif (isinstance(base, Path) and base.is_dir()) or os.path.exists(base):
             retval = cuvis_il.cuvis_calib_create_from_path(str(base), _ptr)
         else:
             raise SDKException(
-                "Could not interpret input of type '{}'.".format(type(base)))
+                "Could not interpret input of type '{}'.".format(type(base))
+            )
         if cuvis_il.status_ok != retval:
             raise SDKException()
         self._handle = cuvis_il.p_int_value(_ptr)
@@ -33,15 +32,15 @@ class Calibration(object):
         _ptr = cuvis_il.new_p_int()
 
         if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_capabilities(
-                self._handle, internal.__CuvisOperationMode__[operation_mode], _ptr):
+            self._handle, internal.__CuvisOperationMode__[operation_mode], _ptr
+        ):
             raise SDKException()
         return Capabilities(cuvis_il.p_int_value(_ptr))
 
     @property
     def info(self) -> CalibrationInfo:
         ret = cuvis_il.cuvis_calibration_info_t()
-        if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_info(
-                self._handle, ret):
+        if cuvis_il.status_ok != cuvis_il.cuvis_calib_get_info(self._handle, ret):
             raise SDKException()
         return CalibrationInfo._from_internal(ret)
 
@@ -56,9 +55,9 @@ class Calibration(object):
         cuvis_il.cuvis_calib_free(_ptr)
 
     def __deepcopy__(self, memo):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError('Deep copying is not supported for Calibration')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Deep copying is not supported for Calibration")
 
     def __copy__(self):
-        '''This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk.'''
-        raise TypeError('Shallow copying is not supported for Calibration')
+        """This functions is not permitted due to the class only keeping a handle, that is managed by the cuvis sdk."""
+        raise TypeError("Shallow copying is not supported for Calibration")

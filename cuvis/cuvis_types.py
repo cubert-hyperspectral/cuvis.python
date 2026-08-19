@@ -140,10 +140,10 @@ class PanSharpeningAlgorithm(Enum):
 
 
 __CuvisPanSharpeningAlgorithm__ = {
-    PanSharpeningAlgorithm.Noop : cuvis_il.pan_sharpening_algorithm_Noop,
-    PanSharpeningAlgorithm.CubertMacroPixel : cuvis_il.pan_sharpening_algorithm_CubertMacroPixel,
-    PanSharpeningAlgorithm.CubertPanRatio : cuvis_il.pan_sharpening_algorithm_CubertPanRatio,
-    PanSharpeningAlgorithm.PCAFusion : cuvis_il.pan_sharpening_algorithm_PCAFusion
+    PanSharpeningAlgorithm.Noop: cuvis_il.pan_sharpening_algorithm_Noop,
+    PanSharpeningAlgorithm.CubertMacroPixel: cuvis_il.pan_sharpening_algorithm_CubertMacroPixel,
+    PanSharpeningAlgorithm.CubertPanRatio: cuvis_il.pan_sharpening_algorithm_CubertPanRatio,
+    PanSharpeningAlgorithm.PCAFusion: cuvis_il.pan_sharpening_algorithm_PCAFusion,
 }
 
 __PanSharpeningAlgorithm__ = __inverseTranslationDict(__CuvisPanSharpeningAlgorithm__)

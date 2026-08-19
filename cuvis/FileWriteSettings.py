@@ -293,10 +293,11 @@ class ViewExportSettings(GeneralExportSettings):
         self._set_userplugin(userplugin=v)
 
     def __repr__(self):
-        def short_str(s: str, l: int) -> str:
-            return (s[:l] + "...") if len(s) > l else s
-
         """Returns a string containing but shortens the userplugin field."""
+
+        def short_str(s: str, limit: int) -> str:
+            return (s[:limit] + "...") if len(s) > limit else s
+
         s = ", ".join(
             list(f"{field.name}={getattr(self, field.name)}" for field in fields(self))
             + [f"userplugin={short_str(self._userplugin, 15)}"]
@@ -554,10 +555,11 @@ class ViewerSettings:
         self.pan_sharpening.add_pan = value
 
     def __repr__(self):
-        def short_str(s: str, l: int) -> str:
-            return (s[:l] + "...") if len(s) > l else s
-
         """Returns a string containing but shortens the userplugin field."""
+
+        def short_str(s: str, limit: int) -> str:
+            return (s[:limit] + "...") if len(s) > limit else s
+
         s = ", ".join(
             list(f"{field.name}={getattr(self, field.name)}" for field in fields(self))
             + [f"userplugin={short_str(self._userplugin, 15)}"]

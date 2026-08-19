@@ -5,8 +5,9 @@ Mirrors functionality from Example notebooks related to SDK initialization,
 version information, and configuration.
 """
 
-import pytest
 import logging
+from importlib.metadata import version as imp_version
+
 import cuvis
 
 
@@ -30,7 +31,7 @@ def test_wrapper_version(sdk_initialized):
     """Test wrapper version retrieval."""
     version = cuvis.General.wrapper_version()
     assert isinstance(version, str)
-    assert "3.5.3" in version  # Current wrapper version
+    assert version.startswith(imp_version("cuvis"))
 
 
 # def test_sdk_initialization_and_shutdown():
