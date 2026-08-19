@@ -5,7 +5,6 @@ Mirrors functionality from Example 3 notebook (Reprocess) related to
 processing modes, reference handling, and cube generation.
 """
 
-import pytest
 import cuvis
 
 

@@ -65,7 +65,9 @@ def test_acquisition_context_session_info(simulated_acquisition_context):
 
 
 @pytest.mark.slow
-def test_simulated_capture_snapshot(simulated_acquisition_context, processing_context_from_session):
+def test_simulated_capture_snapshot(
+    simulated_acquisition_context, processing_context_from_session
+):
     """Test capturing snapshot in simulated mode."""
     acq = simulated_acquisition_context
 
@@ -89,7 +91,7 @@ def test_simulated_capture_snapshot(simulated_acquisition_context, processing_co
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Raw
     pc.apply(mesu)
-    assert 'cube' in mesu.data
+    assert "cube" in mesu.data
 
 
 def test_acquisition_context_component_count(simulated_acquisition_context):

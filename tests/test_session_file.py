@@ -5,7 +5,6 @@ Mirrors functionality from Example 2 notebook (Load Measurement) related to
 SessionFile loading, iteration, and metadata access.
 """
 
-import pytest
 import cuvis
 
 

@@ -19,14 +19,16 @@ def spectrum():
     """A single pixel measurement, as a point spectrometer delivers it."""
     return ImageData.from_array(
         np.arange(2500, dtype=np.float32).reshape(1, 1, 2500),
-        wavelength=list(range(200, 2700)))
+        wavelength=list(range(200, 2700)),
+    )
 
 
 @pytest.fixture
 def cube():
     return ImageData.from_array(
         np.arange(4 * 3 * 5, dtype=np.uint16).reshape(4, 3, 5),
-        wavelength=[100, 200, 300, 400, 500])
+        wavelength=[100, 200, 300, 400, 500],
+    )
 
 
 @pytest.fixture
@@ -137,8 +139,9 @@ def test_arithmetic_preserves_metadata(spectrum):
     assert doubled.wavelength == spectrum.wavelength
     np.testing.assert_array_equal(doubled.array, spectrum.array * 2)
 
-    np.testing.assert_array_equal((spectrum - spectrum).array,
-                                  np.zeros_like(spectrum.array))
+    np.testing.assert_array_equal(
+        (spectrum - spectrum).array, np.zeros_like(spectrum.array)
+    )
     np.testing.assert_array_equal((2 * spectrum).array, spectrum.array * 2)
     np.testing.assert_array_equal((-spectrum).array, -spectrum.array)
 
@@ -179,7 +182,11 @@ def real_view(test_measurement):
 
 def test_real_cube_geometry_matches_its_metadata(real_cube):
     assert real_cube.array.ndim == 3
-    assert real_cube.array.shape == (real_cube.height, real_cube.width, real_cube.channels)
+    assert real_cube.array.shape == (
+        real_cube.height,
+        real_cube.width,
+        real_cube.channels,
+    )
     assert not real_cube.is_spectrum
 
 
@@ -213,8 +220,10 @@ def test_real_cube_index_forms(real_cube):
     assert real_cube[:, :, 0].shape == (real_cube.height, real_cube.width)
     assert np.ndim(real_cube[0, 0, 0]) == 0
     assert real_cube[..., 1:3].wavelength == real_cube.wavelength[1:3]
-    assert real_cube[:, :, [0, 2]].wavelength == [real_cube.wavelength[0],
-                                                  real_cube.wavelength[2]]
+    assert real_cube[:, :, [0, 2]].wavelength == [
+        real_cube.wavelength[0],
+        real_cube.wavelength[2],
+    ]
 
 
 def test_real_view_has_no_wavelengths(real_view):
@@ -234,8 +243,9 @@ def test_real_cube_arithmetic_preserves_metadata(real_cube):
     assert doubled.wavelength == real_cube.wavelength
     assert doubled.shape == real_cube.shape
     np.testing.assert_array_equal(doubled.array, real_cube.array * 2)
-    np.testing.assert_array_equal((real_cube - real_cube).array,
-                                  np.zeros_like(real_cube.array))
+    np.testing.assert_array_equal(
+        (real_cube - real_cube).array, np.zeros_like(real_cube.array)
+    )
 
 
 def test_real_cube_numpy_interop(real_cube):

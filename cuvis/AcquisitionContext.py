@@ -6,7 +6,7 @@ from .SessionFile import SessionFile
 from .cuvis_aux import SDKException, SessionData, ComponentInfo
 from .cuvis_types import HardwareState, OperationMode
 
-from typing import Coroutine, Callable, Awaitable, Union, Iterable, Optional
+from typing import Callable, Awaitable, Union, Optional
 from .doc import copydoc
 
 import cuvis.cuvis_types as internal
@@ -563,7 +563,6 @@ class AcquisitionContext(object):
         self,
         callback: Callable[[HardwareState, list[tuple[str, bool]]], Awaitable[None]],
     ) -> None:
-        """ """
         self.reset_state_change_callback()
 
         async def _internal_state_loop():
@@ -600,7 +599,6 @@ class AcquisitionContext(object):
         self._state_poll_task = a.create_task(_internal_state_loop())
 
     def reset_state_change_callback(self) -> None:
-        """ """
         if self._state_poll_task is not None:
             self._state_poll_task.cancel()
             self._state_poll_task = None
@@ -629,8 +627,6 @@ class AcquisitionContext(object):
 
 
 class Component:
-    """ """
-
     def __init__(self, acq: AcquisitionContext, idx: int):
         self._acq = acq
         self._idx = idx

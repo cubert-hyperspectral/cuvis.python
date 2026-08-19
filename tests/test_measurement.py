@@ -5,7 +5,6 @@ Mirrors functionality from Example 2 notebook (Load Measurement) related to
 measurement data access, properties, and metadata.
 """
 
-import pytest
 import datetime
 import cuvis
 
@@ -92,7 +91,10 @@ def test_unsupported_data_entries_do_not_overwrite_each_other(test_measurement):
     The C API reports entries it cannot hand out with an empty key. They all used to
     land under the same dictionary key and so collapsed into a single one.
     """
-    unsupported = {key: value for key, value in test_measurement.data.items()
-                   if isinstance(value, str) and value.startswith("Not Implemented!")}
+    unsupported = {
+        key: value
+        for key, value in test_measurement.data.items()
+        if isinstance(value, str) and value.startswith("Not Implemented!")
+    }
     assert len(unsupported) == len(set(unsupported))
     assert "" not in test_measurement.data

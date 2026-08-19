@@ -106,7 +106,8 @@ class ImageData(object):
 
         if not isinstance(img_buf, cuvis_il.cuvis_imbuffer_t):
             raise TypeError(
-                "Wrong data type for image buffer: {}".format(type(img_buf)))
+                "Wrong data type for image buffer: {}".format(type(img_buf))
+            )
 
         if dformat is None:
             raise TypeError("Missing format for reading image buffer")
@@ -126,7 +127,8 @@ class ImageData(object):
         if img_buf.wavelength is not None:
             self.wavelength = [
                 cuvis_il.p_unsigned_int_getitem(img_buf.wavelength, z)
-                for z in range(self.channels)]
+                for z in range(self.channels)
+            ]
 
     @property
     def shape(self) -> Optional[tuple]:
@@ -172,16 +174,22 @@ class ImageData(object):
         if not self.is_spectrum:
             raise ValueError(
                 "Not a single pixel measurement ({}x{}); index a pixel first, "
-                "for example image[y, x].".format(self.shape[1], self.shape[0]))
+                "for example image[y, x].".format(self.shape[1], self.shape[0])
+            )
         return self.array.reshape(-1)
 
     def __repr__(self) -> str:
         if self.array is None:
             return "ImageData(empty)"
         return "ImageData({}x{}x{}, {}, wavelength={})".format(
-            self.width, self.height, self.channels, self.array.dtype,
-            "no" if self.wavelength is None else
-            "{}..{} nm".format(self.wavelength[0], self.wavelength[-1]))
+            self.width,
+            self.height,
+            self.channels,
+            self.array.dtype,
+            "no"
+            if self.wavelength is None
+            else "{}..{} nm".format(self.wavelength[0], self.wavelength[-1]),
+        )
 
     def __getitem__(self, key) -> Union[np.ndarray, tuple, "ImageData", np.generic]:
         """
@@ -227,7 +235,8 @@ class ImageData(object):
         if np.ndim(sliced_array) == 3:
             return ImageData.from_array(
                 sliced_array,
-                wavelength=self._wavelengths_at(bands, sliced_array.shape[-1]))
+                wavelength=self._wavelengths_at(bands, sliced_array.shape[-1]),
+            )
         if np.ndim(sliced_array) == 1:
             return sliced_array, self._wavelengths_at(bands, len(sliced_array))
         return sliced_array
@@ -243,9 +252,11 @@ class ImageData(object):
             key = (key,)
         at_ellipsis = next((i for i, part in enumerate(key) if part is Ellipsis), None)
         if at_ellipsis is not None:
-            key = (key[:at_ellipsis]
-                   + (slice(None),) * (4 - len(key))
-                   + key[at_ellipsis + 1:])
+            key = (
+                key[:at_ellipsis]
+                + (slice(None),) * (4 - len(key))
+                + key[at_ellipsis + 1 :]
+            )
         band_key = key[2] if len(key) >= 3 else slice(None)
 
         if isinstance(band_key, slice):
@@ -259,8 +270,9 @@ class ImageData(object):
             return [int(band) % self.channels for band in selected.ravel()]
         return None
 
-    def _wavelengths_at(self, bands: Optional[Sequence[int]],
-                        expected: int) -> Optional[list]:
+    def _wavelengths_at(
+        self, bands: Optional[Sequence[int]], expected: int
+    ) -> Optional[list]:
         """The wavelengths of the selected bands, or None if they do not line up."""
         if self.wavelength is None or bands is None or len(bands) != expected:
             return None
@@ -269,10 +281,14 @@ class ImageData(object):
     def _wrap(self, result):
         """Keep the metadata when an operation preserved the image geometry."""
         # A boolean result is a mask, not image data; wavelengths would not describe it.
-        if (isinstance(result, np.ndarray) and result.shape == self.array.shape
-                and result.dtype != bool):
+        if (
+            isinstance(result, np.ndarray)
+            and result.shape == self.array.shape
+            and result.dtype != bool
+        ):
             return ImageData.from_array(
-                result, self.width, self.height, self.channels, self.wavelength)
+                result, self.width, self.height, self.channels, self.wavelength
+            )
         return result
 
     def __array__(self, dtype=None, copy=None) -> np.ndarray:
@@ -304,7 +320,8 @@ class ImageData(object):
         if "out" in kwargs:
             kwargs["out"] = tuple(_unwrap(out) for out in kwargs["out"])
         return self._wrap(
-            getattr(ufunc, method)(*(_unwrap(i) for i in inputs), **kwargs))
+            getattr(ufunc, method)(*(_unwrap(i) for i in inputs), **kwargs)
+        )
 
     def to_numpy(self) -> np.ndarray:
         """
@@ -317,8 +334,14 @@ class ImageData(object):
         return self.array
 
     @classmethod
-    def from_array(cls, array: np.ndarray, width: int = None, height: int = None,
-                   channels: int = None, wavelength=None):
+    def from_array(
+        cls,
+        array: np.ndarray,
+        width: int = None,
+        height: int = None,
+        channels: int = None,
+        wavelength=None,
+    ):
         """
         Build an :class:`ImageData` around an existing array.
 
@@ -360,7 +383,9 @@ def _binary_op(op, reflected=False):
     """Build one arithmetic dunder that delegates to the underlying array."""
 
     def apply(self, other):
-        operands = (_unwrap(other), self.array) if reflected else (self.array, _unwrap(other))
+        operands = (
+            (_unwrap(other), self.array) if reflected else (self.array, _unwrap(other))
+        )
         return self._wrap(op(*operands))
 
     name = op.__name__.strip("_")
@@ -368,14 +393,22 @@ def _binary_op(op, reflected=False):
     apply.__doc__ = (
         "Element-wise {} on the underlying array, against a scalar, an array or "
         "another ImageData. Returns an ImageData with the metadata carried over "
-        "when the geometry is unchanged, otherwise the plain NumPy result.".format(name))
+        "when the geometry is unchanged, otherwise the plain NumPy result.".format(name)
+    )
     return apply
 
 
 # Arithmetic operators, so that measurements can be combined directly rather than
 # through their arrays. Comparisons are deliberately left out; use np.asarray().
-for _op in (operator.add, operator.sub, operator.mul, operator.truediv,
-            operator.floordiv, operator.mod, operator.pow):
+for _op in (
+    operator.add,
+    operator.sub,
+    operator.mul,
+    operator.truediv,
+    operator.floordiv,
+    operator.mod,
+    operator.pow,
+):
     for _reflected in (False, True):
         _method = _binary_op(_op, _reflected)
         setattr(ImageData, _method.__name__, _method)

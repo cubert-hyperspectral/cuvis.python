@@ -1,6 +1,5 @@
 import logging
 import os
-import platform
 from importlib.metadata import version as imp_version
 
 from ._cuvis_il import cuvis_il
@@ -45,9 +44,12 @@ def sdk_version() -> str:
 
 def wrapper_version() -> str:
     pip_version = imp_version("cuvis")
-    with open(Path(__file__).parent.parent / "git-hash.txt", "r") as f:
-        git_hash = f.readline()
-        return f"{pip_version} {git_hash}".strip()
+    # Written into the package by prebuild.py; absent when the wrapper was
+    # installed from a tree that never ran it.
+    git_hash = Path(__file__).parent / "git-hash.txt"
+    if not git_hash.is_file():
+        return pip_version
+    return f"{pip_version} {git_hash.read_text().splitlines()[0]}".strip()
 
 
 def set_log_level(lvl: Union[int, str]):
