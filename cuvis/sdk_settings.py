@@ -69,20 +69,67 @@ def _load(path: Path) -> dict[str, str]:
 
 
 class SdkSettings(MutableMapping):
-    """Dict-like builder for the SDK's ``cuvis.settings`` file.
+    """
+    Dict-like builder for the SDK's ``cuvis.settings`` file.
 
-    Behaves like a ``dict`` of setting id to value, can be loaded from an
-    existing settings file or from a directory containing one, and serializes
-    itself into a temporary directory when used as a context manager.
+    The SDK reads its configuration from a ``cuvis.settings`` file in the
+    directory passed to :func:`cuvis.init`. This class lets that configuration
+    be written in Python instead of maintaining the file by hand::
 
-    Example::
+        import cuvis
 
-        settings = SdkSettings(force_gpu_mode="cuda", processing_thread_count=8)
+        settings = cuvis.SdkSettings(force_gpu_mode="cuda", processing_thread_count=8)
+        cuvis.init(settings)
+
+    Settings are a flat mapping of setting id to value. Values are stored as
+    strings, because that is what the XML carries and what the SDK parses.
+    Booleans become ``"true"`` / ``"false"``, enums are written as their value,
+    and anything else goes through ``str()``. A value of ``None`` means "not
+    set" and is dropped rather than written.
+
+    Inspecting and editing
+    ----------------------
+    The full ``MutableMapping`` interface is available, so an instance can be
+    read and edited like a ``dict``::
+
         settings["verbose"] = True
-        print(dict(settings))
+        del settings["force_gpu_mode"]
+        print(dict(settings))       # {'processing_thread_count': '8', 'verbose': 'true'}
+        print(settings.xml_str)     # the exact file that will be written
+
+    Loading
+    -------
+    An existing configuration can be loaded from a settings file, or from the
+    directory containing one. Keyword arguments override what was loaded::
+
+        settings = cuvis.SdkSettings("/path/to/settings_dir", processing_thread_count=4)
+
+    Writing
+    -------
+    Used as a context manager, the settings are serialized into a temporary
+    directory that exists for the duration of the block. This is useful for
+    pointing other consumers at the same configuration::
 
         with settings as settings_dir:
             cuvis.init(settings_dir)
+
+    Use :meth:`save` to write the file to a permanent location instead.
+
+    Parameters
+    ----------
+    source : str or Path, optional
+        A ``cuvis.settings`` file, or a directory containing one, to use as the
+        starting point. Positional only.
+    **kwargs
+        Settings to set, overriding any value read from ``source``.
+
+    Raises
+    ------
+    FileNotFoundError
+        If ``source`` is a directory that contains no ``cuvis.settings``.
+    ValueError
+        If ``source`` is not a well-formed settings document, or if a setting
+        id is empty or contains whitespace.
     """
 
     def __init__(self, source: Optional[Union[str, Path]] = None, /, **kwargs):
