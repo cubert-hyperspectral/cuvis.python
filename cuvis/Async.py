@@ -17,6 +17,25 @@ def _to_ms(value: int | timedelta) -> int:
         raise SDKException("Unknown type for converting to ms")
 
 
+# The SDK's own waits take a timeout in ms and treat 0 as "wait for ever".
+_WAIT_FOREVER = 0
+
+
+async def _wait_off_the_loop(blocking_get):
+    """Run one of the SDK's blocking waits in a worker thread.
+
+    The wrappers release the GIL for the duration of the call, so the thread parks in the
+    SDK and the event loop keeps running. This is what makes the awaitables below real:
+    they resume when the SDK is done, not when the next poll happens to come round.
+
+    The cost is one pooled thread per outstanding wait, and a wait that never completes
+    cannot be cancelled, because a thread blocked in C is not interruptible. Both go away
+    only if the SDK hands out something the event loop can watch directly.
+    """
+    loop = a.get_running_loop()
+    return await loop.run_in_executor(None, blocking_get, _WAIT_FOREVER)
+
+
 class AsyncMesu(object):
     def __init__(self, handle):
         self._handle = handle
@@ -46,17 +65,8 @@ class AsyncMesu(object):
 
     def __await__(self) -> Measurement | None:
         async def _wait_for_return():
-            _status_ptr = cuvis_il.new_p_cuvis_status_t()
-            while True:
-                if cuvis_il.status_ok != cuvis_il.cuvis_async_capture_status(
-                    self._handle, _status_ptr
-                ):
-                    raise SDKException()
-                status = cuvis_il.p_cuvis_status_t_value(_status_ptr)
-                if status == cuvis_il.status_ok:
-                    return self.get(0)[0]
-                else:
-                    await a.sleep(10.0 / 1000)
+            mesu, _ = await _wait_off_the_loop(self.get)
+            return mesu
 
         return _wait_for_return().__await__()
 
@@ -101,20 +111,7 @@ class Async(object):
     # Python Magic Methods
 
     def __await__(self) -> AsyncResult:
-        async def _wait_for_return():
-            _status_ptr = cuvis_il.new_p_cuvis_status_t()
-            while True:
-                if cuvis_il.status_ok != cuvis_il.cuvis_async_call_status(
-                    self._handle, _status_ptr
-                ):
-                    raise SDKException()
-                status = cuvis_il.p_cuvis_status_t_value(_status_ptr)
-                if status == cuvis_il.status_ok:
-                    return self.get(0)
-                else:
-                    await a.sleep(10.0 / 1000)
-
-        return _wait_for_return().__await__()
+        return _wait_off_the_loop(self.get).__await__()
 
     def __del__(self):
         if self._handle is None:
