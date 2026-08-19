@@ -140,7 +140,9 @@ def test_round_trip_via_directory(tmp_path):
 def test_load_from_directory_matches_load_from_file(tmp_path):
     """A directory and the file inside it load to the same mapping."""
     _write(tmp_path / SETTINGS_FILENAME, VALID_XML)
-    assert dict(SdkSettings(tmp_path)) == dict(SdkSettings(tmp_path / SETTINGS_FILENAME))
+    assert dict(SdkSettings(tmp_path)) == dict(
+        SdkSettings(tmp_path / SETTINGS_FILENAME)
+    )
 
 
 def test_load_accepts_str_path(tmp_path):
@@ -169,9 +171,9 @@ INVALID_DOCUMENTS = {
     "wrong_root": "<nonsense/>",
     "missing_version": '<settings xmlns="{}"/>'.format(SETTINGS_NAMESPACE),
     "property_without_id": (
-        '<settings xmlns="{0}" version="1.0.0">'
-        '<property value="1"/>'
-        "</settings>".format(SETTINGS_NAMESPACE)
+        '<settings xmlns="{0}" version="1.0.0"><property value="1"/></settings>'.format(
+            SETTINGS_NAMESPACE
+        )
     ),
     "duplicate_ids": (
         '<settings xmlns="{0}" version="1.0.0">'
