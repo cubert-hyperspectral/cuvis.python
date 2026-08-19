@@ -30,7 +30,8 @@ def test_measurement_capture_time(test_measurement):
 def test_measurement_capture_time_value(test_measurement):
     """Test capture time has the expected exact UTC value (see cuvis.pyil#29)."""
     assert test_measurement.capture_time == datetime.datetime(
-        2023, 11, 24, 11, 13, 5, 356000, tzinfo=datetime.timezone.utc)
+        2023, 11, 24, 11, 13, 5, 356000, tzinfo=datetime.timezone.utc
+    )
 
 
 def test_measurement_integration_time(test_measurement):
