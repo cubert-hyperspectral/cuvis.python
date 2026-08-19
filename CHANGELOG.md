@@ -19,6 +19,14 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml` and against this file, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
 - `CONTRIBUTING.md` - documents the branch model, the version scheme, the changelog conventions and the release checklist.
+- `cuvis.BindingInfo` - new frozen dataclass with the fields `built_against: str`, `library_version: str`, `library_path: str` and `missing_symbols: Tuple[str, ...]`, the read-only property `is_complete: bool`, and a `__str__` rendering a report fit for a bug report.
+- `cuvis.UnavailableSDKFunction` - new exception deriving from both `cuvis.cuvis_aux.SDKException` and `RuntimeError`, with the field `names: Tuple[str, ...]`.
+- `cuvis.binding` - new module reporting the compiled binding, the cuvis library loaded beside it, and the functions that library does not provide.
+  Nothing in it needs the SDK to be initialised, so it can be called before `cuvis.init`.
+- `cuvis.binding.available` - new function, returns `bool`.
+- `cuvis.binding.info` - new function, returns `BindingInfo`.
+- `cuvis.binding.missing_symbols` - new function, returns `FrozenSet[str]`.
+- `cuvis.binding.require` - new function, raises `UnavailableSDKFunction` naming whichever of the given functions the installed cuvis library does not provide.
 - `pyproject.toml` - `dev` extra pinning `ruff==0.16.3`, plus `[tool.ruff]` configuration selecting the `E4`, `E7`, `E9` and `F` rule sets.
 
 ### Changed
