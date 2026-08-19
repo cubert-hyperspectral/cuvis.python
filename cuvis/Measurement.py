@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 from .FileWriteSettings import SaveArgs
 import datetime
 from pathlib import Path
@@ -11,6 +11,7 @@ from .cuvis_aux import (
     MeasurementFlags,
     SensorInfo,
     GPSData,
+    _utc_from_epoch_ms,
 )
 from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
 from .cube_utils import ImageData
@@ -18,15 +19,13 @@ from .cube_utils import ImageData
 
 import cuvis.cuvis_types as internal
 
-base_datetime = datetime.datetime(1970, 1, 1)
-
 
 class Measurement(object):
     capture_time: datetime.datetime  # read-only
     measurement_flags: MeasurementFlags  # read-only
     path: str  # read-only
     comment: str
-    factory_calibration: datetime.datetime  # read-only
+    factory_calibration: Optional[datetime.datetime]  # read-only
     assembly: str  # read-only
     integration_time: int  # read-only
     averages: int  # read-only
@@ -67,15 +66,13 @@ class Measurement(object):
         ):
             raise SDKException
 
-        self._capture_time = base_datetime + datetime.timedelta(
-            milliseconds=_metaData.capture_time
-        )
+        self._capture_time = _utc_from_epoch_ms(_metaData.capture_time)
         self._measurement_flags = MeasurementFlags(_metaData.measurement_flags)
         self._path = _metaData.path
         self._comment = _metaData.comment
         try:
-            self._factory_calibration = base_datetime + datetime.timedelta(
-                milliseconds=_metaData.factory_calibration
+            self._factory_calibration = _utc_from_epoch_ms(
+                _metaData.factory_calibration
             )
         except OverflowError:
             self._factory_calibration = None
@@ -156,6 +153,7 @@ class Measurement(object):
 
     @property
     def capture_time(self) -> datetime.datetime:
+        """Timezone-aware UTC instant; comparing it against a naive datetime raises TypeError."""
         return self._capture_time
 
     @property
@@ -180,7 +178,14 @@ class Measurement(object):
         pass
 
     @property
-    def factory_calibration(self) -> datetime.datetime:
+    def factory_calibration(self) -> Optional[datetime.datetime]:
+        """The calibration day, or None if the SDK reported a value datetime cannot hold.
+
+        Timezone-aware UTC, but only the day carries meaning. The SDK stores the day as
+        midnight in the local time of the machine that wrote the file, so the time
+        component is an artifact of that machine and the day can be off by one when the
+        file is read in another timezone.
+        """
         return self._factory_calibration
 
     @property
