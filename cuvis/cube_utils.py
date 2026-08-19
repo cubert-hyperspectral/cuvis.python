@@ -6,7 +6,6 @@ import operator
 from .cuvis_aux import SDKException
 from .cuvis_types import DataFormat
 from . import cuda
-import cuvis_ipc
 
 _IMBUF_READERS = {
     1: cuvis_il.cuvis_read_imbuf_uint8,
@@ -559,6 +558,11 @@ class CudaImageData(object):
         """
         if self.descriptor is None:
             self.make_ipc(backend)
+        # Imported here, not at module scope: cuvis_ipc is the consumer half and lives
+        # outside the package, so a producer that never exports must not fail to import
+        # cuvis because it is absent.
+        import cuvis_ipc
+
         return cuvis_ipc.pack_payload(
             self.descriptor, self.width, self.height, self.channels, self._format
         )
