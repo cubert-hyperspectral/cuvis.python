@@ -327,6 +327,8 @@ class Measurement(object):
         return copy
 
     def __del__(self):
+        if self._handle is None:
+            return
         _ptr = cuvis_il.new_p_int()
         self.clear_cube()
         cuvis_il.p_int_assign(_ptr, self._handle)

@@ -61,6 +61,8 @@ class Viewer(object):
         return self._create_view_data(currentView)
 
     def __del__(self):
+        if self._handle is None:
+            return
         _ptr = cuvis_il.new_p_int()
         cuvis_il.p_int_assign(_ptr, self._handle)
         cuvis_il.cuvis_viewer_free(_ptr)

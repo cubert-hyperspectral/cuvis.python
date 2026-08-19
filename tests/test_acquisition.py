@@ -8,6 +8,8 @@ simulated camera acquisition, operation modes, and snapshot capture.
 import pytest
 import time
 import cuvis
+from cuvis.cuvis_aux import SDKException
+from cuvis.cuvis_types import AsyncResult
 
 
 def test_simulated_acquisition_context_creation(simulated_acquisition_context):
@@ -99,3 +101,103 @@ def test_acquisition_context_component_count(simulated_acquisition_context):
     count = simulated_acquisition_context.component_count
     assert isinstance(count, int)
     assert count >= 0
+
+
+def _drain(acq):
+    """Take the queued measurement back out, so the next test sees an empty queue."""
+    deadline = time.time() + 10
+    while time.time() < deadline:
+        try:
+            return acq.get_next_measurement(500)
+        except SDKException:
+            continue
+    pytest.fail("the capture never reached the internal queue")
+
+
+def _ready_software_context(acq):
+    """A simulated context in Software mode, ready to be triggered."""
+    acq.operation_mode = cuvis.OperationMode.Software
+    deadline = time.time() + 10
+    while not acq.ready and time.time() < deadline:
+        time.sleep(0.1)
+    if not acq.ready:
+        pytest.skip("Acquisition context not ready within timeout")
+    return acq
+
+
+def _assert_queue_empty(acq):
+    with pytest.raises(SDKException):
+        acq.get_next_measurement(300)
+
+
+def test_capture_to_internal_queues_the_measurement(
+    simulated_acquisition_context, processing_context_from_session
+):
+    """to_internal=True hands the SDK a null result handle, which queues the capture.
+
+    The queue is checked empty on both sides so the measurement cannot be anything but
+    this capture, and the result is processed to prove it is a usable measurement rather
+    than a handle the SDK never filled in.
+    """
+    acq = _ready_software_context(simulated_acquisition_context)
+    _assert_queue_empty(acq)
+
+    assert acq.capture(to_internal=True) is None
+
+    mesu = _drain(acq)
+    assert isinstance(mesu, cuvis.Measurement)
+    _assert_queue_empty(acq)
+
+    processing_context_from_session.processing_mode = cuvis.ProcessingMode.Raw
+    processing_context_from_session.apply(mesu)
+    assert mesu.cube.array.size > 0
+
+
+def test_worker_receives_a_capture_from_the_internal_queue(
+    simulated_acquisition_context, processing_context_from_session
+):
+    """The other consumer cuvis.h:1887 names for the internal queue."""
+    acq = _ready_software_context(simulated_acquisition_context)
+    _assert_queue_empty(acq)
+
+    worker = cuvis.Worker(cuvis.WorkerSettings(output_queue_size=8))
+    worker.set_acquisition_context(acq)
+    processing_context_from_session.processing_mode = cuvis.ProcessingMode.Raw
+    worker.set_processing_context(processing_context_from_session)
+    worker.start_processing()
+    try:
+        assert acq.capture(to_internal=True) is None
+
+        deadline = time.time() + 15
+        while time.time() < deadline:
+            try:
+                result = worker.get_next_result(1000)
+            except SDKException:
+                continue
+            assert isinstance(result.mesu, cuvis.Measurement)
+            return
+        pytest.fail("the worker never saw the queued capture")
+    finally:
+        worker.stop_processing()
+        worker.drop_all_queued()
+        worker.set_acquisition_context(None)
+
+
+def test_capture_returns_an_async_measurement_without_queueing_it(
+    simulated_acquisition_context,
+):
+    """The other half of the same switch: a result handle means no queue entry.
+
+    The async result is collected first, so the capture is known to have happened and an
+    empty queue afterwards cannot be mistaken for a capture that never ran. Three windows
+    rather than one, so a late delivery does not pass as an absence.
+    """
+    acq = _ready_software_context(simulated_acquisition_context)
+    _assert_queue_empty(acq)
+
+    mesu, result = acq.capture().get(5000)
+    assert isinstance(mesu, cuvis.Measurement)
+    assert result is AsyncResult.done
+
+    for _ in range(3):
+        _assert_queue_empty(acq)
