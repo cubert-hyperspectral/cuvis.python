@@ -14,6 +14,11 @@ from .doc import copydoc
 from dataclasses import dataclass
 from collections.abc import Callable, Awaitable
 
+# How long each wait for a worker result blocks before looping round. Long enough that a
+# quiet worker costs nothing, short enough that reset_worker_callback is not held up by
+# more than one window.
+_RESULT_WAIT_MS = 1000
+
 
 @dataclass
 class WorkerResult:
@@ -152,29 +157,40 @@ class Worker(object):
             view = None
         return WorkerResult(mesu, view)
 
-    async def get_next_result_async(self, timeout: int) -> WorkerResult:
-        poll_intervall = 100
+    def _wait_for_result(self, timeout_ms: int):
+        """The SDK's own blocking wait, returning None instead of raising on a timeout.
+
+        `get_next_result` reports "nothing arrived" as an error, and `SDKException` logs
+        every instance it is constructed with. A wait that expects to come back empty
+        cannot go through it without filling the log with tracebacks, so the status is
+        read here directly.
+        """
         ptr_mesu = cuvis_il.new_p_int()
         ptr_view = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_next_result(
+            self._handle, ptr_mesu, ptr_view, timeout_ms
+        ):
+            return None
+        view = (
+            Viewer._create_view_data(None, cuvis_il.p_int_value(ptr_view))
+            if self._viewer_set
+            else None
+        )
+        return WorkerResult(Measurement(cuvis_il.p_int_value(ptr_mesu)), view)
 
-        tries = 0
-        while tries * poll_intervall < timeout:
-            if self.has_next_result():
-                await a.sleep(0)
-                if cuvis_il.status_ok != cuvis_il.cuvis_worker_get_next_result(
-                    self._handle, ptr_mesu, ptr_view, 100
-                ):
-                    raise SDKException()
-                break
-            else:
-                tries += 1
-                await a.sleep(poll_intervall / 1000)
-        mesu = Measurement(cuvis_il.p_int_value(ptr_mesu))
-        if self._viewer_set:
-            view = Viewer._create_view_data(None, cuvis_il.p_int_value(ptr_view))
-        else:
-            view = None
-        return WorkerResult(mesu, view)
+    async def get_next_result_async(self, timeout: int) -> WorkerResult:
+        """Wait for the next result without polling for it.
+
+        The SDK's own wait is blocking and releases the GIL, so it runs in a worker
+        thread while the event loop carries on. Unlike the polling version this raises
+        `SDKException` when the timeout passes rather than returning a result built from
+        handles the SDK never filled in.
+        """
+        loop = a.get_running_loop()
+        result = await loop.run_in_executor(None, self._wait_for_result, timeout)
+        if result is None:
+            raise SDKException("Worker produced no result within {} ms".format(timeout))
+        return result
 
     @property
     @copydoc(cuvis_il.cuvis_worker_get_input_queue_limit)
@@ -311,17 +327,18 @@ class Worker(object):
         self, callback: Callable[[WorkerResult], Awaitable[None]]
     ) -> None:
         self.reset_worker_callback()
-        poll_time = 0.001
 
         async def _internal_worker_loop():
+            loop = a.get_running_loop()
             while True:
-                if self.has_next_result():
-                    workerContainer = await self.get_next_result_async(1000)
-                    a.create_task(callback(workerContainer))
+                result = await loop.run_in_executor(
+                    None, self._wait_for_result, _RESULT_WAIT_MS
+                )
+                if result is None:
+                    continue  # nothing arrived inside the window; wait again
 
-                    # TODO limit number of created task objects like in the cpp wrapper
-                else:
-                    await a.sleep(poll_time)
+                a.create_task(callback(result))
+                # TODO limit number of created task objects like in the cpp wrapper
 
         self._worker_poll_task = a.create_task(_internal_worker_loop())
 

@@ -51,6 +51,10 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - Annotations throughout `cuvis` restated in the forms Python 3.10 provides: `Union[A, B]` and `Optional[A]` became `A | B` and `A | None`, and `Tuple`, `FrozenSet`, `Sequence`, `Callable` and `Awaitable` now come from `builtins` and `collections.abc` rather than `typing`.
   Every signature denotes what it denoted before; `cuvis.cube_utils.ImageData.__getitem__` keeps `Union`, because its member list contains a forward reference and `|` cannot join a type to a string at runtime.
 - `cuvis.AcquisitionContext.capture` - parameter `to_interal` renamed to `to_internal`.
+- `cuvis.Async.AsyncMesu.__await__`, `cuvis.Async.Async.__await__`, `cuvis.Worker.get_next_result_async` - await the SDK's own blocking wait in a worker thread instead of polling it every 10 ms or 100 ms, so they resume when the SDK finishes rather than at the next poll.
+  Each outstanding wait occupies one pooled thread, and it cannot be cancelled, because a thread blocked in C is not interruptible.
+- `cuvis.Worker.register_worker_callback` - awaits each result instead of re-checking every 1 ms, so an idle registered callback no longer occupies a core.
+  `cuvis.Worker.reset_worker_callback` therefore takes effect only once the current one-second wait expires.
 
 ### Removed
 
@@ -69,6 +73,7 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.AcquisitionContext.register_ready_callback` - parameter `callback` was annotated `Callable[None, Awaitable[None]]`, which is not a valid `Callable` form; it is now `Callable[[], Awaitable[None]]`, matching the no-argument call the implementation makes.
 - `cuvis.AcquisitionContext.capture` - `to_internal=True` raised `TypeError` instead of queueing the measurement, because it passed a Python `0` where SWIG requires a null pointer.
 - `cuvis.Calibration`, `cuvis.AcquisitionContext`, `cuvis.ProcessingContext`, `cuvis.SessionFile`, `cuvis.Measurement`, `cuvis.Viewer`, `cuvis.Worker`, `cuvis.CubeExporter`, `cuvis.EnviExporter`, `cuvis.TiffExporter`, `cuvis.ViewExporter` - `__del__` raised `TypeError` after a failed construction, because it freed a handle that was still `None`.
+- `cuvis.Worker.get_next_result_async` - a timeout returned a `cuvis.Worker.WorkerResult` built from handles the SDK never filled in; it now raises `cuvis.cuvis_aux.SDKException`.
 
 ## [3.5.3.2] - 2026-08-19
 
