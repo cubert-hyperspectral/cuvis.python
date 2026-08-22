@@ -444,12 +444,15 @@ class CudaImageData(object):
     _TORCH_DTYPE = {1: "uint8", 2: "uint16", 3: "uint32", 4: "float32"}
 
     def __init__(self, cuda_buf):
+        # Set before the check that can raise, so __del__ on the half-built object
+        # sees None rather than an absent attribute.
+        self._handle = None  # CUVIS_CUDA_MEM (int), owned
+        self._ipc_handle = None  # CUVIS_CUDA_IPC (int), set by make_ipc()
         if not isinstance(cuda_buf, cuvis_il.cuvis_cuda_imbuffer_t):
             raise TypeError(
                 "Wrong data type for cuda image buffer: {}".format(type(cuda_buf))
             )
-        self._handle = cuda_buf.handle  # CUVIS_CUDA_MEM (int), owned
-        self._ipc_handle = None  # CUVIS_CUDA_IPC (int), set by make_ipc()
+        self._handle = cuda_buf.handle
         self._format = cuda_buf.format
         self.width = cuda_buf.width
         self.height = cuda_buf.height
@@ -568,12 +571,12 @@ class CudaImageData(object):
         )
 
     def __del__(self):
-        try:
-            if self._ipc_handle is not None:
-                cuvis_il.cuvis_cuda_ipc_handle_free(self._ipc_handle)
-        except Exception:
-            pass
-        try:
-            cuvis_il.cuvis_cuda_mem_free(self._handle)
-        except Exception:
-            pass
+        if self._handle is None:
+            return
+        # Not wrapped in try/except: a device buffer that fails to free is a VRAM leak,
+        # and swallowing it here would hide the leak as well as the reason for it.
+        if self._ipc_handle is not None:
+            cuvis_il.cuvis_cuda_ipc_handle_free(self._ipc_handle)
+            self._ipc_handle = None
+        cuvis_il.cuvis_cuda_mem_free(self._handle)
+        self._handle = None

@@ -354,7 +354,7 @@ class Measurement(object):
         cimg.make_ipc(backend)
         return cimg
 
-    def get_cube(self, key: str = "cube") -> Union[ImageData, CudaImageData]:
+    def get_cube(self, key: str = "cube") -> ImageData | CudaImageData:
         """Cube through whichever mode is active, so one call site serves both.
 
         .. code-block:: python3
