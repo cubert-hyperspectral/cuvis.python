@@ -41,6 +41,9 @@ FAILING_CONSTRUCTORS = {
     "CubeExporter": lambda: cuvis.CubeExporter("not export settings"),
     "Worker": lambda: cuvis.Worker("not worker settings"),
     "Viewer": lambda: cuvis.Viewer("not viewer settings"),
+    # Raises TypeError on a CUDA-capable binding and AttributeError on one without the
+    # CUDA surface; either way __del__ must stay quiet about the half-built object.
+    "CudaImageData": lambda: cuvis.CudaImageData("not a cuda buffer"),
 }
 
 

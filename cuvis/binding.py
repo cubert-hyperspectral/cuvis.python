@@ -162,7 +162,7 @@ def missing_symbols() -> frozenset[str]:
     return frozenset(getattr(cuvis_il, "missing_symbols", ()))
 
 
-def unavailable(*names: str) -> Tuple[str, ...]:
+def unavailable(*names: str) -> tuple[str, ...]:
     """Which of the named functions cannot be called, in the order given.
 
     A function is unusable for either of two reasons, and callers care about neither:

@@ -12,5 +12,6 @@
 /cuvis/git-hash.txt
 
 /tests/__pycache__
+/examples/__pycache__
 /.claude
 
