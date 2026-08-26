@@ -19,33 +19,59 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml` and against this file, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
 - `CONTRIBUTING.md` - documents the branch model, the version scheme, the changelog conventions and the release checklist.
-- `cuvis.BindingInfo` - new frozen dataclass with the fields `built_against: str`, `library_version: str`, `library_path: str` and `missing_symbols: Tuple[str, ...]`, the read-only property `is_complete: bool`, and a `__str__` rendering a report fit for a bug report.
+- `cuvis.BindingInfo` - new frozen dataclass with the fields `built_against: str`, `library_version: str`, `library_path: str` and `missing_symbols: tuple[str, ...]`, the read-only property `is_complete: bool`, and a `__str__` rendering a report fit for a bug report.
+- `cuvis.CudaImageData` - new class, device-resident image data backed by a shareable CUDA buffer, exposed zero-copy through DLPack or `__cuda_array_interface__` with no host copy.
+- `cuvis.CudaImageData.export_payload` - new method, returns `bytes`.
+- `cuvis.CudaImageData.make_ipc` - new method, returns `bytes`.
+- `cuvis.CudaImageData.to_torch` - new method, returns `torch.Tensor`.
+- `cuvis.Measurement.get_cube` - new method, returns `ImageData | CudaImageData` depending on whether `cuvis.cuda.enable` was called.
+- `cuvis.Measurement.get_cube_cuda` - new method, returns `CudaImageData`.
+- `cuvis.Measurement.get_cube_cuda_ipc` - new method, returns `CudaImageData`.
 - `cuvis.SdkSettings` - new class, a `MutableMapping` of setting id to value that writes the SDK's `cuvis.settings` file, so the SDK configuration can be built in Python instead of maintained by hand.
   Values are stored as strings: `bool` becomes `true`/`false`, an `Enum` becomes its value, anything else goes through `str()`, and `None` drops the entry.
 - `cuvis.SdkSettings.__enter__`, `cuvis.SdkSettings.__exit__` - new methods; entering the context serializes the settings into a temporary directory and returns its path as `str`, leaving the context removes the directory.
 - `cuvis.SdkSettings.save` - new method, writes the settings to a file, or into a directory as `cuvis.settings`.
 - `cuvis.SdkSettings.xml_str` - new read-only property, returns the serialized settings document as `str`.
-- `cuvis.UnavailableSDKFunction` - new exception deriving from both `cuvis.cuvis_aux.SDKException` and `RuntimeError`, with the field `names: Tuple[str, ...]`.
+- `cuvis.UnavailableSDKFunction` - new exception deriving from both `cuvis.cuvis_aux.SDKException` and `RuntimeError`, with the field `names: tuple[str, ...]`.
 - `cuvis.binding` - new module reporting the compiled binding, the cuvis library loaded beside it, and the functions that library does not provide.
   Nothing in it needs the SDK to be initialised, so it can be called before `cuvis.init`.
 - `cuvis.binding.available` - new function, returns `bool`.
 - `cuvis.binding.info` - new function, returns `BindingInfo`.
-- `cuvis.binding.missing_symbols` - new function, returns `FrozenSet[str]`.
+- `cuvis.binding.missing_symbols` - new function, returns `frozenset[str]`.
 - `cuvis.binding.require` - new function, raises `UnavailableSDKFunction` naming whichever of the given functions the installed cuvis library does not provide.
+- `cuvis.binding.unavailable` - new function, returns `tuple[str, ...]`.
+  A function the binding never exposed is unusable as well, so availability cannot be answered from the reported-missing list alone.
+- `cuvis.cuda` - new module gating the optional CUDA feature surface; CUDA stays off until `cuvis.cuda.enable` is called.
+- `cuvis.cuda.BACKEND_NONE`, `cuvis.cuda.BACKEND_POOL`, `cuvis.cuda.BACKEND_LEGACY`, `cuvis.cuda.BACKEND_VMM` - new constants, the IPC backend codes from `cuvis.h`.
+- `cuvis.cuda.CudaCapabilities` - new `NamedTuple` with the `bool` fields `same_process`, `ipc_pool`, `ipc_legacy`, `ipc_vmm`, `torch` and `cuda_python`, and the read-only property `any_ipc: bool`.
+- `cuvis.cuda.capabilities` - new function, returns `CudaCapabilities`.
+- `cuvis.cuda.disable` - new function.
+- `cuvis.cuda.enable` - new function.
+- `cuvis.cuda.is_enabled` - new function, returns `bool`.
+- `cuvis.cuda.require_device` - new function, raises `UnavailableSDKFunction` unless the installed library provides the same-process device path.
+- `cuvis.cuda.require_ipc` - new function, raises `UnavailableSDKFunction` unless the installed library provides the cross-process export path.
+- `cuvis_ipc` - new top-level module, the consumer side of cross-process CUDA IPC.
+  It sits outside the `cuvis` package because importing `cuvis` requires the SDK and a consumer process does not have one; its only import is `struct`.
+- `cuvis_ipc.ImportedCube` - new class, a mapped IPC buffer in the consumer process, usable as a context manager.
+- `cuvis_ipc.open` - new function, returns `ImportedCube`.
+- `cuvis_ipc.open_descriptor` - new function, returns `ImportedCube`.
+- `cuvis_ipc.pack_payload` - new function, returns `bytes`.
+- `pyproject.toml` - `py-modules` declaring the top-level `cuvis_ipc`.
+- `tests/` - `test_binding.py`, `test_cuda.py` and `test_cuvis_ipc.py`.
 
 ### Changed
 
 - Whole tree reformatted with `ruff format`; no behaviour change.
 - `README.md` - documents the version scheme, and lists Python 3.14 among the supported interpreters as `pyproject.toml` already did.
 - `prebuild.py` - writes `cuvis/git-hash.txt` instead of `git-hash.txt` at the repository root, so the file lands inside the package that declares it as package data.
-- `cuvis.General.init` - parameter `settings_path` type changed from `str` to `Union[str, Path, SdkSettings]`.
+- `cuvis.General.init` - parameter `settings_path` type changed from `str` to `str | Path | SdkSettings`.
   An `SdkSettings` is written to a temporary directory that exists only for the duration of the call, since the SDK reads the settings once during initialisation.
 - `cuvis.FileWriteSettings.GeneralExportSettings.__repr__`, `cuvis.FileWriteSettings.ViewerSettings.__repr__` - the docstring that sat below the nested helper, where it was a dead expression rather than a docstring, moved to the top of the method.
 - `cuvis.Measurement.capture_time`, `cuvis.Measurement.factory_calibration`, `cuvis.GPSData.time`, `cuvis.SensorInfo.readout_time` - type changed from a naive `datetime.datetime` to one carrying `tzinfo=datetime.timezone.utc`.
   The instant is unchanged, only the `+00:00` label is added; comparing or subtracting against a naive `datetime` now raises `TypeError`, so use `datetime.datetime.now(datetime.timezone.utc)` or `.astimezone()` for local time.
 - `cuvis.CalibrationInfo.calibration_date` - type changed from `int` to a `datetime.datetime` carrying `tzinfo=datetime.timezone.utc`; the field was annotated as a `datetime` but returned the raw epoch milliseconds unconverted.
   The SDK derives this value as midnight on the calibration day in the host's standard local time, so unlike the other timestamps the instant it denotes shifts with the reading machine; treat it as a day, not as an exact moment.
-- `cuvis.Measurement.factory_calibration` - type changed from `datetime.datetime` to `Optional[datetime.datetime]`, matching the existing fallback to `None` for SDK values the `datetime` range cannot represent.
+- `cuvis.Measurement.factory_calibration` - type changed from `datetime.datetime` to `datetime.datetime | None`, matching the existing fallback to `None` for SDK values the `datetime` range cannot represent.
   Only the day carries meaning: the SDK stores it as midnight in the local time of the machine that wrote the file, so the time component is an artifact of that machine and the day can be off by one when the file is read in another timezone.
 - `pyproject.toml` - `requires-python` raised from `>=3.9` to `>=3.10`, Python 3.9 having reached end of life in October 2025.
 - Annotations throughout `cuvis` restated in the forms Python 3.10 provides: `Union[A, B]` and `Optional[A]` became `A | B` and `A | None`, and `Tuple`, `FrozenSet`, `Sequence`, `Callable` and `Awaitable` now come from `builtins` and `collections.abc` rather than `typing`.

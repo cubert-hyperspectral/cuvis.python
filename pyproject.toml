@@ -38,6 +38,9 @@ Issues = "https://github.com/cubert-hyperspectral/cuvis.python/issues"
 
 [tool.setuptools]
 packages = ["cuvis"]
+# cuvis_ipc sits outside the package because a consumer process opening a CUDA IPC
+# payload has no SDK, and importing `cuvis` requires one.
+py-modules = ["cuvis_ipc"]
 include-package-data = true
 
 [tool.setuptools.package-data]
