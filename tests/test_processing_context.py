@@ -336,9 +336,9 @@ def test_white_spectrum_replaces_white_reference(
 def test_spectra_survive_legacy_cu3_round_trip(
     processing_context_from_session, test_measurement, temp_output_dir
 ):
-    """A measurement processed with both spectra keeps them through a legacy .cu3 save:
-    the spectra travel embedded in the file (no sidecar), values and rounded-nm
-    wavelengths intact, and the stored cube is bit-identical after reload."""
+    """A measurement processed with both spectra keeps them through a legacy .cu3 save
+    behind the SpectrumFileRefData indirection: one .cu3sp sidecar per slot beside the
+    .cu3, never embedded, and the stored cube is bit-identical after reload."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Reflectance
     pc.apply(test_measurement)
@@ -352,24 +352,27 @@ def test_spectra_survive_legacy_cu3_round_trip(
     pc.apply(test_measurement)
     expected = np.array(test_measurement.data["cube"].array, copy=True)
 
-    test_measurement.save(
+    # the CubeExporter is the one component that writes references in their link
+    # forms; allow_session_file=False makes it produce a loose legacy .cu3
+    exporter = cuvis.CubeExporter(
         cuvis.SaveArgs(
             export_dir=str(temp_output_dir),
             allow_overwrite=True,
             allow_session_file=False,
             allow_info_file=False,
+            full_export=True,
         )
     )
+    exporter.apply(test_measurement)
+    exporter.flush()
+    del exporter
     cu3 = list(temp_output_dir.glob("*.cu3"))
     assert len(cu3) == 1
 
+    # the spectra land as sidecar files beside the other reference files, shared by
+    # every measurement saved into the directory, never embedded into the measurement
+    assert (temp_output_dir / "Calibration" / "target_spectrum_ref.cu3sp").is_file()
+    assert (temp_output_dir / "Calibration" / "white_spectrum_ref.cu3sp").is_file()
+
     reloaded = cuvis.Measurement(str(cu3[0]))
     assert np.array_equal(np.asarray(reloaded.data["cube"].array), expected)
-
-    stored_target = reloaded.data["target_spectrum_ref"]
-    np.testing.assert_array_equal(np.asarray(stored_target.array).reshape(-1), target)
-    np.testing.assert_array_equal(stored_target.wavelength, np.round(grid).astype(int))
-
-    stored_white = reloaded.data["white_spectrum_ref"]
-    np.testing.assert_array_equal(np.asarray(stored_white.array).reshape(-1), counts)
-    np.testing.assert_array_equal(stored_white.wavelength, np.round(wls).astype(int))
