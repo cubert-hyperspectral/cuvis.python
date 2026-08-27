@@ -15,6 +15,13 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ### Added
 
+- `cuvis.ReferenceType.WhiteSpectrum` - new enum member.
+- `cuvis.ReferenceType.TargetSpectrum` - new enum member.
+- `cuvis.ProcessingContext.set_reference` - new parameter `effective_bit_depth: int | None = None`.
+- `cuvis.ProcessingContext.set_reference` - new parameter `integration_time: float = 0.0`.
+- `cuvis.ProcessingContext.set_reference` - new parameter `load_level: float = 0.0`.
+- `cuvis.ProcessingContext.get_reference_spectrum` - new method.
+  Returns the white or target reference spectrum as an `ImageData`, or `None` when the slot is empty.
 - `CI` - `.github/workflows/ci.yml` runs the test suite and a lint job enforcing `ruff check` and `ruff format --check` on every pull request and on every push to `develop` and `main`.
 - `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml` and against this file, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
@@ -36,6 +43,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 ### Changed
 
 - Whole tree reformatted with `ruff format`; no behaviour change.
+- `cuvis.ProcessingContext.set_reference` - type changed from `(mesu: Measurement, refType: ReferenceType)` to `(data: Measurement | ImageData | tuple, refType: ReferenceType)`.
+  The spectrum reference types take spectrum data instead of a `Measurement`; the first parameter is renamed from `mesu` to `data`.
 - `README.md` - documents the version scheme, and lists Python 3.14 among the supported interpreters as `pyproject.toml` already did.
 - `prebuild.py` - writes `cuvis/git-hash.txt` instead of `git-hash.txt` at the repository root, so the file lands inside the package that declares it as package data.
 - `cuvis.General.init` - parameter `settings_path` type changed from `str` to `Union[str, Path, SdkSettings]`.

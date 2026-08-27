@@ -85,6 +85,8 @@ class ReferenceType(Enum):
     WhiteDark = 3
     SpRad = 4
     Distance = 5
+    WhiteSpectrum = 6
+    TargetSpectrum = 7
 
 
 __CuvisReferenceType__ = {
@@ -93,6 +95,8 @@ __CuvisReferenceType__ = {
     ReferenceType.WhiteDark: cuvis_il.Reference_WhiteDark,
     ReferenceType.SpRad: cuvis_il.Reference_SpRad,
     ReferenceType.Distance: cuvis_il.Reference_Distance,
+    ReferenceType.WhiteSpectrum: cuvis_il.Reference_WhiteSpectrum,
+    ReferenceType.TargetSpectrum: cuvis_il.Reference_TargetSpectrum,
 }
 
 __ReferenceType__ = __inverseTranslationDict(__CuvisReferenceType__)
