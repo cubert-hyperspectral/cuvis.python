@@ -257,4 +257,119 @@ def test_flat_target_spectrum_keeps_reflectance_identical(
     with_target = np.array(test_measurement.data["cube"].array, copy=True)
     pc.clear_reference(cuvis.ReferenceType.TargetSpectrum)
 
-    np.testing.assert_array_equal(plain, with_target)
+    # one count of tolerance: the reflectance kernel is parallel and not
+    # bit-deterministic between runs, and a flat 100 percent target must only be
+    # a no-op within uint16 rounding
+    assert np.abs(plain.astype(np.int32) - with_target.astype(np.int32)).max() <= 1
+
+
+def test_target_spectrum_scales_reflectance(
+    processing_context_from_session, test_measurement
+):
+    """A flat 50 percent target spectrum halves every reflectance value."""
+    pc = processing_context_from_session
+    pc.processing_mode = cuvis.ProcessingMode.Reflectance
+    pc.apply(test_measurement)
+    base = np.array(test_measurement.data["cube"].array, copy=True)
+    grid = np.asarray(test_measurement.data["cube"].wavelength, dtype=np.float32)
+
+    pc.set_reference(
+        (grid, np.full(grid.size, 50.0, dtype=np.float32)),
+        cuvis.ReferenceType.TargetSpectrum,
+    )
+    pc.apply(test_measurement)
+    halved = np.array(test_measurement.data["cube"].array, copy=True)
+    pc.clear_reference(cuvis.ReferenceType.TargetSpectrum)
+
+    mask = base > 200  # above the noise floor, so uint16 rounding stays below 1 percent
+    ratio = halved[mask].astype(np.float64) / base[mask]
+    assert abs(ratio.mean() - 0.5) < 0.005
+    assert ratio.min() > 0.49 and ratio.max() < 0.51
+
+
+def _padded_white(test_measurement, level):
+    """A flat counts spectrum spanning past the cube grid, whose rounded ends may sit
+    inside the calibration's float grid."""
+    grid = np.asarray(test_measurement.data["cube"].wavelength, dtype=np.float32)
+    wls = np.concatenate(([grid[0] - 10.0], grid, [grid[-1] + 10.0])).astype(np.float32)
+    return wls, np.full(wls.size, level, dtype=np.uint16)
+
+
+def test_white_spectrum_replaces_white_reference(
+    processing_context_from_session, test_measurement
+):
+    """The two white sources are mutually exclusive: setting one clears the other, and
+    reflectance uses whichever is set; four times the counts quarter the cube."""
+    pc = processing_context_from_session
+    pc.processing_mode = cuvis.ProcessingMode.Reflectance
+    pc.apply(test_measurement)
+    assert pc.has_reference(cuvis.ReferenceType.White)
+    white_mesu = pc.get_reference(cuvis.ReferenceType.White)
+
+    wls, counts = _padded_white(test_measurement, 1000)
+    pc.set_reference(
+        (wls, counts), cuvis.ReferenceType.WhiteSpectrum, effective_bit_depth=12
+    )
+    assert not pc.has_reference(cuvis.ReferenceType.White)
+    assert pc.has_reference(cuvis.ReferenceType.WhiteSpectrum)
+
+    pc.apply(test_measurement)
+    from_1000 = np.array(test_measurement.data["cube"].array, copy=True)
+
+    wls, counts = _padded_white(test_measurement, 4000)
+    pc.set_reference(
+        (wls, counts), cuvis.ReferenceType.WhiteSpectrum, effective_bit_depth=12
+    )
+    pc.apply(test_measurement)
+    from_4000 = np.array(test_measurement.data["cube"].array, copy=True)
+
+    mask = from_1000 > 200
+    ratio = from_4000[mask].astype(np.float64) / from_1000[mask]
+    assert abs(ratio.mean() - 0.25) < 0.005
+
+    # and the other direction: restoring the white measurement clears the spectrum
+    pc.set_reference(white_mesu, cuvis.ReferenceType.White)
+    assert pc.has_reference(cuvis.ReferenceType.White)
+    assert not pc.has_reference(cuvis.ReferenceType.WhiteSpectrum)
+
+
+def test_spectra_survive_legacy_cu3_round_trip(
+    processing_context_from_session, test_measurement, temp_output_dir
+):
+    """A measurement processed with both spectra keeps them through a legacy .cu3 save:
+    the spectra travel embedded in the file (no sidecar), values and rounded-nm
+    wavelengths intact, and the stored cube is bit-identical after reload."""
+    pc = processing_context_from_session
+    pc.processing_mode = cuvis.ProcessingMode.Reflectance
+    pc.apply(test_measurement)
+    grid = np.asarray(test_measurement.data["cube"].wavelength, dtype=np.float32)
+    target = np.full(grid.size, 50.0, dtype=np.float32)
+    pc.set_reference((grid, target), cuvis.ReferenceType.TargetSpectrum)
+    wls, counts = _padded_white(test_measurement, 1000)
+    pc.set_reference(
+        (wls, counts), cuvis.ReferenceType.WhiteSpectrum, effective_bit_depth=12
+    )
+    pc.apply(test_measurement)
+    expected = np.array(test_measurement.data["cube"].array, copy=True)
+
+    test_measurement.save(
+        cuvis.SaveArgs(
+            export_dir=str(temp_output_dir),
+            allow_overwrite=True,
+            allow_session_file=False,
+            allow_info_file=False,
+        )
+    )
+    cu3 = list(temp_output_dir.glob("*.cu3"))
+    assert len(cu3) == 1
+
+    reloaded = cuvis.Measurement(str(cu3[0]))
+    assert np.array_equal(np.asarray(reloaded.data["cube"].array), expected)
+
+    stored_target = reloaded.data["target_spectrum_ref"]
+    np.testing.assert_array_equal(np.asarray(stored_target.array).reshape(-1), target)
+    np.testing.assert_array_equal(stored_target.wavelength, np.round(grid).astype(int))
+
+    stored_white = reloaded.data["white_spectrum_ref"]
+    np.testing.assert_array_equal(np.asarray(stored_white.array).reshape(-1), counts)
+    np.testing.assert_array_equal(stored_white.wavelength, np.round(wls).astype(int))
