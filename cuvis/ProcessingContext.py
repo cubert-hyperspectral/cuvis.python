@@ -137,7 +137,7 @@ class ProcessingContext(object):
             values = np.ascontiguousarray(values, dtype=np.float32)
             if (
                 cuvis_il.status_ok
-                != cuvis_il.cuvis_proc_cont_set_reference_spectrum_swig(
+                != cuvis_il.cuvis_proc_cont_set_reference_target_spectrum_swig(
                     self._handle, wavelengths, values
                 )
             ):
@@ -153,7 +153,7 @@ class ProcessingContext(object):
         values = np.ascontiguousarray(values, dtype=np.uint16)
         if (
             cuvis_il.status_ok
-            != cuvis_il.cuvis_proc_cont_set_reference_spectrum_counts_swig(
+            != cuvis_il.cuvis_proc_cont_set_reference_white_spectrum_swig(
                 self._handle,
                 wavelengths,
                 values,
@@ -195,9 +195,9 @@ class ProcessingContext(object):
         does not expose it.
         """
         if refType is ReferenceType.TargetSpectrum:
-            read = cuvis_il.cuvis_proc_cont_get_reference_spectrum_swig
+            read = cuvis_il.cuvis_proc_cont_get_reference_target_spectrum_swig
         elif refType is ReferenceType.WhiteSpectrum:
-            read = cuvis_il.cuvis_proc_cont_get_reference_spectrum_counts_swig
+            read = cuvis_il.cuvis_proc_cont_get_reference_white_spectrum_swig
         else:
             raise ValueError(
                 f"Reference type {refType} is not a spectrum; use get_reference."
