@@ -97,7 +97,6 @@ class ProcessingContext(object):
         *,
         effective_bit_depth: int | None = None,
         integration_time: float = 0.0,
-        load_level: float = 0.0,
     ) -> None:
         """Set a reference for processing.
 
@@ -107,10 +106,10 @@ class ProcessingContext(object):
 
         - TargetSpectrum: reflectance values in percent (0 to 100).
         - WhiteSpectrum: raw sensor counts (uint16); effective_bit_depth (1 to 16) is
-          required, integration_time [ms] and load_level describe the recording.
+          required, integration_time [ms] describes the recording.
         """
         if refType not in _SPECTRUM_REFERENCES:
-            if effective_bit_depth is not None or integration_time or load_level:
+            if effective_bit_depth is not None or integration_time:
                 raise TypeError(
                     "Spectrum metadata only applies to WhiteSpectrum and TargetSpectrum references."
                 )
@@ -130,7 +129,7 @@ class ProcessingContext(object):
         wavelengths, values = _spectrum_arrays(data)
 
         if refType is ReferenceType.TargetSpectrum:
-            if effective_bit_depth is not None or integration_time or load_level:
+            if effective_bit_depth is not None or integration_time:
                 raise TypeError(
                     "Counts metadata does not apply to the target spectrum."
                 )
@@ -159,7 +158,6 @@ class ProcessingContext(object):
                 values,
                 int(effective_bit_depth),
                 float(integration_time),
-                float(load_level),
             )
         ):
             raise SDKException()
@@ -191,7 +189,7 @@ class ProcessingContext(object):
 
         Only ReferenceType.WhiteSpectrum and ReferenceType.TargetSpectrum are spectra;
         other types live in get_reference. The counts metadata passed to set_reference
-        (effective_bit_depth, integration_time, load_level) is not returned; the C API
+        (effective_bit_depth, integration_time) is not returned; the C API
         does not expose it.
         """
         if refType is ReferenceType.TargetSpectrum:
