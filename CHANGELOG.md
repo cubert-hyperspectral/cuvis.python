@@ -4,8 +4,8 @@ All notable changes to the `cuvis` Python wrapper are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Entry wording follows the conventions in [CONTRIBUTING.md](CONTRIBUTING.md#changelog-conventions) - every API entry names the fully qualified symbol first, then states the change with one of the fixed predicates.
 
-Versions are `MAJOR.MINOR.PATCH.TWEAK`.
-`MAJOR.MINOR.PATCH` is the cuvis SDK release the wrapper targets; `TWEAK` counts wrapper-only revisions against that same SDK.
+Versions are `WORLD.MAJOR.MINOR.PATCH`.
+`WORLD.MAJOR.MINOR` is the cuvis SDK release the wrapper targets; `PATCH` counts wrapper-only revisions against that same SDK.
 See [CONTRIBUTING.md](CONTRIBUTING.md#version-scheme) for the full scheme.
 
 Entries for versions released before this file existed were reconstructed from the published PyPI artifacts and from an AST-level diff of the public `cuvis` API surface between the corresponding commits.
@@ -15,6 +15,14 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ### Added
 
+- `cuvis.ReferenceType.WhiteSpectrum` - new enum member.
+- `cuvis.ReferenceType.TargetSpectrum` - new enum member.
+- `cuvis.ProcessingContext.set_reference` - new parameter `effective_bit_depth: int | None = None`.
+- `cuvis.ProcessingContext.set_reference` - new parameter `integration_time: float = 0.0`.
+- `cuvis.ProcessingContext.get_reference_spectrum` - new method.
+  Returns the white or target reference spectrum as an `ImageData`, or `None` when the slot is empty.
+  Target values are reflectance fractions (1.0 = 100 percent); the white spectrum additionally carries `effective_bit_depth` and `integration_time` attributes.
+- `tests/` - behavior tests for the reference spectra: a 0.5 reflectivity target halves the reflectance cube, white spectrum and white measurement clear each other, four times the white counts quarter the cube, and both spectra survive a legacy `.cu3` save behind `.cu3sp` sidecar links and the stored cube is bit-identical after reload.
 - `CI` - `.github/workflows/ci.yml` runs the test suite and a lint job enforcing `ruff check` and `ruff format --check` on every pull request and on every push to `develop` and `main`.
 - `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml` and against this file, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
@@ -36,6 +44,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 ### Changed
 
 - Whole tree reformatted with `ruff format`; no behaviour change.
+- `cuvis.ProcessingContext.set_reference` - type changed from `(mesu: Measurement, refType: ReferenceType)` to `(data: Measurement | ImageData | tuple, refType: ReferenceType)`.
+  The spectrum reference types take spectrum data instead of a `Measurement`; the first parameter is renamed from `mesu` to `data`.
 - `README.md` - documents the version scheme, and lists Python 3.14 among the supported interpreters as `pyproject.toml` already did.
 - `prebuild.py` - writes `cuvis/git-hash.txt` instead of `git-hash.txt` at the repository root, so the file lands inside the package that declares it as package data.
 - `cuvis.General.init` - parameter `settings_path` type changed from `str` to `Union[str, Path, SdkSettings]`.
