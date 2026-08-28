@@ -135,7 +135,7 @@ def test_cube_wavelength_access(processing_context_from_session, test_measuremen
 
 def _flat_target(n=10):
     wavelengths = np.linspace(450.0, 900.0, n, dtype=np.float32)
-    values = np.full(n, 100.0, dtype=np.float32)
+    values = np.full(n, 1.0, dtype=np.float32)
     return wavelengths, values
 
 
@@ -176,6 +176,8 @@ def test_white_counts_spectrum_round_trip(processing_context_from_session):
     spectrum = pc.get_reference_spectrum(cuvis.ReferenceType.WhiteSpectrum)
     assert np.asarray(spectrum.array).reshape(-1).tolist() == counts.tolist()
     np.testing.assert_allclose(spectrum.wavelength, wavelengths, rtol=1e-6)
+    assert spectrum.effective_bit_depth == 12
+    assert spectrum.integration_time == 10.0
 
     pc.clear_reference(cuvis.ReferenceType.WhiteSpectrum)
     assert not pc.has_reference(cuvis.ReferenceType.WhiteSpectrum)
@@ -243,7 +245,7 @@ def test_spectrum_and_measurement_slots_do_not_mix(
 def test_flat_target_spectrum_keeps_reflectance_identical(
     processing_context_from_session, test_measurement
 ):
-    """A flat 100 percent target spectrum must not change the reflectance cube."""
+    """A flat 1.0 (full reflectivity) target spectrum must not change the reflectance cube."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Reflectance
 
@@ -257,15 +259,15 @@ def test_flat_target_spectrum_keeps_reflectance_identical(
     pc.clear_reference(cuvis.ReferenceType.TargetSpectrum)
 
     # one count of tolerance: the reflectance kernel is parallel and not
-    # bit-deterministic between runs, and a flat 100 percent target must only be
-    # a no-op within uint16 rounding
+    # bit-deterministic between runs, and a flat full-reflectivity target must only
+    # be a no-op within uint16 rounding
     assert np.abs(plain.astype(np.int32) - with_target.astype(np.int32)).max() <= 1
 
 
 def test_target_spectrum_scales_reflectance(
     processing_context_from_session, test_measurement
 ):
-    """A flat 50 percent target spectrum halves every reflectance value."""
+    """A flat 0.5 reflectivity target spectrum halves every reflectance value."""
     pc = processing_context_from_session
     pc.processing_mode = cuvis.ProcessingMode.Reflectance
     pc.apply(test_measurement)
@@ -273,7 +275,7 @@ def test_target_spectrum_scales_reflectance(
     grid = np.asarray(test_measurement.data["cube"].wavelength, dtype=np.float32)
 
     pc.set_reference(
-        (grid, np.full(grid.size, 50.0, dtype=np.float32)),
+        (grid, np.full(grid.size, 0.5, dtype=np.float32)),
         cuvis.ReferenceType.TargetSpectrum,
     )
     pc.apply(test_measurement)
