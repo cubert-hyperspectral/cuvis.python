@@ -21,7 +21,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.ProcessingContext.set_reference` - new parameter `integration_time: float = 0.0`.
 - `cuvis.ProcessingContext.get_reference_spectrum` - new method.
   Returns the white or target reference spectrum as an `ImageData`, or `None` when the slot is empty.
-- `tests/` - behavior tests for the reference spectra: a 50 percent target halves the reflectance cube, white spectrum and white measurement clear each other, four times the white counts quarter the cube, and both spectra survive a legacy `.cu3` save behind `.cu3sp` sidecar links and the stored cube is bit-identical after reload.
+  Target values are reflectance fractions (1.0 = 100 percent); the white spectrum additionally carries `effective_bit_depth` and `integration_time` attributes.
+- `tests/` - behavior tests for the reference spectra: a 0.5 reflectivity target halves the reflectance cube, white spectrum and white measurement clear each other, four times the white counts quarter the cube, and both spectra survive a legacy `.cu3` save behind `.cu3sp` sidecar links and the stored cube is bit-identical after reload.
 - `CI` - `.github/workflows/ci.yml` runs the test suite and a lint job enforcing `ruff check` and `ruff format --check` on every pull request and on every push to `develop` and `main`.
 - `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml` and against this file, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
 - `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
