@@ -4,8 +4,8 @@ All notable changes to the `cuvis` Python wrapper are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Entry wording follows the conventions in [CONTRIBUTING.md](CONTRIBUTING.md#changelog-conventions) - every API entry names the fully qualified symbol first, then states the change with one of the fixed predicates.
 
-Versions are `MAJOR.MINOR.PATCH.TWEAK`.
-`MAJOR.MINOR.PATCH` is the cuvis SDK release the wrapper targets; `TWEAK` counts wrapper-only revisions against that same SDK.
+Versions are `WORLD.MAJOR.MINOR.PATCH`.
+`WORLD.MAJOR.MINOR` is the cuvis SDK release the wrapper targets; `PATCH` counts wrapper-only revisions against that same SDK.
 See [CONTRIBUTING.md](CONTRIBUTING.md#version-scheme) for the full scheme.
 
 Entries for versions released before this file existed were reconstructed from the published PyPI artifacts and from an AST-level diff of the public `cuvis` API surface between the corresponding commits.
