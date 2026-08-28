@@ -19,7 +19,6 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.ReferenceType.TargetSpectrum` - new enum member.
 - `cuvis.ProcessingContext.set_reference` - new parameter `effective_bit_depth: int | None = None`.
 - `cuvis.ProcessingContext.set_reference` - new parameter `integration_time: float = 0.0`.
-- `cuvis.ProcessingContext.set_reference` - new parameter `load_level: float = 0.0`.
 - `cuvis.ProcessingContext.get_reference_spectrum` - new method.
   Returns the white or target reference spectrum as an `ImageData`, or `None` when the slot is empty.
 - `tests/` - behavior tests for the reference spectra: a 50 percent target halves the reflectance cube, white spectrum and white measurement clear each other, four times the white counts quarter the cube, and both spectra survive a legacy `.cu3` save behind `.cu3sp` sidecar links and the stored cube is bit-identical after reload.

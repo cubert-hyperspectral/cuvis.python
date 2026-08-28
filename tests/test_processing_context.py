@@ -129,8 +129,8 @@ def test_cube_wavelength_access(processing_context_from_session, test_measuremen
 
 
 # --- reference spectra -----------------------------------------------------------------
-# The counts metadata (effective_bit_depth, integration_time, load_level) cannot be
-# asserted after a round trip: the C API stores it but exposes no getter for it.
+# The counts metadata (effective_bit_depth, integration_time) cannot be asserted after a
+# round trip: the C API stores it but exposes no getter for it.
 
 
 def _flat_target(n=10):
@@ -170,7 +170,6 @@ def test_white_counts_spectrum_round_trip(processing_context_from_session):
         cuvis.ReferenceType.WhiteSpectrum,
         effective_bit_depth=12,
         integration_time=10.0,
-        load_level=0.8,
     )
     assert pc.has_reference(cuvis.ReferenceType.WhiteSpectrum)
 
