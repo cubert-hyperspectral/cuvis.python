@@ -66,8 +66,8 @@ For building the python bindings refer to [cuvis.pyil](https://github.com/cubert
 
 ## Versioning
 
-Wrapper versions are `MAJOR.MINOR.PATCH.TWEAK`.
-`MAJOR.MINOR.PATCH` is the Cuvis C SDK release this wrapper targets, and `TWEAK` counts wrapper-only
+Wrapper versions are `GENERATION.MAJOR.MINOR.PATCH`.
+`GENERATION.MAJOR.MINOR` is the Cuvis C SDK release this wrapper targets, and `PATCH` counts wrapper-only
 revisions against that same SDK; `3.5.3.1` is a wrapper fix on top of `3.5.3.0`, both for SDK 3.5.3.
 
 `main` always points at the latest released wrapper state, `develop` at the next release.
