@@ -15,6 +15,14 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ### Added
 
+- `cuvis.ReferenceType.WhiteSpectrum` - new enum member.
+- `cuvis.ReferenceType.TargetSpectrum` - new enum member.
+- `cuvis.ProcessingContext.set_reference` - new parameter `effective_bit_depth: int | None = None`.
+- `cuvis.ProcessingContext.set_reference` - new parameter `integration_time: float = 0.0`.
+- `cuvis.ProcessingContext.get_reference_spectrum` - new method.
+  Returns the white or target reference spectrum as an `ImageData`, or `None` when the slot is empty.
+  Target values are reflectance fractions (1.0 = 100 percent); the white spectrum additionally carries `effective_bit_depth` and `integration_time` attributes.
+- `tests/` - behavior tests for the reference spectra: a 0.5 reflectivity target halves the reflectance cube, white spectrum and white measurement clear each other, four times the white counts quarter the cube, and both spectra survive a legacy `.cu3` save behind `.cu3sp` sidecar links and the stored cube is bit-identical after reload.
 - `CI` - `.github/workflows/ci.yml` runs the test suite and a lint job enforcing `ruff check` and `ruff format --check` on every pull request and on every push to `develop` and `main`.
 - `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml`, this file and the `cuvis_pyil` image, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
   Pre-release tags (`a`, `b`, `rc` suffix) publish to PyPI as pre-releases and create no GitHub Release.
@@ -39,6 +47,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 - Whole tree reformatted with `ruff format`; no behaviour change.
 - `pyproject.toml` - the `cuvis-il` requirement moved from `>=3.5.0,<3.6.0` to `>=3.6.0a0,<3.7.0`, so the wrapper targets cuvis SDK 3.6 and accepts the pre-releases of that SDK line.
+- `cuvis.ProcessingContext.set_reference` - type changed from `(mesu: Measurement, refType: ReferenceType)` to `(data: Measurement | ImageData | tuple, refType: ReferenceType)`.
+  The spectrum reference types take spectrum data instead of a `Measurement`; the first parameter is renamed from `mesu` to `data`.
 - `README.md` - documents the version scheme, and lists Python 3.14 among the supported interpreters as `pyproject.toml` already did.
 - `prebuild.py` - writes `cuvis/git-hash.txt` instead of `git-hash.txt` at the repository root, so the file lands inside the package that declares it as package data.
 - `cuvis.General.init` - parameter `settings_path` type changed from `str` to `Union[str, Path, SdkSettings]`.
