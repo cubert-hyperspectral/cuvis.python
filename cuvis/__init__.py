@@ -41,7 +41,8 @@ from .binding import BindingInfo, UnavailableSDKFunction
 from .Export import CubeExporter, EnviExporter, TiffExporter, ViewExporter
 from .Calibration import Calibration
 from .AcquisitionContext import AcquisitionContext
-from .cube_utils import ImageData
+from .cube_utils import ImageData, CudaImageData
+from . import cuda
 import os
 import platform
 import sys

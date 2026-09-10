@@ -4,6 +4,8 @@ from ._cuvis_il import cuvis_il
 import numpy as np
 import operator
 from .cuvis_aux import SDKException
+from .cuvis_types import DataFormat
+from . import cuda
 
 _IMBUF_READERS = {
     1: cuvis_il.cuvis_read_imbuf_uint8,
@@ -418,3 +420,163 @@ ImageData.__neg__ = lambda self: self._wrap(-self.array)
 ImageData.__abs__ = lambda self: self._wrap(abs(self.array))
 
 del _op, _reflected, _method
+
+
+class CudaImageData(object):
+    """Device-resident image data backed by a shareable CUDA buffer.
+
+    Wraps a CUVIS_CUDA_MEM handle plus geometry, exposing the device memory as a
+    zero-copy CUDA tensor (torch via DLPack, or any consumer via
+    __cuda_array_interface__). Unlike ImageData, no host copy is made.
+
+    Lifetime: this object owns the CUVIS_CUDA_MEM handle and frees it in __del__.
+    to_torch() takes its own SDK reference so the returned tensor can outlive this
+    object; the __cuda_array_interface__ path does not, so keep this object alive
+    until such a consumer is done with it.
+
+    For cross-process sharing, make_ipc() (called by Measurement.get_cube_cuda_ipc)
+    creates a CUVIS_CUDA_IPC handle and fills .descriptor. That IPC handle is an
+    independent reference to the same buffer, freed in __del__; freeing the mem handle
+    while it is open would not release the memory.
+    """
+
+    _TYPESTR = {1: "|u1", 2: "<u2", 3: "<u4", 4: "<f4"}
+    _TORCH_DTYPE = {1: "uint8", 2: "uint16", 3: "uint32", 4: "float32"}
+
+    def __init__(self, cuda_buf):
+        # Set before the check that can raise, so __del__ on the half-built object
+        # sees None rather than an absent attribute.
+        self._handle = None  # CUVIS_CUDA_MEM (int), owned
+        self._ipc_handle = None  # CUVIS_CUDA_IPC (int), set by make_ipc()
+        if not isinstance(cuda_buf, cuvis_il.cuvis_cuda_imbuffer_t):
+            raise TypeError(
+                "Wrong data type for cuda image buffer: {}".format(type(cuda_buf))
+            )
+        self._handle = cuda_buf.handle
+        self._format = cuda_buf.format
+        self.width = cuda_buf.width
+        self.height = cuda_buf.height
+        self.channels = cuda_buf.channels
+        self.dtype = DataFormat[cuda_buf.format]
+        self.wavelength = None
+        if cuda_buf.wavelength is not None:
+            self.wavelength = [
+                cuvis_il.p_unsigned_int_getitem(cuda_buf.wavelength, z)
+                for z in range(self.channels)
+            ]
+        # bytes of the transportable IPC descriptor, filled by make_ipc()
+        self.descriptor = None
+
+    def _view(self):
+        """(device_ptr:int, size_bytes:int, device_ordinal:int)."""
+        v = cuvis_il.cuvis_cuda_mem_view_t()
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_mem_get_view(self._handle, v):
+            raise SDKException()
+        return int(cuvis_il.cuvis_cuda_view_ptr(v)), int(v.size), int(v.device_ordinal)
+
+    @property
+    def __cuda_array_interface__(self):
+        # Fallback interop (cupy, torch.as_tensor). Unlike to_torch(), this hands out only
+        # a pointer with NO lifecycle tie: the caller must keep this CudaImageData alive for
+        # as long as the resulting array is used, or it reads freed device memory.
+        import warnings
+
+        warnings.warn(
+            "CudaImageData.__cuda_array_interface__ has no lifecycle management; the buffer "
+            "is freed when this CudaImageData is dropped. Prefer to_torch() (DLPack), which "
+            "ties the buffer lifetime to the returned tensor. Keep this object alive while "
+            "the array is used.",
+            UserWarning,
+            stacklevel=2,
+        )
+        ptr, _size, _dev = self._view()
+        return {
+            "shape": (self.height, self.width, self.channels),
+            "typestr": self._TYPESTR[self._format],
+            "data": (ptr, False),  # torch.as_tensor rejects read-only=True
+            "version": 3,
+        }
+
+    def to_torch(self):
+        """Zero-copy torch.Tensor of shape (height, width, channels).
+
+        Preferred same-process path: torch owns the buffer lifetime through the DLPack
+        capsule deleter, which drops an SDK reference taken here, so the tensor is safe
+        even after this CudaImageData is dropped.
+        """
+        try:
+            import torch
+        except ImportError as e:
+            raise ImportError(
+                "torch is required for CudaImageData.to_torch(); install 'cuvis[torch]'"
+            ) from e
+        from ._dlpack import make_cuda_dlpack
+
+        ptr, size, dev = self._view()
+        pref = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_mem_copy_handle(
+            self._handle, pref
+        ):
+            raise SDKException()
+        ref = cuvis_il.p_int_value(pref)
+        producer = make_cuda_dlpack(
+            ptr, size, dev, on_delete=lambda: cuvis_il.cuvis_cuda_mem_free(ref)
+        )
+        t = torch.from_dlpack(producer)  # flat uint8
+        t = t.view(getattr(torch, self._TORCH_DTYPE[self._format]))
+        return t.reshape(self.height, self.width, self.channels)
+
+    def make_ipc(self, backend: int = 0):
+        """Create an IPC export of this buffer and fill .descriptor (transportable bytes).
+
+        backend selects the mechanism (CUVIS_CUDA_IPC_BACKEND_*): 0 = auto (pool zero-copy if
+        available, else legacy cudaIpc, else VMM); 1 = pool; 2 = legacy; 3 = VMM. Fails with
+        SDKException if the requested backend is unavailable on this device.
+
+        The IPC handle is an independent reference kept until __del__; while it is open,
+        freeing the mem handle does not release the device memory. Returns .descriptor.
+        """
+        cuda.require_ipc()
+        pipc = cuvis_il.new_p_int()
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_ipc_handle_create(
+            self._handle, int(backend), pipc
+        ):
+            raise SDKException()
+        self._ipc_handle = cuvis_il.p_int_value(pipc)
+        desc = cuvis_il.cuvis_cuda_ipc_descriptor_t()
+        if cuvis_il.status_ok != cuvis_il.cuvis_cuda_ipc_get_descriptor(
+            self._ipc_handle, desc
+        ):
+            raise SDKException()
+        self.descriptor = cuvis_il.cuvis_cuda_descriptor_bytes(desc)
+        return self.descriptor
+
+    def export_payload(self, backend: int = 0) -> bytes:
+        """A single transportable blob (IPC descriptor + geometry) for a consumer process.
+
+        Send these bytes out-of-band; the consumer opens them with cuvis_ipc.open(payload)
+        and gets a correctly shaped/typed tensor. Calls make_ipc(backend) if not already done
+        (backend: 0=auto, 1=pool, 2=legacy, 3=VMM). Keep this CudaImageData alive until the
+        consumer is finished (legacy IPC has no cross-process refcount).
+        """
+        if self.descriptor is None:
+            self.make_ipc(backend)
+        # Imported here, not at module scope: cuvis_ipc is the consumer half and lives
+        # outside the package, so a producer that never exports must not fail to import
+        # cuvis because it is absent.
+        import cuvis_ipc
+
+        return cuvis_ipc.pack_payload(
+            self.descriptor, self.width, self.height, self.channels, self._format
+        )
+
+    def __del__(self):
+        if self._handle is None:
+            return
+        # Not wrapped in try/except: a device buffer that fails to free is a VRAM leak,
+        # and swallowing it here would hide the leak as well as the reason for it.
+        if self._ipc_handle is not None:
+            cuvis_il.cuvis_cuda_ipc_handle_free(self._ipc_handle)
+            self._ipc_handle = None
+        cuvis_il.cuvis_cuda_mem_free(self._handle)
+        self._handle = None

@@ -13,7 +13,8 @@ from .cuvis_aux import (
     _utc_from_epoch_ms,
 )
 from .cuvis_types import DataFormat, ProcessingMode, ReferenceType
-from .cube_utils import ImageData
+from .cube_utils import ImageData, CudaImageData
+from . import cuda
 
 
 import cuvis.cuvis_types as internal
@@ -35,6 +36,13 @@ class Measurement(object):
     name: str
     session_info: SessionData  # read-only
     frame_id: int  # read-only
+
+    # When False, refresh() skips fetching image data to the host via
+    # cuvis_measurement_get_data_image. That host fetch moves a GPU-processed cube
+    # into host memory and frees the device copy, which makes the same-process CUDA
+    # path (get_cube_cuda) unavailable. Set False before processing when you intend
+    # to read the cube as CUDA device memory. Default True preserves normal behaviour.
+    _refresh_images = True
 
     def __init__(self, base: int | str | Path):
         self._handle = None
@@ -106,6 +114,10 @@ class Measurement(object):
             )
             cdtype = cuvis_il.p_cuvis_data_type_t_value(pType)
             if cdtype == cuvis_il.data_type_image:
+                if not Measurement._refresh_images:
+                    # Skip the host fetch so a GPU-processed cube stays in device
+                    # memory and remains reachable via get_cube_cuda.
+                    continue
                 data = cuvis_il.cuvis_imbuffer_t()
                 cuvis_il.cuvis_measurement_get_data_image(self._handle, key, data)
                 # t0 = datetime.datetime.now()
@@ -273,6 +285,93 @@ class Measurement(object):
         raise ValueError(
             "This Measurement does not have a cube saved. Consider reprocessing with a Processing Context."
         )
+
+    def get_cube_cuda(self, key: str = "cube") -> CudaImageData:
+        """Image data as a device-resident CUDA buffer for same-process, zero-copy use.
+
+        .. code-block:: python3
+
+            from cuvis import cuda
+
+            if cuda.capabilities().same_process:
+                cuda.enable()                       # BEFORE loading or processing
+                tensor = mesu.get_cube_cuda().to_torch()
+
+        Returns a :class:`cuvis.CudaImageData` wrapping a CUVIS_CUDA_MEM handle; read it
+        with ``.to_torch()`` (DLPack, which ties the buffer lifetime to the tensor) or
+        through ``__cuda_array_interface__`` (which does not, so keep the CudaImageData
+        alive). No host copy is made.
+
+        The cube must still be on the device, which it is only when `cuda.enable` was
+        called before it was processed; the host fetch in `refresh` otherwise moves it to
+        host memory and frees the device copy.
+
+        :param key: which image entry to read, `"cube"` unless the measurement carries
+            several.
+        :raises cuvis.UnavailableSDKFunction: the installed cuvis library provides no
+            CUDA support; call `cuda.capabilities` first to avoid this.
+        :raises cuvis.cuvis_aux.SDKException: the image data is not device-backed.
+        """
+        cuda.require_device()
+        buf = cuvis_il.cuvis_cuda_imbuffer_t()
+        if cuvis_il.status_ok != cuvis_il.cuvis_measurement_get_data_image_cuda(
+            self._handle, key, buf
+        ):
+            raise SDKException()
+        return CudaImageData(buf)
+
+    def get_cube_cuda_ipc(self, key: str = "cube", backend: int = 0) -> CudaImageData:
+        """Image data as a shareable CUDA buffer for cross-process use.
+
+        Producer side; the consumer opens the payload with :mod:`cuvis_ipc`, which needs
+        no SDK of its own.
+
+        .. code-block:: python3
+
+            cimg = mesu.get_cube_cuda_ipc()         # keep alive until the consumer is done
+            send(cimg.export_payload())            # descriptor + geometry, one blob
+
+            # ... in the consumer process, no cuvis installed ...
+            import cuvis_ipc
+            with cuvis_ipc.open(payload) as cube:
+                tensor = cube.to_torch()
+
+        Fetches the device buffer with `get_cube_cuda` and creates an IPC export on it,
+        filling `.descriptor` with the transportable bytes. The returned object is the
+        in-process pin, since legacy IPC carries no cross-process refcount: drop it and
+        the consumer is reading freed device memory.
+
+        :param key: which image entry to read.
+        :param backend: which mechanism to export with, one of `cuvis.cuda.BACKEND_NONE`
+            (auto), `BACKEND_POOL`, `BACKEND_LEGACY` or `BACKEND_VMM`. `cuda.capabilities`
+            reports which of them this device supports.
+        :raises cuvis.UnavailableSDKFunction: the installed cuvis library provides no
+            CUDA IPC support.
+        :raises cuvis.cuvis_aux.SDKException: the requested backend is unavailable on
+            this device.
+        """
+        cimg = self.get_cube_cuda(key)
+        cimg.make_ipc(backend)
+        return cimg
+
+    def get_cube(self, key: str = "cube") -> ImageData | CudaImageData:
+        """Cube through whichever mode is active, so one call site serves both.
+
+        .. code-block:: python3
+
+            cube = mesu.get_cube()      # CudaImageData after cuda.enable(), else ImageData
+
+        With CUDA mode on (`cuvis.cuda.enable`) this is `get_cube_cuda` and raises when
+        the device path is unavailable. There is deliberately no silent fallback to the
+        host: a zero-copy path that quietly degrades to two copies is worse than an error,
+        because the cost is invisible.
+
+        :param key: which image entry to read.
+        :return: `CudaImageData` in CUDA mode, otherwise the host `ImageData`.
+        """
+        if cuda.is_enabled():
+            return self.get_cube_cuda(key)
+        return self.cube
 
     @property
     def thumbnail(self):

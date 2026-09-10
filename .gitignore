@@ -7,9 +7,11 @@
 /cuvis/cuvis_il.py
 /cuvis/_cuvis_pyil.pyd
 /venv
+/__pycache__
 /cuvis/__pycache__
 /cuvis/git-hash.txt
 
 /tests/__pycache__
+/examples/__pycache__
 /.claude
 
