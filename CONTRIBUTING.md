@@ -22,11 +22,11 @@ A pull request into `develop` or `main` must pass the `ci.yml` lint and test job
 
 ## Version scheme
 
-Versions are `MAJOR.MINOR.PATCH.TWEAK`, always with all four components.
+Versions are `GENERATION.MAJOR.MINOR.PATCH`, always with all four components, optionally followed by a pre-release suffix `a1`, `b1` or `rc1`.
 
-- `MAJOR.MINOR.PATCH` is the cuvis SDK release this wrapper targets.
+- `GENERATION.MAJOR.MINOR` is the cuvis SDK release this wrapper targets.
   It is not chosen by the wrapper; it follows the SDK.
-- `TWEAK` counts wrapper-only revisions against that same SDK release, starting at `0`.
+- `PATCH` counts wrapper-only revisions against that same SDK release, starting at `0`.
 
 Examples:
 
@@ -40,8 +40,10 @@ Two consequences worth knowing:
 
 - PEP 440 treats `3.5.3.0` and `3.5.3` as the same version, so only one of the two forms may ever be published for a given release.
   Tags created before this scheme was written down use the three-component form (`v3.5.3` is release `3.5.3.0`); everything from `v3.5.3.2` onward is four-component.
-- A `TWEAK` bump never widens or narrows the `cuvis-il` requirement in `pyproject.toml`.
-  If the interface layer requirement changes, the SDK it targets changed, so the change belongs in a `MAJOR.MINOR.PATCH` release.
+- A `PATCH` bump never widens or narrows the `cuvis-il` requirement in `pyproject.toml`.
+  If the interface layer requirement changes, the SDK it targets changed, so the change belongs in a `GENERATION.MAJOR.MINOR` release.
+- A pre-release (`3.6.0.0rc1`) runs the whole release pipeline and reaches PyPI as a pre-release, which `pip` ignores unless asked for with `--pre` or an exact pin.
+  It creates no GitHub Release; its changelog entries stay under `## [Unreleased]` until the final version, whose section then covers everything since the previous final release.
 
 The version lives in exactly one place: `[project].version` in `pyproject.toml`.
 The git tag is `v` followed by that value, and the release workflow refuses to publish when the two disagree.
@@ -70,7 +72,7 @@ Widening it is a separate, self-contained pull request, never a side effect of a
 ## Changelog conventions
 
 Every user-visible change is recorded in `CHANGELOG.md` under `## [Unreleased]` in the same pull request that makes the change.
-The file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and is validated by `scripts/check_changelog.py`, which CI runs on every pull request.
+The file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and is validated on every pull request by the shared `changelog` action from [cuvis.docker](https://github.com/cubert-hyperspectral/cuvis.docker).
 
 ### Structure
 
@@ -123,6 +125,9 @@ The git history already records those, and they say nothing about the API.
 
 ## Releasing
 
+Releases run in a fixed order across repositories; see the [cuvis.docker README](https://github.com/cubert-hyperspectral/cuvis.docker#release-order).
+The `cuvis_pyil:<sdk>-ubuntu24.04` image must exist before cuvis.python can release for that SDK; the workflow checks and stops otherwise.
+
 ### One-time repository setup
 
 The release workflow depends on settings that live outside the repository:
@@ -139,10 +144,11 @@ The release workflow depends on settings that live outside the repository:
 ### Regular release from `develop`
 
 1. On `develop`, confirm which SDK version the wrapper targets and that `cuvis-il` in `pyproject.toml` matches it.
-2. Rename `## [Unreleased]` to `## [X.Y.Z.W] - <today>` and add the SDK statement lines beneath it.
+2. For a final version rename `## [Unreleased]` to `## [X.Y.Z.W] - <today>` and add the SDK statement lines beneath it.
    Add a fresh empty `## [Unreleased]` above it.
-3. Set `[project].version` in `pyproject.toml` to `X.Y.Z.W`.
-4. Run `ruff format --check . && ruff check . && pytest && python scripts/check_changelog.py`.
+   For a pre-release leave the entries under `## [Unreleased]`.
+3. Set `[project].version` in `pyproject.toml` to `X.Y.Z.W` (or `X.Y.Z.WrcN`).
+4. Run `ruff format --check . && ruff check . && pytest`.
 5. Open a pull request `develop` -> `main` titled `release: vX.Y.Z.W` and merge it once CI is green.
 6. Tag the merge commit on `main` and push the tag:
 
@@ -152,15 +158,15 @@ The release workflow depends on settings that live outside the repository:
    git push origin vX.Y.Z.W
    ```
 
-7. `release.yml` validates the tag, builds, publishes to TestPyPI, and then waits for approval on the `pypi` environment before publishing to PyPI and creating the GitHub Release.
+7. `release.yml` validates the tag, builds, publishes to TestPyPI, and then waits for approval on the `pypi` environment before publishing to PyPI and, for a final version, creating the GitHub Release.
 8. Merge `main` back into `develop` so the release commit is an ancestor of both.
 
 ### Hotfix release from `main`
 
-Same as above, except the branch is `hotfix/<slug>` cut from `main`, the pull request targets `main` directly, only `TWEAK` increases, and step 8 becomes mandatory rather than tidy-up.
+Same as above, except the branch is `hotfix/<slug>` cut from `main`, the pull request targets `main` directly, only `PATCH` increases, and step 8 becomes mandatory rather than tidy-up.
 
 ### If a release goes wrong
 
 A published PyPI version cannot be replaced.
-Fix forward with the next `TWEAK`; yank on PyPI only when the artifact is actively harmful.
+Fix forward with the next `PATCH`; yank on PyPI only when the artifact is actively harmful.
 Delete the tag and re-tag only while the release workflow has not yet published anything.

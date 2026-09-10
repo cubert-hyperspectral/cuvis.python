@@ -18,19 +18,25 @@ jobs:
     name: Resolve versions
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.meta.outputs.version }}
       sdk: ${{ steps.meta.outputs.sdk }}
-      ruff: ${{ steps.meta.outputs.ruff }}
+      ruff: ${{ steps.pyproject.outputs.ruff }}
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
       - name: Read pyproject.toml
-        id: meta
-        run: python scripts/release_meta.py >> "$GITHUB_OUTPUT"
+        id: pyproject
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import tomllib
+          project = tomllib.load(open("pyproject.toml", "rb"))["project"]
+          print(f"version={project['version']}")
+          print("ruff=" + next(s for s in project["optional-dependencies"]["dev"] if s.startswith("ruff")))
+          PY
+
+      - id: meta
+        uses: cubert-hyperspectral/cuvis.docker/.github/actions/release-meta@main
+        with:
+          version: ${{ steps.pyproject.outputs.version }}
 
   lint:
     name: Lint
@@ -60,12 +66,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Validate CHANGELOG.md structure
-        run: python scripts/check_changelog.py
+      - uses: cubert-hyperspectral/cuvis.docker/.github/actions/changelog@main
 
       - name: Require a changelog entry
         if: >

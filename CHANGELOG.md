@@ -4,8 +4,8 @@ All notable changes to the `cuvis` Python wrapper are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Entry wording follows the conventions in [CONTRIBUTING.md](CONTRIBUTING.md#changelog-conventions) - every API entry names the fully qualified symbol first, then states the change with one of the fixed predicates.
 
-Versions are `MAJOR.MINOR.PATCH.TWEAK`.
-`MAJOR.MINOR.PATCH` is the cuvis SDK release the wrapper targets; `TWEAK` counts wrapper-only revisions against that same SDK.
+Versions are `GENERATION.MAJOR.MINOR.PATCH`.
+`GENERATION.MAJOR.MINOR` is the cuvis SDK release the wrapper targets; `PATCH` counts wrapper-only revisions against that same SDK.
 See [CONTRIBUTING.md](CONTRIBUTING.md#version-scheme) for the full scheme.
 
 Entries for versions released before this file existed were reconstructed from the published PyPI artifacts and from an AST-level diff of the public `cuvis` API surface between the corresponding commits.
@@ -16,8 +16,9 @@ Pre-releases (`b*`, `rc*`) are not listed.
 ### Added
 
 - `CI` - `.github/workflows/ci.yml` runs the test suite and a lint job enforcing `ruff check` and `ruff format --check` on every pull request and on every push to `develop` and `main`.
-- `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml` and against this file, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
-- `CI` - `scripts/check_changelog.py` validates this file's structure (header format, allowed section names, descending versions) and the tag/version/changelog agreement at release time.
+- `CI` - `.github/workflows/release.yml` is driven by `v*.*.*.*` tags: it validates the tag against `pyproject.toml`, this file and the `cuvis_pyil` image, builds, publishes to TestPyPI, and publishes to PyPI plus a GitHub Release after manual approval.
+  Pre-release tags (`a`, `b`, `rc` suffix) publish to PyPI as pre-releases and create no GitHub Release.
+- `CI` - the changelog structure and the tag/version/changelog agreement are validated by the shared actions in [cuvis.docker](https://github.com/cubert-hyperspectral/cuvis.docker).
 - `CONTRIBUTING.md` - documents the branch model, the version scheme, the changelog conventions and the release checklist.
 - `cuvis.BindingInfo` - new frozen dataclass with the fields `built_against: str`, `library_version: str`, `library_path: str` and `missing_symbols: Tuple[str, ...]`, the read-only property `is_complete: bool`, and a `__str__` rendering a report fit for a bug report.
 - `cuvis.SdkSettings` - new class, a `MutableMapping` of setting id to value that writes the SDK's `cuvis.settings` file, so the SDK configuration can be built in Python instead of maintained by hand.
