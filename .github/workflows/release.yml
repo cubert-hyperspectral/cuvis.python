@@ -79,6 +79,37 @@ jobs:
           print(f"cuvis=={version} is not published yet.")
           PY
 
+      - name: Verify the cuvis-il requirement agrees with the version
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          SDK: ${{ steps.meta.outputs.sdk }}
+        run: |
+          python -m pip install packaging
+          python - <<'PY'
+          import os, sys, tomllib
+          from packaging.requirements import Requirement
+          from packaging.version import Version
+
+          version, sdk = Version(os.environ["VERSION"]), os.environ["SDK"]
+          project = tomllib.load(open("pyproject.toml", "rb"))["project"]
+          spec = next(Requirement(d) for d in project["dependencies"] if d.startswith("cuvis-il")).specifier
+
+          if Version(sdk) not in spec:
+              sys.exit(f"cuvis-il{spec} does not accept {sdk}, the SDK this release targets.")
+
+          # PEP 440 sorts 3.6.0.0rc1 below 3.6.0, so only a bound that names a pre-release
+          # can reach one; naming one also opens the whole range to pre-releases, which a
+          # final release must not ship.
+          if bool(spec.prereleases) != version.is_prerelease:
+              opens = "opens" if spec.prereleases else "does not open"
+              sys.exit(
+                  f"cuvis-il{spec} {opens} to pre-releases but {version} is "
+                  f"{'a pre-release' if version.is_prerelease else 'final'}. "
+                  f"A pre-release needs a bound naming one, as in >={sdk}a0; a final needs >={sdk}."
+              )
+          print(f"cuvis-il{spec} agrees with {version}.")
+          PY
+
       - name: Verify the cuvis_pyil image for this SDK exists
         env:
           IMAGE: cubertgmbh/cuvis_pyil:${{ steps.meta.outputs.sdk }}-ubuntu24.04

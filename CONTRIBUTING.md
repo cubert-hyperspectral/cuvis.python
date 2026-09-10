@@ -42,6 +42,11 @@ Two consequences worth knowing:
   Tags created before this scheme was written down use the three-component form (`v3.5.3` is release `3.5.3.0`); everything from `v3.5.3.2` onward is four-component.
 - A `PATCH` bump never widens or narrows the `cuvis-il` requirement in `pyproject.toml`.
   If the interface layer requirement changes, the SDK it targets changed, so the change belongs in a `GENERATION.MAJOR.MINOR` release.
+  The one exception is the pre-release bound below, which is tied to the release being a pre-release rather than to the SDK.
+- A pre-release opens the `cuvis-il` requirement at `a0`, as in `>=3.6.0a0,<3.7.0`; the final release closes it again to `>=3.6.0,<3.7.0`.
+  The `a0` is load-bearing.
+  PEP 440 sorts `3.6.0.0rc1` below `3.6.0`, so a `>=3.6.0` bound cannot reach a pre-release of that SDK at all, and naming a pre-release in the bound is also what permits `pip` to consider pre-releases without `--pre`.
+  The cost is that `pip` then prefers a pre-release of a later SDK in the same line, `3.6.1.0rc1`, over the current final `3.6.0.0`.
 - A pre-release (`3.6.0.0rc1`) runs the whole release pipeline and reaches PyPI as a pre-release, which `pip` ignores unless asked for with `--pre` or an exact pin.
   It creates no GitHub Release; its changelog entries stay under `## [Unreleased]` until the final version, whose section then covers everything since the previous final release.
 
