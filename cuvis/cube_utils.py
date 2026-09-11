@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from ._cuvis_il import cuvis_il
 import numpy as np
 import operator
+import struct
 from .cuvis_aux import SDKException
 from .cuvis_types import DataFormat
 from . import cuda
@@ -422,6 +423,57 @@ ImageData.__abs__ = lambda self: self._wrap(abs(self.array))
 del _op, _reflected, _method
 
 
+# Wire format of cuvis_cuda_ipc_descriptor_t, mirroring the offsets cuvis_ipc parses. Kept
+# here rather than imported from cuvis_ipc, which is the consumer half and lives outside this
+# package precisely so a consumer process need not be able to import cuvis.
+_IPC_HEAD = struct.Struct(
+    "<iiiIQQQQ"
+)  # backend, device_ordinal, handle_type, blob_len, size, alloc_size, offset, exporter_pid
+_IPC_BLOB_OFF = 48
+_IPC_PTR_LEN_OFF = 112
+_IPC_PTR_BLOB_OFF = 120
+_IPC_BLOB_MAX = 64
+_IPC_DESC_LEN = 184
+
+
+def _descriptor_bytes(desc) -> bytes:
+    """Serialise a cuvis_cuda_ipc_descriptor_t to its transportable form.
+
+    Done field by field rather than as one memcpy of the struct: SWIG exposes the scalars
+    directly and the two blobs only as `unsigned char *`, so there is no way to hand the whole
+    struct out as bytes from Python. The layout is fixed by the C header and asserted below.
+    """
+
+    def blob(pointer, length):
+        """`length` bytes out of an unsigned char array, padded to the fixed field width."""
+        if length > _IPC_BLOB_MAX:
+            raise ValueError("blob length {} exceeds {}".format(length, _IPC_BLOB_MAX))
+        taken = bytes(
+            cuvis_il.p_unsigned_char_getitem(pointer, i) for i in range(length)
+        )
+        return taken.ljust(_IPC_BLOB_MAX, bytes(1))
+
+    out = bytearray(_IPC_DESC_LEN)
+    _IPC_HEAD.pack_into(
+        out,
+        0,
+        int(desc.backend),
+        int(desc.device_ordinal),
+        int(desc.handle_type),
+        int(desc.blob_len),
+        int(desc.size),
+        int(desc.alloc_size),
+        int(desc.offset),
+        int(desc.exporter_pid),
+    )
+    out[_IPC_BLOB_OFF : _IPC_BLOB_OFF + _IPC_BLOB_MAX] = blob(desc.blob, desc.blob_len)
+    struct.pack_into("<I", out, _IPC_PTR_LEN_OFF, int(desc.ptr_blob_len))
+    out[_IPC_PTR_BLOB_OFF : _IPC_PTR_BLOB_OFF + _IPC_BLOB_MAX] = blob(
+        desc.ptr_blob, desc.ptr_blob_len
+    )
+    return bytes(out)
+
+
 class CudaImageData(object):
     """Device-resident image data backed by a shareable CUDA buffer.
 
@@ -467,12 +519,26 @@ class CudaImageData(object):
         # bytes of the transportable IPC descriptor, filled by make_ipc()
         self.descriptor = None
 
+    @staticmethod
+    def _free(handle):
+        """Release one CUVIS_CUDA_MEM.
+
+        cuvis_cuda_mem_free takes CUVIS_CUDA_MEM* (like cuvis_cuda_ipc_handle_free), not the
+        handle by value, so the handle has to be boxed. Passing it by value raises TypeError
+        out of the binding and the buffer is never returned to the SDK's pool.
+        """
+        box = cuvis_il.new_p_int()
+        cuvis_il.p_int_assign(box, int(handle))
+        return cuvis_il.cuvis_cuda_mem_free(box)
+
     def _view(self):
         """(device_ptr:int, size_bytes:int, device_ordinal:int)."""
         v = cuvis_il.cuvis_cuda_mem_view_t()
         if cuvis_il.status_ok != cuvis_il.cuvis_cuda_mem_get_view(self._handle, v):
             raise SDKException()
-        return int(cuvis_il.cuvis_cuda_view_ptr(v)), int(v.size), int(v.device_ordinal)
+        # int() on the void* SWIG object yields the address directly; no binding helper
+        # is involved, so this cannot drift out of sync with one.
+        return int(v.device_ptr), int(v.size), int(v.device_ordinal)
 
     @property
     def __cuda_array_interface__(self):
@@ -519,9 +585,7 @@ class CudaImageData(object):
         ):
             raise SDKException()
         ref = cuvis_il.p_int_value(pref)
-        producer = make_cuda_dlpack(
-            ptr, size, dev, on_delete=lambda: cuvis_il.cuvis_cuda_mem_free(ref)
-        )
+        producer = make_cuda_dlpack(ptr, size, dev, on_delete=lambda: self._free(ref))
         t = torch.from_dlpack(producer)  # flat uint8
         t = t.view(getattr(torch, self._TORCH_DTYPE[self._format]))
         return t.reshape(self.height, self.width, self.channels)
@@ -548,7 +612,7 @@ class CudaImageData(object):
             self._ipc_handle, desc
         ):
             raise SDKException()
-        self.descriptor = cuvis_il.cuvis_cuda_descriptor_bytes(desc)
+        self.descriptor = _descriptor_bytes(desc)
         return self.descriptor
 
     def export_payload(self, backend: int = 0) -> bytes:
@@ -576,7 +640,9 @@ class CudaImageData(object):
         # Not wrapped in try/except: a device buffer that fails to free is a VRAM leak,
         # and swallowing it here would hide the leak as well as the reason for it.
         if self._ipc_handle is not None:
-            cuvis_il.cuvis_cuda_ipc_handle_free(self._ipc_handle)
+            box = cuvis_il.new_p_int()
+            cuvis_il.p_int_assign(box, int(self._ipc_handle))
+            cuvis_il.cuvis_cuda_ipc_handle_free(box)
             self._ipc_handle = None
-        cuvis_il.cuvis_cuda_mem_free(self._handle)
+        self._free(self._handle)
         self._handle = None
