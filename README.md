@@ -70,7 +70,7 @@ Wrapper versions are `GENERATION.MAJOR.MINOR.PATCH`.
 `GENERATION.MAJOR.MINOR` is the Cuvis C SDK release this wrapper targets, and `PATCH` counts wrapper-only
 revisions against that same SDK; `3.5.3.1` is a wrapper fix on top of `3.5.3.0`, both for SDK 3.5.3.
 
-`main` always points at the latest released wrapper state, `develop` at the next release.
+`main` is the trunk and points at the latest released wrapper state; every release is a `v*` tag on one of its commits.
 Every release is listed in [CHANGELOG.md](CHANGELOG.md).
 The scheme and the release process are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 

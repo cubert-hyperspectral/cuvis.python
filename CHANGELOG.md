@@ -13,6 +13,11 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+## [3.6.0.0] - 2026-09-11
+
+Targets cuvis SDK 3.6.0.
+First wrapper release for that SDK.
+
 ### Added
 
 - `cuvis.ReferenceType.WhiteSpectrum` - new enum member.
@@ -72,7 +77,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 ### Changed
 
 - Whole tree reformatted with `ruff format`; no behaviour change.
-- `pyproject.toml` - the `cuvis-il` requirement moved from `>=3.5.0,<3.6.0` to `>=3.6.0a0,<3.7.0`, so the wrapper targets cuvis SDK 3.6 and accepts the pre-releases of that SDK line.
+- `pyproject.toml` - the `cuvis-il` requirement moved from `>=3.5.0,<3.6.0` to `>=3.6.0,<3.7.0`, so the wrapper targets cuvis SDK 3.6.
+- `CONTRIBUTING.md`, `README.md` - the branch model is now trunk based: `develop` is gone, every change is cut from `main` and merged back into it by pull request, and a commit on `main` is no longer necessarily a release.
 - `cuvis.ProcessingContext.set_reference` - type changed from `(mesu: Measurement, refType: ReferenceType)` to `(data: Measurement | ImageData | tuple, refType: ReferenceType)`.
   The spectrum reference types take spectrum data instead of a `Measurement`; the first parameter is renamed from `mesu` to `data`.
 - `README.md` - documents the version scheme, and lists Python 3.14 among the supported interpreters as `pyproject.toml` already did.

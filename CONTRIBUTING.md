@@ -7,18 +7,17 @@ For bug reports and questions use [GitHub Issues](https://github.com/cubert-hype
 
 | Branch | Role |
 | --- | --- |
-| `main` | The latest released wrapper state for the latest released cuvis SDK. Every commit on `main` is a release and carries a `v*` tag. Never receives direct pushes. |
-| `develop` | Integration branch for the next release. All feature work lands here. |
-| `feature/*` | One branch per change, cut from `develop`, merged back into `develop` by pull request. |
-| `hotfix/*` | Cut from `main` when a released version needs a fix before `develop` is ready to release. Merged into `main` by pull request, tagged, then merged back into `develop`. |
+| `main` | Trunk, and the latest released wrapper state for the latest released cuvis SDK. Never receives direct pushes. |
+| `feature/*` | One branch per change, cut from `main`, merged back into `main` by pull request. |
 | `release/vX.Y` | Maintenance branch for an older SDK line that still receives wrapper revisions. Cut from the corresponding tag on demand. |
 
 ```
-feature/*  ->  develop  ->  main  (tag vX.Y.Z.W)
-hotfix/*   ->  main     (tag vX.Y.Z.W)  ->  develop
+feature/*  ->  main  (tag vX.Y.Z.W)
 ```
 
-A pull request into `develop` or `main` must pass the `ci.yml` lint and test jobs.
+A release is a `v*` tag on a commit of `main`; not every commit on `main` is a release.
+
+A pull request into `main` must pass the `ci.yml` lint and test jobs.
 
 ## Version scheme
 
@@ -143,18 +142,18 @@ The release workflow depends on settings that live outside the repository:
 - **Environments.** `testpypi` and `pypi` must exist under Settings -> Environments.
   `pypi` carries the required reviewers that make step 7 below a human gate; without them the release
   publishes unattended.
-- **Branch protection.** `main` and `develop` require the `Lint`, `Changelog` and `Tests` checks from
-  `ci.yml`, and `main` additionally forbids direct pushes.
+- **Branch protection.** `main` requires the `Lint`, `Changelog` and `Tests` checks from `ci.yml`
+  and forbids direct pushes.
 
-### Regular release from `develop`
+### Cutting a release
 
-1. On `develop`, confirm which SDK version the wrapper targets and that `cuvis-il` in `pyproject.toml` matches it.
+1. On a `feature/*` branch cut from `main`, confirm which SDK version the wrapper targets and that `cuvis-il` in `pyproject.toml` matches it.
 2. For a final version rename `## [Unreleased]` to `## [X.Y.Z.W] - <today>` and add the SDK statement lines beneath it.
    Add a fresh empty `## [Unreleased]` above it.
    For a pre-release leave the entries under `## [Unreleased]`.
 3. Set `[project].version` in `pyproject.toml` to `X.Y.Z.W` (or `X.Y.Z.WrcN`).
 4. Run `ruff format --check . && ruff check . && pytest`.
-5. Open a pull request `develop` -> `main` titled `release: vX.Y.Z.W` and merge it once CI is green.
+5. Open a pull request into `main` titled `release: vX.Y.Z.W` and merge it once CI is green.
 6. Tag the merge commit on `main` and push the tag:
 
    ```bash
@@ -164,11 +163,10 @@ The release workflow depends on settings that live outside the repository:
    ```
 
 7. `release.yml` validates the tag, builds, publishes to TestPyPI, and then waits for approval on the `pypi` environment before publishing to PyPI and, for a final version, creating the GitHub Release.
-8. Merge `main` back into `develop` so the release commit is an ancestor of both.
 
-### Hotfix release from `main`
+### Fixing a released version
 
-Same as above, except the branch is `hotfix/<slug>` cut from `main`, the pull request targets `main` directly, only `PATCH` increases, and step 8 becomes mandatory rather than tidy-up.
+An ordinary change: branch from `main`, raise only `PATCH`, and follow the same steps.
 
 ### If a release goes wrong
 
