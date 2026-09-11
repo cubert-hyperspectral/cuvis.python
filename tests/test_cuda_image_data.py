@@ -21,13 +21,19 @@ from pathlib import Path
 import pytest
 
 import cuvis
-from cuvis import cuda
+from cuvis import binding, cuda
 from cuvis._cuvis_il import cuvis_il
 from cuvis.cube_utils import _descriptor_bytes
 
-_HAS_DEVICE = cuda.capabilities().same_process
+# Two different denials: the loaded library may not export the CUDA functions at all (the
+# CPU-only build CI runs against), and the device may not support them. The first makes even
+# calling into the binding raise, so it gates separately from the device tests below.
+_HAS_CUDA_EXPORTS = binding.available("cuvis_cuda_mem_free")
+requires_cuda_exports = pytest.mark.skipif(
+    not _HAS_CUDA_EXPORTS, reason="loaded cuvis library exports no CUDA functions"
+)
 requires_device = pytest.mark.skipif(
-    not _HAS_DEVICE, reason="needs a CUDA device the SDK accepts"
+    not cuda.capabilities().same_process, reason="needs a CUDA device the SDK accepts"
 )
 
 
@@ -54,6 +60,7 @@ def test_every_binding_symbol_the_cuda_path_uses_exists():
     assert not missing, f"cube_utils references absent cuvis_il symbols: {missing}"
 
 
+@requires_cuda_exports
 def test_free_passes_the_handle_the_way_the_c_api_takes_it():
     """Test cuvis_cuda_mem_free is called with CUVIS_CUDA_MEM*, not the handle by value.
 
