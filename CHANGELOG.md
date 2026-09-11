@@ -113,6 +113,14 @@ Pre-releases (`b*`, `rc*`) are not listed.
 - `cuvis.AcquisitionContext.capture` - `to_internal=True` raised `TypeError` instead of queueing the measurement, because it passed a Python `0` where SWIG requires a null pointer.
 - `cuvis.Calibration`, `cuvis.AcquisitionContext`, `cuvis.ProcessingContext`, `cuvis.SessionFile`, `cuvis.Measurement`, `cuvis.Viewer`, `cuvis.Worker`, `cuvis.CubeExporter`, `cuvis.EnviExporter`, `cuvis.TiffExporter`, `cuvis.ViewExporter` - `__del__` raised `TypeError` after a failed construction, because it freed a handle that was still `None`.
 - `cuvis.Worker.get_next_result_async` - a timeout returned a `cuvis.Worker.WorkerResult` built from handles the SDK never filled in; it now raises `cuvis.cuvis_aux.SDKException`.
+- `cuvis.CudaImageData.to_torch`, `cuvis.CudaImageData.__cuda_array_interface__` - raised `AttributeError` on every call, because `_view` used `cuvis_il.cuvis_cuda_view_ptr`, which no `cuvis-il` build exports.
+  The device pointer is now read from the `cuvis_cuda_mem_view_t` field directly, so no binding helper is involved and none can go missing.
+- `cuvis.CudaImageData.make_ipc`, `cuvis.CudaImageData.export_payload` - raised `AttributeError`, because they used `cuvis_il.cuvis_cuda_descriptor_bytes`, which no `cuvis-il` build exports.
+  The descriptor is now serialized in Python to the same 184-byte layout `cuvis_ipc` parses.
+- `cuvis.CudaImageData.__del__`, `cuvis.CudaImageData.to_torch` - device buffers were never released: both freed through `cuvis_cuda_mem_free(handle)`, but the C API declares `cuvis_cuda_mem_free(CUVIS_CUDA_MEM*)`, so every call raised `TypeError` out of the binding.
+  In `__del__` that surfaced only as an ignored exception, and in the DLPack capsule deleter not at all, so a long-running consumer exhausted the card. The handle is now boxed, and `cuvis_cuda_ipc_handle_free` is corrected the same way.
+- `tests/test_cuda_image_data.py` - behavior tests for the device-buffer path, which nothing previously executed: a static check that `cube_utils` references no absent `cuvis_il` symbol, the descriptor's wire layout and its agreement with `cuvis_ipc`, the free calling convention, and, on a machine with a CUDA device, that the zero-copy tensor equals the host cube and that repeated read-and-drop cycles return their memory.
+  The static and layout checks need no device, which matters because CI has none and therefore never ran this code.
 
 ## [3.5.3.2] - 2026-08-19
 
