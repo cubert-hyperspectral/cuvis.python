@@ -22,6 +22,11 @@ First wrapper release for that SDK.
 
 - `pyproject.toml` - the `cuvis-il` requirement is raised to `>=3.6.1,<3.7.0`.
 
+### Fixed
+
+- `tests/` - the legacy `.cu3` round-trip test failed against SDK 3.6.1, which appends a content hash to the reference spectrum sidecars (`target_spectrum_ref_<md5>.cu3sp`).
+  The sidecars are now matched by prefix, one per slot, so the test passes against SDK 3.6.0 and 3.6.1.
+
 ## [3.6.0.0] - 2026-09-11
 
 Targets cuvis SDK 3.6.0.
