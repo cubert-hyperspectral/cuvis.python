@@ -371,9 +371,11 @@ def test_spectra_survive_legacy_cu3_round_trip(
     assert len(cu3) == 1
 
     # the spectra land as sidecar files beside the other reference files, shared by
-    # every measurement saved into the directory, never embedded into the measurement
-    assert (temp_output_dir / "Calibration" / "target_spectrum_ref.cu3sp").is_file()
-    assert (temp_output_dir / "Calibration" / "white_spectrum_ref.cu3sp").is_file()
+    # every measurement saved into the directory, never embedded into the measurement;
+    # SDK 3.6.1 appends a content hash to the name (target_spectrum_ref_<md5>.cu3sp)
+    calibration = temp_output_dir / "Calibration"
+    assert len(list(calibration.glob("target_spectrum_ref*.cu3sp"))) == 1
+    assert len(list(calibration.glob("white_spectrum_ref*.cu3sp"))) == 1
 
     reloaded = cuvis.Measurement(str(cu3[0]))
     assert np.array_equal(np.asarray(reloaded.data["cube"].array), expected)
