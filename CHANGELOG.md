@@ -13,6 +13,15 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+## [3.6.1.0] - 2026-10-16
+
+Targets cuvis SDK 3.6.1.
+First wrapper release for that SDK.
+
+### Changed
+
+- `pyproject.toml` - the `cuvis-il` requirement is raised to `>=3.6.1,<3.7.0`.
+
 ## [3.6.0.0] - 2026-09-11
 
 Targets cuvis SDK 3.6.0.
