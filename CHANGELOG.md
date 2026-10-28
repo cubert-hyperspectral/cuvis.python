@@ -13,6 +13,16 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+## [3.6.1.1] - 2026-10-28
+
+Targets cuvis SDK 3.6.1.
+No API changes.
+
+### Changed
+
+- Released alongside `cuvis-il` 3.6.1.1, which is rebuilt against the cuvis SDK 3.6.1 installers re-published on 2026-10-28.
+  The `cuvis-il` requirement stays `>=3.6.1,<3.7.0`.
+
 ## [3.6.1.0] - 2026-10-16
 
 Targets cuvis SDK 3.6.1.
