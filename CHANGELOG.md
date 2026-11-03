@@ -13,6 +13,10 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+### Security
+
+- `CI` - `pypa/gh-action-pypi-publish` is bumped to `v1.14.3`, which drops the revoked `emSign` root CA from the trust store Sigstore uses for Trusted Publishing (GHSA-5xjx-3w67-w9x9).
+
 ## [3.6.1.1] - 2026-10-28
 
 Targets cuvis SDK 3.6.1.
